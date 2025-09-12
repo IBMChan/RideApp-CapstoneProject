@@ -3,19 +3,17 @@
 //error handler
 
 // services/rider.service.js
-import Ride from "../entities/rideModel.js";
-import User from "../entities/userModel.js";
+import * as rideRepository from "../repositories/ride.repository.js";
+import * as userRepository from "../repositories/user.repository.js";
+import * as savedLocRepository from "../repositories/savedLoc.repository.js";
+import * as complaintRepository from "../repositories/complaint.repository.js";
+import * as lostItemRepository from "../repositories/lostItem.repository.js";
+
 import { NotFoundError, ValidationError } from "../utils/app.errors.js";
 
-// 1. Ride history
+// --------------------- 1. Ride history ---------------------
 export const getRideHistory = async (riderId) => {
-  const rides = await Ride.findAll({  //from ride table
-    where: { rider_id: riderId },
-    include: [
-      { model: User, as: "Driver", attributes: ["user_id", "full_name", "phone"] },
-    ],
-    order: [["ride_date", "DESC"]],
-  });
+  const rides = await rideRepository.findRidesByRiderId(riderId);
 
   if (!rides || rides.length === 0) {
     throw new NotFoundError("No rides found for this rider.");
@@ -23,73 +21,82 @@ export const getRideHistory = async (riderId) => {
   return rides;
 };
 
-// 2. Profile management
+// --------------------- 2. Profile management ---------------------
 export const getProfile = async (riderId) => {
-  const user = await User.findByPk(riderId, {
-    attributes: { exclude: ["password_hash"] },
-  });
+  const user = await userRepository.findUserById(riderId);
 
   if (!user) throw new NotFoundError("Profile not found.");
   return user;
 };
 
 export const updateProfile = async (riderId, data) => {
-  const user = await User.findByPk(riderId);
+  const user = await userRepository.findUserById(riderId);
   if (!user) throw new NotFoundError("Profile not found.");
 
   // TODO: integrate AWS S3 for profile image upload later
-  await user.update(data);
-  return user;
+  const updatedUser = await userRepository.updateUser(riderId, data);
+  return updatedUser;
 };
 
-// 3. Saved locations (PostgreSQL stub for now)
+// --------------------- 3. Saved locations (PostgreSQL) ---------------------
 export const getSavedLocations = async (riderId) => {
-  // TODO: implement using PostgreSQL model
-  return [{ id: 1, label: "Home", address: "123 Main Street" }];
+  const locations = await savedLocRepository.findLocationsByUser(riderId);
+  if (!locations || locations.length === 0) {
+    throw new NotFoundError("No saved locations found.");
+  }
+  return locations;
 };
 
 export const addSavedLocation = async (riderId, locationData) => {
-  if (!locationData.label || !locationData.address) {
-    throw new ValidationError("Location label and address are required.");
+  const { label, address, latitude, longitude } = locationData;
+  if (!label || !address || !latitude || !longitude) {
+    throw new ValidationError("Label, address, latitude, and longitude are required.");
   }
-  // TODO: persist to PostgreSQL
-  return { id: Date.now(), riderId, ...locationData };
+
+  const existing = await savedLocRepository.findLocationByLabel(riderId, label);
+  if (existing) throw new ValidationError(`Location with label '${label}' already exists.`);
+
+  const newLoc = await savedLocRepository.createLocation(riderId, locationData);
+  return newLoc;
 };
 
 export const deleteSavedLocation = async (riderId, locationId) => {
-  // TODO: delete from PostgreSQL
+  const deleted = await savedLocRepository.deleteLocation(riderId, locationId);
+  if (!deleted) throw new NotFoundError("Saved location not found or not owned by rider.");
   return true;
 };
 
-// 4. Share ride status (Twilio placeholder)
+// --------------------- 4. Share ride status (Twilio placeholder) ---------------------
 export const shareRideStatus = async (riderId, rideId, phoneNumber) => {
   if (!phoneNumber) throw new ValidationError("Recipient phone number required.");
 
-  const ride = await Ride.findByPk(rideId, {
-    include: [{ model: User, as: "Driver", attributes: ["full_name", "phone"] }],
-  });
+  const ride = await rideRepository.findRideWithDriver(rideId);
   if (!ride) throw new NotFoundError("Ride not found.");
 
   // TODO: Integrate Twilio WhatsApp/SMS
-  console.log(`Sharing ride ${rideId} with ${phoneNumber}`);
+  console.log(`Sharing ride ${rideId} (Rider ${riderId}) with ${phoneNumber}`);
   return true;
 };
 
-// 5. Complaints + Lost items (stubs for now)
+// --------------------- 5. Complaints + Lost items (MongoDB) ---------------------
 export const registerComplaint = async (riderId, rideId, data) => {
-  const ride = await Ride.findOne({ where: { ride_id: rideId, rider_id: riderId } });
-  if (!ride) throw new NotFoundError("Ride not found or does not belong to rider.");
-
   if (!data || !data.message) throw new ValidationError("Complaint message is required.");
 
-  // TODO: Save complaint in DB
-  return { complaintId: Date.now(), riderId, rideId, ...data };
+  const ride = await rideRepository.findRideByRider(rideId, riderId);
+  if (!ride) throw new NotFoundError("Ride not found or does not belong to rider.");
+
+  const complaint = await complaintRepository.createComplaint(riderId, rideId, data.message);
+  return complaint;
 };
 
 export const getLostItems = async (riderId, rideId) => {
-  const ride = await Ride.findOne({ where: { ride_id: rideId, rider_id: riderId } });
+  const ride = await rideRepository.findRideByRider(rideId, riderId);
   if (!ride) throw new NotFoundError("Ride not found or does not belong to rider.");
 
-  // TODO: Query lost items DB
-  return [{ itemId: 1, description: "Black Wallet", status: "pending" }];
+  const items = await lostItemRepository.findLostItemsByRide(riderId, rideId);
+  if (!items || items.length === 0) {
+    throw new NotFoundError("No lost items reported for this ride.");
+  }
+
+  return items;
 };
