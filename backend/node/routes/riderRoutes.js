@@ -2,3 +2,30 @@
 //chandana - wallet management 
 //error handler
 
+// routes/rider.routes.js
+import express from "express";
+import * as riderController from "../controllers/rider.controller.js";
+
+const router = express.Router();
+
+// 1. Ride history
+router.get("/history", riderController.getRideHistory);
+
+// 2. Profile management
+router.get("/profile", riderController.getProfile);
+router.put("/profile", riderController.updateProfile);
+
+// 3. Saved locations (future use, db table yet to come)
+router.get("/locations", riderController.getSavedLocations);
+router.post("/locations", riderController.addSavedLocation);
+router.delete("/locations/:id", riderController.deleteSavedLocation);
+
+// 4. Share ride status (Twilio integration later)
+router.post("/share-ride/:rideId", riderController.shareRideStatus);
+
+// 5. Complaints + Lost items
+// Complaints + Lost items
+router.post("/complaints/:rideId", riderController.registerComplaint);
+router.get("/lost-items/:rideId", riderController.getLostItems);
+
+export default router;
