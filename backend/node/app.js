@@ -1,13 +1,14 @@
 // app.js - entry point
 
+import { config as configDotenv } from "dotenv";
+configDotenv();
+
 import express from "express";
 import sequelize from "./config/sqlConfig.js";
-import { configDotenv } from "dotenv";
 import { connectDB } from "./config/mongoConfig.js";
 import cookieParser from "cookie-parser";
 import rideRoutes from "./routes/rideRoutes.js";
 
-configDotenv();
 
 const app = express();
 const PORT = process.env.PORT || 3000;

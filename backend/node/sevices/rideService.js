@@ -2,7 +2,7 @@ import path from "path";
 import { spawn } from "child_process";
 import { callPython } from "./pythonService.js";
 import redisClient from "../config/redisConfig.js";
-import RideRepository from "../repositories/mysql/rides.repository.js";
+import RideRepository from "../repositories/mysql/ridesRepository.js";
 import User from "../entities/userModel.js";
 import Vehicle from "../entities/vehicleModel.js";
 
@@ -110,7 +110,7 @@ class RideService {
           reject(new Error("Invalid matcher output: " + stdout));
         }
       });
-      
+
       // --------- Provide input to C++ via stdin ---------
       child.stdin.write(`${riders} ${driverCount}\n`);
 
