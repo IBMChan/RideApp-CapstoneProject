@@ -3,12 +3,15 @@
 import express from "express";
 import sequelize from "./config/sqlConfig.js";
 import { configDotenv } from "dotenv";
+import {connectDB} from "./config/mongoConfig.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 (async () => {
   try {
+    await connectDB();
+    console.log("Mongo db connected successfully ");
     // Authenticate DB connection
     await sequelize.authenticate();
     console.log("Database connection established successfully.");
