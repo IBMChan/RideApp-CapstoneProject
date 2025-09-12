@@ -1,0 +1,17 @@
+Payments Table 
+{
+    "ride_id": 2001,
+    "fare": 350,
+    "status": "success",
+    "mode": "upi"
+},
+
+
+Ratings table 
+
+{
+  "rating_id": 1,
+  "ride_id": 2,
+  "r_to_d": { "rate": 3, "comment": "Late driver" },
+  "d_to_r": { "rate": 5, "comment": "Good passenger" }
+}
