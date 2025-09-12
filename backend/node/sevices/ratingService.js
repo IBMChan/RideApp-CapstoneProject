@@ -1,0 +1,1 @@
+// rating functionalities(r_to_d, d_to_r) 

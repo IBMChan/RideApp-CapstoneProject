@@ -1,0 +1,49 @@
+--ratings collection--Document
+
+{
+  "rating_id": Number,
+  "ride_id": Number,
+  "r_to_d": {
+    "rate": Number,
+    "comment": String
+  },
+  "d_to_r": {
+    "rate": Number,
+    "comment": String
+  }
+}
+
+Example:
+{
+  "rating_id": 1,
+  "ride_id": 2,
+  "r_to_d": { "rate": 3, "comment": "Late driver" },
+  "d_to_r": { "rate": 5, "comment": "Good passenger" }
+}
+
+
+---------------------------------------------------------------
+
+--payments Collection--
+{
+  "payment_id": Number,
+  "ride_id": Number,
+  "fare": Number,
+  "status": "pending" | "success" | "failed" | "refunded",
+  "mode": "cash" | "card" | "upi" | "wallet",
+  "paid_at": Date
+}
+
+
+
+
+Example
+
+{
+    "ride_id": 2001,
+    "fare": 350,
+    "status": "success",
+    "mode": "upi"
+},
+
+
