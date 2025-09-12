@@ -1,7 +1,7 @@
 //entry point 
 
 import express from "express";
-import sequelize from "./config/dbConfig.js";
+import sequelize from "./config/sqlConfig.js";
 import { configDotenv } from "dotenv";
 
 const app = express();
