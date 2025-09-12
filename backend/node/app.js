@@ -4,11 +4,15 @@ import sequelize from "./config/sqlConfig.js";
 import { configDotenv } from "dotenv";
 import { connectDB } from "./config/mongoConfig.js";
 import mysql from "mysql2/promise";
+import authRoutes from "./routes/authRoutes.js";
 
 configDotenv(); // Load .env
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Middlewares
+app.use(express.json());
 
 (async () => {
   try {
@@ -36,7 +40,8 @@ const PORT = process.env.PORT || 3000;
     await sequelize.sync({ alter: true });
     console.log("Models synced successfully.");
 
-    // 5️⃣ Basic route
+    // 5️⃣ Routes
+    app.use("/api/auth", authRoutes);
     app.get("/", (req, res) => {
       res.send("Sequelize is running and working fine");
     });
