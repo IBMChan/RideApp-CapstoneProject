@@ -10,7 +10,6 @@ const router = express.Router();
 
 // Rider
 router.post("/create", RideController.createRide);
-<<<<<<< HEAD
 // Example Request:
 // {
 //   "pickup_loc": {"lat": 22.32, "lng": 73.15},
@@ -55,9 +54,6 @@ router.post("/create", RideController.createRide);
 //     ]
 //   }
 // }
-=======
-
->>>>>>> upstream/main
 
 // Driver
 router.post("/accept/:ride_id", RideController.acceptRide); // Here, no body needed. driver_id will be taken from auth. (req.user?.id)
@@ -70,8 +66,4 @@ router.get("/history", RideController.getRideHistory);
 router.get("/list/:role", RideController.listRides);
 router.get("/:ride_id", RideController.getRide);
 
-<<<<<<< HEAD
 export default router;
-=======
-export default router;
->>>>>>> upstream/main
