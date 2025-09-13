@@ -17,7 +17,7 @@ import { NotFoundError, ValidationError } from "../utils/appError.js";
 
 // --------------------- 1. Ride history ---------------------
 export const getRideHistory = async (riderId) => {
-  const rides = await rideRepository.findRidesByRiderId(riderId);
+  const rides = await rideRepository.findById(riderId);
 
   if (!rides || rides.length === 0) {
     throw new NotFoundError("No rides found for this rider.");

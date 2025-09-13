@@ -68,7 +68,7 @@ app.use(errorHandler);
     // 3️⃣ Sequelize Auth & Sync
     await sequelize.authenticate();
     console.log("✅ Sequelize connection established successfully.");
-    await sequelize.sync({ alter: true }); // ⚠️ Dev-only
+    await sequelize.sync({ force: false }); // ⚠️ Dev-only
     console.log("✅ Sequelize models synced successfully.");
 
     // 4️⃣ Connect PostgreSQL
