@@ -1,4 +1,5 @@
-const ratingSchema = new mongoose.Schema({
+import {Schema,model}  from "mongoose";
+const ratingSchema = new Schema({
   rating_id:{
     type:Number,
     default: async function () {
