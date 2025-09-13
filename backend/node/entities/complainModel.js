@@ -3,6 +3,12 @@ import mongoose from "mongoose";
 
 const complaintSchema = new mongoose.Schema(
   {
+    complaint_id: {
+      type: Number,
+      unique: true,
+      index: true,
+      required: true,
+    },
     riderId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
