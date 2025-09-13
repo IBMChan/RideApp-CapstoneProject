@@ -1,4 +1,4 @@
-// repositories/mongo/complaint.repository.js
+// repositories/mongodb/complaintRepository.js
 import Complaint from "../../entities/complainModel.js";
 
 // ------------------
@@ -11,14 +11,17 @@ export const createComplaint = async (riderId, rideId, message) => {
 };
 
 export const findComplaintsByRider = async (riderId) => {
+  // riderId is a Number now
   return await Complaint.find({ riderId }).sort({ createdAt: -1 });
 };
 
 export const findComplaintByRide = async (rideId, riderId) => {
+  // both rideId and riderId are Numbers
   return await Complaint.findOne({ rideId, riderId });
 };
 
 export const updateComplaintStatus = async (complaintId, status) => {
+  // complaintId here is Mongo’s internal _id
   return await Complaint.findByIdAndUpdate(
     complaintId,
     { status },
