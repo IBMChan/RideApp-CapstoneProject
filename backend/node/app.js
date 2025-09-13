@@ -44,6 +44,9 @@ app.use("/api/rides", rideRoutes);
 app.use("/api/rider", riderRoutes);
 app.use("/api/driver", driverRoutes);
 
+    // Error Raksha & Harshit
+app.use(errorHandler);
+
 // ---------- Server & DB Connections ----------
 (async () => {
   try {
@@ -76,8 +79,7 @@ app.use("/api/driver", driverRoutes);
     // await redisClient.connect();
     // console.log("✅ Redis connected");
 
-    // Error Raksha & Harshit
-app.use(errorHandler);
+
 
     // 4️⃣ Start server
     app.listen(PORT, () => {
