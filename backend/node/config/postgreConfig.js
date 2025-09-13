@@ -11,12 +11,7 @@ const pgSequelize = new Sequelize(
     port: env.postgre.port,
     dialect: "postgres",
     logging: false,
-    pool: {
-      max: 10,
-      min: 0,
-      acquire: 30000,
-      idle: 10000,
-    },
+    pool: { max: 10, min: 0, acquire: 30000, idle: 10000 },
   }
 );
 

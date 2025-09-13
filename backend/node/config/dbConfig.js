@@ -2,7 +2,7 @@
 import { Sequelize } from "sequelize";
 import env from "./envConfig.js";
 
-const sequelize = new Sequelize(
+const mysqlSequelize = new Sequelize(
   env.mysql.database,
   env.mysql.user,
   env.mysql.password,
@@ -20,4 +20,4 @@ const sequelize = new Sequelize(
   }
 );
 
-export default sequelize;
+export default mysqlSequelize;

@@ -1,51 +1,53 @@
-// entry point
+// entry point - app.js
 import express from "express";
-import sequelize from "./config/sqlConfig.js";
-import { configDotenv } from "dotenv";
-import { connectDB } from "./config/mongoConfig.js";
+import env from "./config/envConfig.js";
+import mysqlSequelize from "./config/dbConfig.js";
+import pgSequelize from "./config/postgreConfig.js";
+import { connectMongoDB } from "./config/mongoConfig.js";
 import mysql from "mysql2/promise";
-
-configDotenv(); // Load .env
+import riderRoutes from "./routes/riderRoutes.js";
+import { errorHandler } from "./middlewares/errorHandler.js";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = env.server.port;
 
 (async () => {
   try {
     // 1️⃣ Connect MongoDB
-    await connectDB();
-    console.log("MongoDB connected successfully");
+    await connectMongoDB();
 
     // 2️⃣ Ensure MySQL database exists
-    const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
-
     const connection = await mysql.createConnection({
-      host: DB_HOST,
-      user: DB_USER,
-      password: DB_PASSWORD,
+      host: env.mysql.host,
+      user: env.mysql.user,
+      password: env.mysql.password,
     });
+    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${env.mysql.database}\`;`);
+    console.log(`MySQL database "${env.mysql.database}" is ready.`);
 
-    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;`);
-    console.log(`MySQL database "${DB_NAME}" is ready.`);
+    // 3️⃣ Authenticate MySQL Sequelize
+    await mysqlSequelize.authenticate();
+    console.log("MySQL (Sequelize) connection established successfully.");
+    await mysqlSequelize.sync({ alter: true });
+    console.log("MySQL models synced successfully.");
 
-    // 3️⃣ Authenticate Sequelize
-    await sequelize.authenticate();
-    console.log("Sequelize connection established successfully.");
-
-    // 4️⃣ Sync models
-    await sequelize.sync({ alter: true });
-    console.log("Models synced successfully.");
+    // 4️⃣ Authenticate PostgreSQL Sequelize
+    await pgSequelize.authenticate();
+    console.log("PostgreSQL (Sequelize) connection established successfully.");
 
     // 5️⃣ Basic route
     app.get("/", (req, res) => {
-      res.send("Sequelize is running and working fine");
+      res.send("✅ All databases connected and Sequelize is running fine");
     });
+
+    // Global Error Handler (Raksha & Harshit)
+    app.use(errorHandler);
 
     // 6️⃣ Start server
     app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
+      console.log(`🚀 Server running on http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error("Unable to connect to the database:", error);
+    console.error("❌ Unable to connect to the databases:", error);
   }
 })();
