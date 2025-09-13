@@ -1,21 +1,32 @@
-class AppError extends Error {
+// utils/appError.js
+export class AppError extends Error {
   constructor(message, statusCode = 400, code = "BAD_REQUEST", details = null) {
     super(message);
     this.statusCode = statusCode;
     this.code = code;
     this.details = details;
+    this.isOperational = true; // Useful for distinguishing expected vs. unexpected errors
     Error.captureStackTrace(this, this.constructor);
   }
 }
 
-// Convenience factory functions for common error types
-export const NotFoundError = (msg = "Not Found") =>
-  new AppError(msg, 404, "NOT_FOUND");
+// Specific subclasses for better instanceof checks
+export class NotFoundError extends AppError {
+  constructor(message = "Not Found") {
+    super(message, 404, "NOT_FOUND");
+  }
+}
 
-export const ValidationError = (msg = "Validation Error", details = null) =>
-  new AppError(msg, 400, "VALIDATION_ERROR", details);
+export class ValidationError extends AppError {
+  constructor(message = "Validation Error", details = null) {
+    super(message, 400, "VALIDATION_ERROR", details);
+  }
+}
 
-export const ConflictError = (msg = "Conflict") =>
-  new AppError(msg, 409, "CONFLICT");
+export class ConflictError extends AppError {
+  constructor(message = "Conflict") {
+    super(message, 409, "CONFLICT");
+  }
+}
 
 export default AppError;
