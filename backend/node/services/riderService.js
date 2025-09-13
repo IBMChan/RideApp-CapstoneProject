@@ -2,13 +2,15 @@
 //chandana - wallet management 
 //error handler
 
-<<<<<<< HEAD
 // services/rider.service.js
 import * as rideRepository from "../repositories/mysql/ridesRepository.js";
 import * as userRepository from "../repositories/mysql/userRepository.js";
 import * as savedLocRepository from "../repositories/postgres/saveLocRepository.js";
 import * as complaintRepository from "../repositories/mongodb/complaintRepository.js";
 import * as lostItemRepository from "../repositories/mongodb/lostItemRepository.js";
+import { walletRepository } from '../repositories/postgres/walletRepositoy.js';
+import { walletTransactionRepository } from '../repositories/postgres/walletTransactionRepository.js';
+import { spawnPythonPayment } from '../config/razorpayConfig.js';
 
 import { NotFoundError, ValidationError } from "../utils/app.error.js";
 
@@ -100,11 +102,7 @@ export const getLostItems = async (riderId, rideId) => {
   }
 
   return items;
-=======
-import { walletRepository } from '../repositories/postgres/walletRepositoy.js';
-import { walletTransactionRepository } from '../repositories/postgres/walletTransactionRepository.js';
-import { spawnPythonPayment } from '../config/razorpayConfig.js';
-
+}
 export const addMoneyService = async ({ user_id, amount, payment_method, bank_details }) => {
     // Call Python Razorpay script
     const paymentResult = await spawnPythonPayment({ action: 'create_order', amount, currency: 'INR', user_id, payment_method, bank_details });
@@ -123,5 +121,4 @@ export const addMoneyService = async ({ user_id, amount, payment_method, bank_de
     await walletTransactionRepository.addTransaction(wallet.wallet_id, amount, null);
 
     return { success: true, newBalance };
->>>>>>> upstream/main
 };
