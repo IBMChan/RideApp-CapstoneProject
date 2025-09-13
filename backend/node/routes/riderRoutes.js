@@ -14,7 +14,7 @@ router.get("/history/:riderId", riderController.getRideHistory);
 
 // 2. Profile management
 router.get("/profile/:riderId", riderController.getProfile);
-router.put("/profile:riderId", riderController.updateProfile);
+router.put("/profile/:riderId", riderController.updateProfile);
 
 // 3. Saved locations (future use, db table yet to come)
 router.get("/locations", riderController.getSavedLocations);
