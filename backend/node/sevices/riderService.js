@@ -3,11 +3,11 @@
 //error handler
 
 // services/rider.service.js
-import * as rideRepository from "../repositories/ride.repository.js";
-import * as userRepository from "../repositories/user.repository.js";
-import * as savedLocRepository from "../repositories/savedLoc.repository.js";
-import * as complaintRepository from "../repositories/complaint.repository.js";
-import * as lostItemRepository from "../repositories/lostItem.repository.js";
+import * as rideRepository from "../repositories/mysql/ridesRepository.js";
+import * as userRepository from "../repositories/mysql/userRepository.js";
+import * as savedLocRepository from "../repositories/postgres/saveLocRepository.js";
+import * as complaintRepository from "../repositories/mongodb/complaintRepository.js";
+import * as lostItemRepository from "../repositories/mongodb/lostItemRepository.js";
 
 import { NotFoundError, ValidationError } from "../utils/app.errors.js";
 
