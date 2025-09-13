@@ -1,11 +1,12 @@
 // Raksha & Harshit
 // middlewares/errorHandler.js
 import {
-  AppError,
   NotFoundError,
   ValidationError,
   ConflictError,
 } from "../utils/appError.js";
+import AppError from "../utils/appError.js";   // check the file name carefully
+
 
 export const errorHandler = (err, req, res, next) => {
   console.error(err); // Log for debugging (optional: use Winston or Morgan later)
