@@ -1,6 +1,7 @@
 //harshit and raksha // funcitonalities: 1. ride history 2. profile management(cloud image upload) 3. saved location (managing) 4. share status(twilio to whatsapp) 5. find a lost item/contact driver or previous rides/register a complaint
 //chandana - wallet management 
 //error handler
+<<<<<<< HEAD
 
 // routes/rider.routes.js
 import express from "express";
@@ -27,5 +28,13 @@ router.post("/share-ride/:rideId", riderController.shareRideStatus);
 // Complaints + Lost items
 router.post("/complaints/:rideId", riderController.registerComplaint);
 router.get("/lost-items/:rideId", riderController.getLostItems);
+=======
+import express from 'express';
+import { addMoney } from '../controllers/riderController.js';
+
+const router = express.Router();
+
+router.post('/addMoney', addMoney);
+>>>>>>> upstream/main
 
 export default router;

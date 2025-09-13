@@ -1,9 +1,8 @@
-import { connect } from "mongoose";
+import mongoose from "mongoose";
+import { config as configDotenv } from "dotenv";
+configDotenv();
 
 export const connectDB = async () => {
-    try {
-        const conn = await connect(`${process.env.MONGO_URL}/${process.env.DB_NAME}`);
-    } catch (error) {
-        process.exit(1);
-    }
-}
+  const uri = process.env.MONGO_URI || "mongodb://localhost:27017/ride_app";
+  await mongoose.connect(uri);
+};

@@ -25,4 +25,8 @@ export const withdrawMoneyService = async ({ user_id, amount, payment_method, ba
     await walletTransactionRepository.addTransaction(wallet.wallet_id, null, amount);
 
     return { success: true, newBalance };
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> upstream/main
