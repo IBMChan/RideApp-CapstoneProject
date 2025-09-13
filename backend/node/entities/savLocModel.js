@@ -1,6 +1,6 @@
 // entities/savLocModel.js
 import { DataTypes } from "sequelize";
-import { pgSequelize } from "../config/pgConfig.js"; // separate config for PostgreSQL
+import pgSequelize from "../config/postgreConfig.js"; // separate config for PostgreSQL
 
 const SavedLocation = pgSequelize.define(
   "SavedLocation",

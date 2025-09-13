@@ -3,7 +3,7 @@
 //error handler
 
 // controllers/rider.controller.js
-import * as riderService from "../services/rider.service.js";
+import * as riderService from "../services/riderService.js";
 
 // 1. Ride history
 export const getRideHistory = async (req, res, next) => {

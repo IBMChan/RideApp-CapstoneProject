@@ -9,7 +9,7 @@ import * as savedLocRepository from "../repositories/postgres/saveLocRepository.
 import * as complaintRepository from "../repositories/mongodb/complaintRepository.js";
 import * as lostItemRepository from "../repositories/mongodb/lostItemRepository.js";
 
-import { NotFoundError, ValidationError } from "../utils/app.errors.js";
+import { NotFoundError, ValidationError } from "../utils/app.error.js";
 
 // --------------------- 1. Ride history ---------------------
 export const getRideHistory = async (riderId) => {

@@ -1,5 +1,5 @@
 // repositories/mongo/complaint.repository.js
-import Complaint from "../../entities/complaintModel.js";
+import Complaint from "../../entities/complainModel.js";
 
 // ------------------
 // Repository Methods

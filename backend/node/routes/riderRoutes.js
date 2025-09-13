@@ -4,7 +4,7 @@
 
 // routes/rider.routes.js
 import express from "express";
-import * as riderController from "../controllers/rider.controller.js";
+import * as riderController from "../controllers/riderController.js";
 
 const router = express.Router();
 
