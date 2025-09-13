@@ -18,6 +18,7 @@ import rideRoutes from "./routes/rideRoutes.js";
 import riderRoutes from "./routes/riderRoutes.js";
 import driverRoutes from "./routes/driverRoutes.js";
 
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -40,8 +41,8 @@ app.get("/", (req, res) => {
 
 // ---------- Routes ----------
 app.use("/api/rides", rideRoutes);
-app.use("/rider", riderRoutes);
-app.use("/driver", driverRoutes);
+app.use("/api/rider", riderRoutes);
+app.use("/api/driver", driverRoutes);
 
 // ---------- Server & DB Connections ----------
 (async () => {
@@ -51,15 +52,15 @@ app.use("/driver", driverRoutes);
     console.log("✅ MongoDB connected successfully");
 
     // 2️⃣ Connect MySQL & Ensure DB exists
-    const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
+    const { MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DB } = process.env;
 
     const connection = await mysql.createConnection({
-      host: DB_HOST,
-      user: DB_USER,
-      password: DB_PASSWORD,
+      host: MYSQL_HOST,
+      user: MYSQL_USER,
+      password: MYSQL_PASSWORD,
     });
-    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;`);
-    console.log(`✅ MySQL database "${DB_NAME}" is ready.`);
+    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${MYSQL_DB}\`;`);
+    console.log(`✅ MySQL database "${MYSQL_DB}" is ready.`);
 
     // Sequelize Auth & Sync
     await sequelize.authenticate();
@@ -71,18 +72,9 @@ app.use("/driver", driverRoutes);
     const res = await pool.query("SELECT NOW()");
     console.log("✅ PostgreSQL connected:", res.rows[0].now);
 
-//     if (process.env.REDIS_ENABLED === "true") {
-//   try {
-//     await redisClient.connect();
-//     console.log("✅ Redis connected successfully");
-//   } catch (err) {
-//     console.error("❌ Redis connection failed:", err);
-//   }
-// } else {
-//   console.log("⚠️ Redis is disabled (set REDIS_ENABLED=true to enable).");
-// }
-
-
+    // Connect Redis
+    await redisClient.connect();
+    console.log("✅ Redis connected");
 
     // 4️⃣ Start server
     app.listen(PORT, () => {
