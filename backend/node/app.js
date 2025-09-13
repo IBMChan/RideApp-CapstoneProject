@@ -53,9 +53,9 @@ app.use("/api/driver", driverRoutes);
     // 2️⃣ Ensure MySQL database exists
     const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
     const connection = await mysql.createConnection({
-      host: MYSQL_HOST,
-      user: MYSQL_USER,
-      password: MYSQL_PASSWORD,
+      host: DB_HOST,
+      user: DB_USER,
+      password: DB_PASSWORD,
     });
     await connection.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;`);
     console.log(`✅ MySQL database "${DB_NAME}" is ready.`);
@@ -71,9 +71,9 @@ app.use("/api/driver", driverRoutes);
     const res = await pool.query("SELECT NOW()");
     console.log("✅ PostgreSQL connected:", res.rows[0].now);
 
-    // Connect Redis
-    await redisClient.connect();
-    console.log("✅ Redis connected");
+    // // Connect Redis
+    // await redisClient.connect();
+    // console.log("✅ Redis connected");
 
     // 4️⃣ Start server
     app.listen(PORT, () => {
