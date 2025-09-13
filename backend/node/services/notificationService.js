@@ -1,7 +1,5 @@
-<<<<<<< HEAD
 //laxmikanth: notification(email(smtp) - phone (firebase)) , authentication, updates of rides, invoice download
 //to send notifcation on payment completion
-=======
 import nodemailer from "nodemailer";
 
 const otpStore = new Map();
@@ -81,4 +79,3 @@ export const sendSmsOTP = async (phone, email) => {
     return { success: false, message: "Failed to send phone OTP via email" };
   }
 };
->>>>>>> upstream/main
