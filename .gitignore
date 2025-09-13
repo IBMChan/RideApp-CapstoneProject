@@ -1,5 +1,11 @@
 backend/.env
 backend/package.json
 backend/package-lock.json
+<<<<<<< HEAD
 backend/node_modules
 requirements.txt
+=======
+requirements.txt
+backend/node_modules
+.gitignore
+>>>>>>> 8c57ba6787b268cfe1b5b49b72f324a4818e5979
