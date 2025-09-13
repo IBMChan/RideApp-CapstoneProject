@@ -57,7 +57,7 @@ app.use(errorHandler);
     // 2️⃣ Ensure MySQL database exists
     const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
     const connection = await mysql.createConnection({
-      host:DB_HOST,
+      host: DB_HOST,
       user: DB_USER,
       password: DB_PASSWORD,
     });
@@ -68,20 +68,18 @@ app.use(errorHandler);
     // 3️⃣ Sequelize Auth & Sync
     await sequelize.authenticate();
     console.log("✅ Sequelize connection established successfully.");
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({ alter: true }); // ⚠️ Dev-only
     console.log("✅ Sequelize models synced successfully.");
 
     // 4️⃣ Connect PostgreSQL
     const res = await pool.query("SELECT NOW()");
     console.log("✅ PostgreSQL connected:", res.rows[0].now);
 
-    // // Connect Redis
+    // // 5️⃣ Redis (optional)
     // await redisClient.connect();
     // console.log("✅ Redis connected");
 
-
-
-    // 4️⃣ Start server
+    // 6️⃣ Start server
     app.listen(PORT, () => {
       console.log(`🚀 Server running at http://localhost:${PORT}`);
     });
