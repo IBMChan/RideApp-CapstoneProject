@@ -5,6 +5,7 @@
 // routes/rider.routes.js
 import express from "express";
 import * as riderController from "../controllers/riderController.js";
+import { addMoney } from '../controllers/riderController.js';
 
 const router = express.Router();
 
@@ -27,8 +28,7 @@ router.post("/share-ride/:rideId", riderController.shareRideStatus);
 // Complaints + Lost items
 router.post("/complaints/:rideId", riderController.registerComplaint);
 router.get("/lost-items/:rideId", riderController.getLostItems);
-import express from 'express';
-import { addMoney } from '../controllers/riderController.js';
+
 
 // const router = express.Router();
 

@@ -1,10 +1,10 @@
 //harshit and raksha // funcitonalities: 1. ride history 2. profile management(cloud image upload) 3. saved location (managing) 4. share status(twilio to whatsapp) 5. find a lost item/contact driver or previous rides/register a complaint
 //chandana - wallet management 
 //error handler
-<<<<<<< HEAD
 
 // controllers/rider.controller.js
 import * as riderService from "../services/riderService.js";
+import { addMoneyService } from '../services/riderService.js';
 
 // 1. Ride history
 export const getRideHistory = async (req, res, next) => {
@@ -108,9 +108,7 @@ export const getLostItems = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-=======
-import { addMoneyService } from '../services/riderService.js';
-
+}
 export const addMoney = async (req, res) => {
     try {
         const { user_id, amount, payment_method, bank_details } = req.body;
@@ -120,5 +118,4 @@ export const addMoney = async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
->>>>>>> upstream/main
 };
