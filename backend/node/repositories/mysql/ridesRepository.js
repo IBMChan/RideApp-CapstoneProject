@@ -112,8 +112,4 @@ class RideRepository {
   }
 }
 
-<<<<<<< HEAD
 export default new RideRepository();
-=======
-export default new RideRepository();
->>>>>>> upstream/main
