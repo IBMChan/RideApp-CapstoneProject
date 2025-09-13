@@ -10,6 +10,8 @@ import mysql from "mysql2/promise";
 import sequelize from "./config/sqlConfig.js";
 import { connectDB } from "./config/mongoConfig.js";
 import pool from "./config/postgres.js";
+import redisClient from "./config/redisConfig.js";
+
 
 // Routes
 import rideRoutes from "./routes/rideRoutes.js";
@@ -62,12 +64,25 @@ app.use("/driver", driverRoutes);
     // Sequelize Auth & Sync
     await sequelize.authenticate();
     console.log("✅ Sequelize connection established successfully.");
-    await sequelize.sync({ alter: true });
+    await sequelize.sync();
     console.log("✅ Sequelize models synced successfully.");
 
     // 3️⃣ Connect PostgreSQL
     const res = await pool.query("SELECT NOW()");
     console.log("✅ PostgreSQL connected:", res.rows[0].now);
+
+//     if (process.env.REDIS_ENABLED === "true") {
+//   try {
+//     await redisClient.connect();
+//     console.log("✅ Redis connected successfully");
+//   } catch (err) {
+//     console.error("❌ Redis connection failed:", err);
+//   }
+// } else {
+//   console.log("⚠️ Redis is disabled (set REDIS_ENABLED=true to enable).");
+// }
+
+
 
     // 4️⃣ Start server
     app.listen(PORT, () => {

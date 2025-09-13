@@ -1,6 +1,6 @@
 // shriya : profile managemnet, ride history, payment history, vehicle management, dr_status management(online, offline) , register a complaint  
 //chandana - wallet management
-import { withdrawMoneyService } from '../sevices/driverService.js';
+import { withdrawMoneyService } from '../services/driverService.js';
 
 export const withdrawMoney = async (req, res) => {
     try {
