@@ -3,7 +3,7 @@
 //error handler
 
 // services/rider.service.js
-import * as rideRepository from "../repositories/mysql/ridesRepository.js";
+import rideRepository from "../repositories/mysql/ridesRepository.js";
 import * as userRepository from "../repositories/mysql/userRepository.js";
 import * as savedLocRepository from "../repositories/postgres/saveLocRepository.js";
 import * as complaintRepository from "../repositories/mongodb/complaintRepository.js";
@@ -17,7 +17,7 @@ import { NotFoundError, ValidationError } from "../utils/appError.js";
 
 // --------------------- 1. Ride history ---------------------
 export const getRideHistory = async (riderId) => {
-  const rides = await rideRepository.findById(riderId);
+  const rides = await rideRepository.getRidesByRider(riderId);
 
   if (!rides || rides.length === 0) {
     throw new NotFoundError("No rides found for this rider.");
