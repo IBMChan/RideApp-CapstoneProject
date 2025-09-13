@@ -1,8 +1,11 @@
 import { spawn } from 'child_process';
+import path from 'path';
+
+const scriptPath = path.resolve("./python/payments/razorpay.py");
 
 export const spawnPythonPayment = ({ action, amount, currency, user_id, payment_method, bank_details }) => {
     return new Promise((resolve, reject) => {
-        const py = spawn('python3', ['backend/python/razorpay.py', JSON.stringify({ action, amount, currency, user_id, payment_method, bank_details })]);
+        const py = spawn('python', [scriptPath, JSON.stringify({ action, amount, currency, user_id, payment_method, bank_details })]);
 
         let output = '';
         py.stdout.on('data', (data) => {

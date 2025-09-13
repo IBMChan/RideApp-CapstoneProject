@@ -17,6 +17,7 @@ import rideRoutes from "./routes/rideRoutes.js";
 import riderRoutes from "./routes/riderRoutes.js";
 import driverRoutes from "./routes/driverRoutes.js";
 
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -39,8 +40,8 @@ app.get("/", (_req, res) => {
 // ---------- Routes ----------
 app.use("/api/auth", authRoutes);
 app.use("/api/rides", rideRoutes);
-app.use("/rider", riderRoutes);
-app.use("/driver", driverRoutes);
+app.use("/api/rider", riderRoutes);
+app.use("/api/driver", driverRoutes);
 
 // ---------- Server & DB Connections ----------
 (async () => {
@@ -52,9 +53,9 @@ app.use("/driver", driverRoutes);
     // 2️⃣ Ensure MySQL database exists
     const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
     const connection = await mysql.createConnection({
-      host: DB_HOST,
-      user: DB_USER,
-      password: DB_PASSWORD,
+      host: MYSQL_HOST,
+      user: MYSQL_USER,
+      password: MYSQL_PASSWORD,
     });
     await connection.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;`);
     console.log(`✅ MySQL database "${DB_NAME}" is ready.`);
@@ -70,19 +71,11 @@ app.use("/driver", driverRoutes);
     const res = await pool.query("SELECT NOW()");
     console.log("✅ PostgreSQL connected:", res.rows[0].now);
 
-    // // 5️⃣ Connect Redis (Optional)
-    // if (process.env.REDIS_ENABLED === "true") {
-    //   try {
-    //     await redisClient.connect();
-    //     console.log("✅ Redis connected successfully");
-    //   } catch (err) {
-    //     console.error("❌ Redis connection failed:", err);
-    //   }
-    // } else {
-    //   console.log("⚠️ Redis is disabled (set REDIS_ENABLED=true to enable).");
-    // }
+    // Connect Redis
+    await redisClient.connect();
+    console.log("✅ Redis connected");
 
-    // 6️⃣ Start server
+    // 4️⃣ Start server
     app.listen(PORT, () => {
       console.log(`🚀 Server running at http://localhost:${PORT}`);
     });
