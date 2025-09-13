@@ -11,11 +11,12 @@ const User = sequelize.define("User", {
   license: { type: DataTypes.STRING },
   password_hash: { type: DataTypes.STRING, allowNull: false },
   gender: { type: DataTypes.STRING },
+  kyc_type: {type: DataTypes.ENUM('pan', 'aadhaar'), defaultValue: null},
   kyc_document: { type: DataTypes.STRING },
   emailVerified: { type: DataTypes.BOOLEAN, defaultValue: false },
   phoneVerified: { type: DataTypes.BOOLEAN, defaultValue: false },
   status: { type: DataTypes.ENUM("active", "inactive"), defaultValue: "active" },
-  is_live_currently: { type: DataTypes.ENUM("yes", "no"),  defaultValue: "no",                 
+  is_live_currently: { type: DataTypes.ENUM("yes", "no"),  defaultValue: "yes",                 
 },
 });
 

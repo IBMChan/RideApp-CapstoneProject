@@ -8,14 +8,14 @@ const resetSessions = new Map(); // email -> { expiresAt, otp }
 
 export const initiateSignup = async (req, res) => {
   try {
-    const { full_name, phone, email, role, password, license, gender, kyc_document } = req.body;
+    const { full_name, phone, email, role, password, license, gender,kyc_type, kyc_document } = req.body;
     if (role === "driver" && !license) return res.status(400).json({ message: "License number is required for drivers" });
     if (!full_name || !email || !phone || !role || !password) return res.status(400).json({ message: "Missing required fields" });
     if (await findByEmail(email)) return res.status(409).json({ message: "Email already in use" });
 
     const password_hash = await bcrypt.hash(password, 10);
     const pendingId = `${email}:${Date.now()}`;
-    pendingUsers.set(pendingId, { full_name, phone, email, role, license: role === "driver" ? license : null, password_hash, kyc_document, gender });
+    pendingUsers.set(pendingId, { full_name, phone, email, role, license: role === "driver" ? license : null, password_hash,kyc_type, kyc_document, gender });
 
     const emailOtp = await sendEmailOTP(email);
     const phoneOtp = await sendSmsOTP(phone, email);
