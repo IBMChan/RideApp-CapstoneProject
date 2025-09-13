@@ -9,6 +9,7 @@ import * as riderService from "../services/riderService.js";
 export const getRideHistory = async (req, res, next) => {
   try {
     const riderId = req.user?.id || req.params.riderId; // auth or param
+    console.log("Rider History called with riderId:", riderId);
     const rides = await riderService.getRideHistory(riderId);
     res.json(rides);
   } catch (err) {

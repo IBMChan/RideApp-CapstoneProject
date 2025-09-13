@@ -5,7 +5,7 @@ import mysqlSequelize from "./config/dbConfig.js";
 import pgSequelize from "./config/postgreConfig.js";
 import { connectMongoDB } from "./config/mongoConfig.js";
 import mysql from "mysql2/promise";
-import riderRoutes from "./routes/riderRoutes.js";
+import  riderRoutes  from "./routes/riderRoutes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 
 const app = express();
@@ -39,6 +39,8 @@ const PORT = env.server.port;
     app.get("/", (req, res) => {
       res.send("✅ All databases connected and Sequelize is running fine");
     });
+
+    app.use("/api/rider", riderRoutes);
 
     // Global Error Handler (Raksha & Harshit)
     app.use(errorHandler);

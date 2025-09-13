@@ -9,11 +9,11 @@ import * as riderController from "../controllers/riderController.js";
 const router = express.Router();
 
 // 1. Ride history
-router.get("/history", riderController.getRideHistory);
+router.get("/history/:riderId", riderController.getRideHistory);
 
 // 2. Profile management
-router.get("/profile", riderController.getProfile);
-router.put("/profile", riderController.updateProfile);
+router.get("/profile/:riderId", riderController.getProfile);
+router.put("/profile:riderId", riderController.updateProfile);
 
 // 3. Saved locations (future use, db table yet to come)
 router.get("/locations", riderController.getSavedLocations);
