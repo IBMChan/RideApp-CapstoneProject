@@ -1,6 +1,7 @@
 // Raksha & Harshit
 // middlewares/errorHandler.js
 import {
+  AppError,
   NotFoundError,
   ValidationError,
   ConflictError,
@@ -22,6 +23,11 @@ export const errorHandler = (err, req, res, next) => {
     return res.status(409).json({ error: err.message });
   }
 
+    if (err instanceof AppError) {
+    return res
+      .status(err.statusCode || 500)
+      .json({ status: err.status || "error", error: err.message });
+  }
   // Handle Sequelize/Mongoose validation errors (fallback)
   if (err.name === "SequelizeValidationError" || err.name === "ValidationError") {
     return res.status(400).json({ error: err.message });
