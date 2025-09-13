@@ -53,9 +53,9 @@ app.use("/api/driver", driverRoutes);
     // 2️⃣ Ensure MySQL database exists
     const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
     const connection = await mysql.createConnection({
-      host: env.mysql.host,
-      user: env.mysql.user,
-      password: env.mysql.password,
+      host:DB_HOST,
+      user: DB_USER,
+      password: DB_PASSWORD,
     });
     await connection.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;`);
     console.log(`✅ MySQL database "${DB_NAME}" is ready.`);
