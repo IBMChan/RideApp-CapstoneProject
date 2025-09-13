@@ -9,6 +9,7 @@ import mysql from "mysql2/promise";
 import sequelize from "./config/sqlConfig.js";
 import { connectDB } from "./config/mongoConfig.js";
 import pool from "./config/postgres.js";
+import { errorHandler } from "./middlewares/errorHandler.js"; // Raksha & Harshit
 import redisClient from "./config/redisConfig.js";
 
 // Routes
@@ -74,6 +75,9 @@ app.use("/api/driver", driverRoutes);
     // // Connect Redis
     // await redisClient.connect();
     // console.log("✅ Redis connected");
+
+    // Error Raksha & Harshit
+app.use(errorHandler);
 
     // 4️⃣ Start server
     app.listen(PORT, () => {
