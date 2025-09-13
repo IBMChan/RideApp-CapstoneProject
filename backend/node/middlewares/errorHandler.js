@@ -4,7 +4,7 @@ import {
   NotFoundError,
   ValidationError,
   ConflictError,
-} from "../utils/app.error.js";
+} from "../utils/appError.js";
 
 export const errorHandler = (err, req, res, next) => {
   console.error(err); // Log for debugging (optional: use Winston or Morgan later)
