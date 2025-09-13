@@ -12,7 +12,7 @@ import { walletRepository } from '../repositories/postgres/walletRepositoy.js';
 import { walletTransactionRepository } from '../repositories/postgres/walletTransactionRepository.js';
 import { spawnPythonPayment } from '../config/razorpayConfig.js';
 
-import { NotFoundError, ValidationError } from "../utils/appError.js";
+import { NotFoundError, ValidationError } from "../utils/app.error.js";
 
 // --------------------- 1. Ride history ---------------------
 export const getRideHistory = async (riderId) => {
