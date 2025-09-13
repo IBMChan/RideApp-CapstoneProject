@@ -5,7 +5,7 @@ import mysqlSequelize from "./config/dbConfig.js";
 import pgSequelize from "./config/postgreConfig.js";
 import { connectMongoDB } from "./config/mongoConfig.js";
 import mysql from "mysql2/promise";
-import riderRoutes from "./routes/riderRoutes.js";
+import  riderRoutes  from "./routes/riderRoutes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 
 const app = express();

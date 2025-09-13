@@ -5,37 +5,50 @@ CREATE TABLE users (
     full_name VARCHAR(100) NOT NULL,
     phone VARCHAR(15) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
-    role ENUM('driver', 'rider', 'admin') NOT NULL,
-    license VARCHAR(100) UNIQUE, 
-    kyc_type ENUM('pan', 'aadhar'),
-    kyc_document VARCHAR(255),
     password_hash VARCHAR(255) NOT NULL,
     gender ENUM('male', 'female', 'other'),
-    wallet_balance DECIMAL(10,2) DEFAULT 0.00,
-    total_earnings DECIMAL(10,2) DEFAULT 0.00,
+    role ENUM('driver', 'rider', 'admin') NOT NULL,
+
+    license VARCHAR(100) NULL, 
+    kyc_type ENUM('pan', 'aadhaar') NULL,
+    kyc_number VARCHAR(255) NULL,
+    is_live_currently ENUM('offline', 'online') NULL,
+
     status ENUM('active', 'inactive') DEFAULT 'active',
-    is_live_currently ENUM('offline', 'online') DEFAULT 'offline',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    -- Drivers must have a license
     CONSTRAINT chk_license_driver CHECK (
         (role <> 'driver') OR (license IS NOT NULL)
     ),
+
+    -- License format (example: MH1220241234567)
     CONSTRAINT chk_license_format CHECK (
         license IS NULL OR license REGEXP '^[A-Z]{2}[0-9]{2}[0-9]{4}[0-9]{7}$'
     ),
+
+    -- KYC mandatory for drivers, optional (NULL) for others
     CONSTRAINT chk_kyc_driver CHECK (
-        (role <> 'driver') OR (kyc_type IS NOT NULL AND kyc_document IS NOT NULL)
+        (role = 'driver' AND kyc_type IS NOT NULL AND kyc_number IS NOT NULL)
+        OR (role <> 'driver' AND kyc_type IS NULL AND kyc_number IS NULL)
     ),
+
+    -- Aadhaar format check (12 digits)
     CONSTRAINT chk_aadhar_format CHECK (
-        kyc_type <> 'aadhar' OR kyc_document REGEXP '^[0-9]{12}$'
+        kyc_type <> 'aadhaar' OR kyc_number REGEXP '^[0-9]{12}$'
     ),
+
+    -- PAN format check (10 alphanumeric)
     CONSTRAINT chk_pan_format CHECK (
-        kyc_type <> 'pan' OR kyc_document REGEXP '^[A-Za-z0-9]{10}$'
+        kyc_type <> 'pan' OR kyc_number REGEXP '^[A-Za-z0-9]{10}$'
     ),
+
+    -- Live status only for drivers
     CONSTRAINT chk_live_driver CHECK (
-        (role <> 'driver') OR (is_live_currently IS NULL)
+        (role = 'driver' AND is_live_currently IS NOT NULL)
+        OR (role <> 'driver' AND is_live_currently IS NULL)
     )
 );
-
 
 
 --Table vehicles--
