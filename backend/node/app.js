@@ -40,6 +40,8 @@ const PORT = env.server.port;
       res.send("✅ All databases connected and Sequelize is running fine");
     });
 
+    app.use("/api/rider", riderRoutes);
+
     // Global Error Handler (Raksha & Harshit)
     app.use(errorHandler);
 
