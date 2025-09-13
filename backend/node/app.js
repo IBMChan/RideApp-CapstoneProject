@@ -1,14 +1,24 @@
 // entry point
 import express from "express";
-import sequelize from "./config/sqlConfig.js";
-import { configDotenv } from "dotenv";
-import { connectDB } from "./config/mongoConfig.js";
+import bodyParser from "body-parser";
+import { config as configDotenv } from "dotenv";
 import mysql from "mysql2/promise";
+import sequelize from "./config/sqlConfig.js";
+import { connectDB } from "./config/mongoConfig.js";
+import pool from "./config/postgres.js"; //
 
-configDotenv(); // Load .env
+import riderRoutes from "./routes/riderRoutes.js";
+import driverRoutes from "./routes/driverRoutes.js";
+
+configDotenv(); // Load environment variables
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+app.use(bodyParser.json());
+
+app.get("/", (req, res) => {
+  res.send("Backend is running successfully!");
+});
 
 (async () => {
   try {
@@ -16,7 +26,7 @@ const PORT = process.env.PORT || 3000;
     await connectDB();
     console.log("MongoDB connected successfully");
 
-    // 2️⃣ Ensure MySQL database exists
+    // 2️⃣ Connect MySQL + Sequelize
     const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
 
     const connection = await mysql.createConnection({
@@ -28,24 +38,25 @@ const PORT = process.env.PORT || 3000;
     await connection.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;`);
     console.log(`MySQL database "${DB_NAME}" is ready.`);
 
-    // 3️⃣ Authenticate Sequelize
     await sequelize.authenticate();
     console.log("Sequelize connection established successfully.");
-
-    // 4️⃣ Sync models
     await sequelize.sync({ alter: true });
     console.log("Models synced successfully.");
 
-    // 5️⃣ Basic route
-    app.get("/", (req, res) => {
-      res.send("Sequelize is running and working fine");
-    });
+    // 3️⃣ Connect PostgreSQL
+    const res = await pool.query("SELECT NOW()");
+    console.log("PostgreSQL connected:", res.rows[0].now);
 
-    // 6️⃣ Start server
+    // 4️⃣ Routes
+    app.use("/rider", riderRoutes);
+    app.use("/driver", driverRoutes);
+
+    // 5️⃣ Start server
     app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
+      console.log(`Server running at http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error("Unable to connect to the database:", error);
+    console.error("Unable to connect to the database(s):", error);
+    process.exit(1);
   }
 })();
