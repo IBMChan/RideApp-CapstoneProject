@@ -1,4 +1,4 @@
-// mysqlConfig.js
+// dbConfig.js
 import { Sequelize } from "sequelize";
 import env from "./envConfig.js";
 
