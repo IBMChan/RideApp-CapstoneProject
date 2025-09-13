@@ -1,3 +1,4 @@
+// rideService.js
 import path from "path";
 import { spawn } from "child_process";
 import { callPython } from "./pythonService.js";
@@ -45,7 +46,13 @@ class RideService {
     });
 
     // Save ride in Redis for quick lookup
-    await redisClient.setEx(`ride:${ride.ride_id}`, 300, JSON.stringify(ride));
+    if (redisClient) {
+      try {
+        await redisClient.setEx(`ride:${ride.ride_id}`, 300, JSON.stringify(ride));
+      } catch (err) {
+        console.error("⚠️ Redis setEx failed:", err.message);
+      }
+    }
 
     const matchedDrivers = await this.matchDrivers(ride.ride_id);
 
@@ -115,7 +122,7 @@ class RideService {
       child.stdin.write(`${riders} ${driverCount}\n`);
 
       // Send driver IDs
-      const driverIds = drivers.map(d => d.user_id);
+      const driverIds = drivers.map((d) => d.user_id);
       child.stdin.write(driverIds.join(" ") + "\n");
 
       // Send cost matrix

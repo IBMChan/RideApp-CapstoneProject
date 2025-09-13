@@ -3,7 +3,7 @@
 //payment(paypal) and rating functionalities(r_to_d, d_to_r)
 
 // ride.controller.js
-import RideService from "../sevices/rideService.js";
+import RideService from "../services/rideService.js";
 import redisClient from "../config/redisConfig.js";
 
 class RideController {
