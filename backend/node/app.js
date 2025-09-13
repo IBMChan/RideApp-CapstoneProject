@@ -4,7 +4,6 @@ import { config as configDotenv } from "dotenv";
 configDotenv();
 
 import express from "express";
-import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import mysql from "mysql2/promise";
 import sequelize from "./config/sqlConfig.js";
@@ -12,8 +11,8 @@ import { connectDB } from "./config/mongoConfig.js";
 import pool from "./config/postgres.js";
 import redisClient from "./config/redisConfig.js";
 
-
 // Routes
+import authRoutes from "./routes/authRoutes.js";
 import rideRoutes from "./routes/rideRoutes.js";
 import riderRoutes from "./routes/riderRoutes.js";
 import driverRoutes from "./routes/driverRoutes.js";
@@ -24,21 +23,21 @@ const PORT = process.env.PORT || 3000;
 // ---------- Middlewares ----------
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(bodyParser.json());
 app.use(cookieParser());
 
 // Simple logger middleware
 app.use((req, res, next) => {
-  console.log("Incoming request:", req.method, req.url);
+  console.log("📥 Incoming request:", req.method, req.url);
   next();
 });
 
 // ---------- Health Check ----------
-app.get("/", (req, res) => {
-  res.send("Backend is running successfully! All DB connections are active.");
+app.get("/", (_req, res) => {
+  res.send("🚀 Backend is running successfully! All DB connections are active.");
 });
 
 // ---------- Routes ----------
+app.use("/api/auth", authRoutes);
 app.use("/api/rides", rideRoutes);
 app.use("/rider", riderRoutes);
 app.use("/driver", driverRoutes);
@@ -50,9 +49,8 @@ app.use("/driver", driverRoutes);
     await connectDB();
     console.log("✅ MongoDB connected successfully");
 
-    // 2️⃣ Connect MySQL & Ensure DB exists
+    // 2️⃣ Ensure MySQL database exists
     const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
-
     const connection = await mysql.createConnection({
       host: DB_HOST,
       user: DB_USER,
@@ -60,31 +58,31 @@ app.use("/driver", driverRoutes);
     });
     await connection.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;`);
     console.log(`✅ MySQL database "${DB_NAME}" is ready.`);
+    await connection.end();
 
-    // Sequelize Auth & Sync
+    // 3️⃣ Sequelize Auth & Sync
     await sequelize.authenticate();
     console.log("✅ Sequelize connection established successfully.");
-    await sequelize.sync();
+    await sequelize.sync({ alter: true });
     console.log("✅ Sequelize models synced successfully.");
 
-    // 3️⃣ Connect PostgreSQL
+    // 4️⃣ Connect PostgreSQL
     const res = await pool.query("SELECT NOW()");
     console.log("✅ PostgreSQL connected:", res.rows[0].now);
 
-//     if (process.env.REDIS_ENABLED === "true") {
-//   try {
-//     await redisClient.connect();
-//     console.log("✅ Redis connected successfully");
-//   } catch (err) {
-//     console.error("❌ Redis connection failed:", err);
-//   }
-// } else {
-//   console.log("⚠️ Redis is disabled (set REDIS_ENABLED=true to enable).");
-// }
+    // // 5️⃣ Connect Redis (Optional)
+    // if (process.env.REDIS_ENABLED === "true") {
+    //   try {
+    //     await redisClient.connect();
+    //     console.log("✅ Redis connected successfully");
+    //   } catch (err) {
+    //     console.error("❌ Redis connection failed:", err);
+    //   }
+    // } else {
+    //   console.log("⚠️ Redis is disabled (set REDIS_ENABLED=true to enable).");
+    // }
 
-
-
-    // 4️⃣ Start server
+    // 6️⃣ Start server
     app.listen(PORT, () => {
       console.log(`🚀 Server running at http://localhost:${PORT}`);
     });
