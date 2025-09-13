@@ -44,7 +44,7 @@ class RideController {
     async acceptRide(req, res) {
         try {
             const { ride_id } = req.params;
-            const driver_id = req.user?.id;
+            const driver_id = req.user?.id; // From Auth
             // const driver_id = 18;
             const ride = await RideService.acceptRide(ride_id, driver_id);
             res.json({ success: true, ride });
