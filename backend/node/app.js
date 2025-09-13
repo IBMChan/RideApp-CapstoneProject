@@ -14,8 +14,8 @@ import redisClient from "./config/redisConfig.js";
 // Routes
 import authRoutes from "./routes/authRoutes.js";
 import rideRoutes from "./routes/rideRoutes.js";
-import riderRoutes from "./routes/riderRoutes.js";
-import driverRoutes from "./routes/driverRoutes.js";
+// import riderRoutes from "./routes/riderRoutes.js";
+// import driverRoutes from "./routes/driverRoutes.js";
 
 
 const app = express();
@@ -40,8 +40,8 @@ app.get("/", (_req, res) => {
 // ---------- Routes ----------
 app.use("/api/auth", authRoutes);
 app.use("/api/rides", rideRoutes);
-app.use("/api/rider", riderRoutes);
-app.use("/api/driver", driverRoutes);
+// app.use("/api/rider", riderRoutes);
+// app.use("/api/driver", driverRoutes);
 
 // ---------- Server & DB Connections ----------
 (async () => {
