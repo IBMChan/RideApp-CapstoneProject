@@ -49,8 +49,4 @@ export async function capturePayment({ payment_id, amount }) {
   const payload = JSON.stringify({ action: 'capture_payment', payment_id, amount });
   const result = await execFileAsync(PY, [RAZORPY, payload]);
   return result;
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> upstream/main
