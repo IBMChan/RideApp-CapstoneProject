@@ -4,6 +4,6 @@ import { authMiddleware } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/:rider_id/wallet/add-money", authMiddleware, riderController.addMoney);
+// router.post("/:rider_id/wallet/add-money", authMiddleware, riderController.addMoney);
 
 export default router;
