@@ -1,163 +1,136 @@
-import walletRepository from "../repositories/postgres/walletRepository.js";
-import walletTransactionRepository from "../repositories/postgres/walletTransactionRepository.js";
-import paymentService from "./paymentService.js";
-
-// services/rider.service.js
 import rideRepository from "../repositories/mysql/ridesRepository.js";
-import * as userRepository from "../repositories/mysql/userRepository.js";
+import userRepository, { findUserById } from "../repositories/mysql/userRepository.js";
 import * as savedLocRepository from "../repositories/postgres/saveLocRepository.js";
 import * as complaintRepository from "../repositories/mongodb/complaintRepository.js";
 import * as lostItemRepository from "../repositories/mongodb/lostItemRepository.js";
 
-import { walletRepository } from '../repositories/postgres/walletRepositoy.js';
-import { walletTransactionRepository } from '../repositories/postgres/walletTransactionRepository.js';
-import { spawnPythonPayment } from '../config/razorpayConfig.js';
+import * as walletRepository from "../repositories/postgres/walletRepository.js";
+import walletTransactionRepository from "../repositories/postgres/walletTransactionRepository.js";
+import { spawnPythonPayment } from "../config/razorpayConfig.js";
+// import razorpay from "../config/razorpayConfig.js"
 
 import { NotFoundError, ValidationError } from "../utils/appError.js";
 
-// --------------------- 1. Ride history ---------------------
-export const getRideHistory = async (riderId) => {
-  const rides = await rideRepository.getRidesByRider(riderId);
-
-  if (!rides || rides.length === 0) {
-    throw new NotFoundError("No rides found for this rider.");
-  }
-  return rides;
-};
-
-// --------------------- 2. Profile management ---------------------
-export const getProfile = async (riderId) => {
-  const user = await userRepository.findUserById(riderId);
-
-  if (!user) throw new NotFoundError("Profile not found.");
-  return user;
-};
-
-export const updateProfile = async (riderId, data) => {
-  const user = await userRepository.findUserById(riderId);
-  if (!user) throw new NotFoundError("Profile not found.");
-
-  // TODO: integrate AWS S3 for profile image upload later
-  const updatedUser = await userRepository.updateUser(riderId, data);
-  return updatedUser;
-};
-
-// --------------------- 3. Saved locations (PostgreSQL) ---------------------
-export const getSavedLocations = async (riderId) => {
-  const locations = await savedLocRepository.findLocationsByUser(riderId);
-  if (!locations || locations.length === 0) {
-    throw new NotFoundError("No saved locations found.");
-  }
-  return locations;
-};
-
-export const addSavedLocation = async (riderId, locationData) => {
-  const { label, address, latitude, longitude } = locationData;
-  if (!label || !address || !latitude || !longitude) {
-    throw new ValidationError("Label, address, latitude, and longitude are required.");
+class RideService {
+  // --------------------- 1. Ride history ---------------------
+  async getRideHistory(riderId) {
+    const rides = await rideRepository.getRidesByRider(riderId);
+    if (!rides || rides.length === 0) {
+      throw new NotFoundError("No rides found for this rider.");
+    }
+    return rides;
   }
 
-  const existing = await savedLocRepository.findLocationByLabel(riderId, label);
-  if (existing) throw new ValidationError(`Location with label '${label}' already exists.`);
-
-  const newLoc = await savedLocRepository.createLocation(riderId, locationData);
-  return newLoc;
-};
-
-export const deleteSavedLocation = async (riderId, locationId) => {
-  const deleted = await savedLocRepository.deleteLocation(riderId, locationId);
-  if (!deleted) throw new NotFoundError("Saved location not found or not owned by rider.");
-  return true;
-};
-
-// --------------------- 4. Share ride status (Twilio placeholder) ---------------------
-export const shareRideStatus = async (riderId, rideId, phoneNumber) => {
-  if (!phoneNumber) throw new ValidationError("Recipient phone number required.");
-
-  const ride = await rideRepository.findRideWithDriver(rideId);
-  if (!ride) throw new NotFoundError("Ride not found.");
-
-  // TODO: Integrate Twilio WhatsApp/SMS
-  console.log(`Sharing ride ${rideId} (Rider ${riderId}) with ${phoneNumber}`);
-  return true;
-};
-
-// --------------------- 5. Complaints + Lost items (MongoDB) ---------------------
-export const registerComplaint = async (riderId, rideId, data) => {
-  if (!data || !data.message) throw new ValidationError("Complaint message is required.");
-
-  const ride = await rideRepository.getRideById(rideId);
-  if (!ride || ride.rider_id !== riderId) {
-    throw new NotFoundError("Ride not found or does not belong to rider.");
+  // --------------------- 2. Profile ---------------------
+  async getProfile(riderId) {
+    const user = await findUserById(riderId);
+    if (!user) throw new NotFoundError("Profile not found.");
+    return user;
   }
 
-  const complaint = await complaintRepository.createComplaint(riderId, rideId, data.message);
-  return complaint;
-};
-
-export const getComplaints = async (riderId) => {
-  const complaints = await complaintRepository.findComplaintsByRider(riderId);
-
-  if (!complaints || complaints.length === 0) {
-    throw new NotFoundError("No complaints found for this rider.");
+  async updateProfile(riderId, data) {
+    const user = await findUserById(riderId);
+    if (!user) throw new NotFoundError("Profile not found.");
+    return await userRepository.updateUser(riderId, data);
   }
 
-  return complaints;
-};
-
-export const getLostItems = async (riderId, rideId) => {
-  // const ride = await rideRepository.getRideById(rideId);
-  // if (!ride || ride.rider_id !== riderId) {
-  //   throw new NotFoundError("Ride not found or does not belong to rider.");
-  // }
-
-  const items = await lostItemRepository.findLostItemsByRide(riderId, rideId);
-  if (!items || items.length === 0) {
-    throw new NotFoundError("No lost items reported for this ride.");
+  // --------------------- 3. Saved Locations ---------------------
+  async getSavedLocations(riderId) {
+    const locations = await savedLocRepository.findLocationsByUser(riderId);
+    if (!locations || locations.length === 0) {
+      throw new NotFoundError("No saved locations found.");
+    }
+    return locations;
   }
 
-  return items;
-};
-
-export const reportLostItem = async (riderId, rideId, itemData) => {
-  if (!itemData || !itemData.description) {
-    throw new ValidationError("Lost item description is required.");
+  async addSavedLocation(riderId, locationData) {
+    const { label, address, latitude, longitude } = locationData;
+    if (!label || !address || !latitude || !longitude) {
+      throw new ValidationError("Label, address, latitude, and longitude are required.");
+    }
+    const existing = await savedLocRepository.findLocationByLabel(riderId, label);
+    if (existing) throw new ValidationError(`Location with label '${label}' already exists.`);
+    return await savedLocRepository.createLocation(riderId, locationData);
   }
 
-  // make sure ride exists and belongs to rider
-  const ride = await rideRepository.getRideById(rideId);
-  if (!ride || ride.rider_id !== riderId) {
-    throw new NotFoundError("Ride not found or does not belong to rider.");
+  async deleteSavedLocation(riderId, locationId) {
+    const deleted = await savedLocRepository.deleteLocation(riderId, locationId);
+    if (!deleted) throw new NotFoundError("Saved location not found or not owned by rider.");
+    return true;
   }
 
-  // create lost item record in MongoDB
-  const lostItem = await lostItemRepository.reportLostItem(
-    riderId,
-    rideId,
-    itemData.description
-  );
+  // --------------------- 4. Share Ride Status ---------------------
+  async shareRideStatus(riderId, rideId, phoneNumber) {
+    if (!phoneNumber) throw new ValidationError("Recipient phone number required.");
+    const ride = await rideRepository.findRideWithDriver(rideId);
+    if (!ride) throw new NotFoundError("Ride not found.");
+    console.log(`Sharing ride ${rideId} (Rider ${riderId}) with ${phoneNumber}`);
+    return true;
+  }
 
-  return lostItem;
-};
+  // --------------------- 5. Complaints & Lost Items ---------------------
+  async registerComplaint(riderId, rideId, data) {
+    if (!data || !data.message) throw new ValidationError("Complaint message is required.");
+    const ride = await rideRepository.getRideById(rideId);
+    if (!ride || ride.rider_id !== riderId) {
+      throw new NotFoundError("Ride not found or does not belong to rider.");
+    }
+    return await complaintRepository.createComplaint(riderId, rideId, data.message);
+  }
 
-export const addMoneyService = async ({ user_id, amount, payment_method, bank_details }) => {
-    // Call Python Razorpay script
-    const paymentResult = await spawnPythonPayment({ action: 'create_order', amount, currency: 'INR', user_id, payment_method, bank_details });
-class RiderService {
-  async addMoney(user_id, amount) {
-    // log txn in DB
-    const txn = await walletTransactionRepository.create({
-      user_id,
+  async getComplaints(riderId) {
+    const complaints = await complaintRepository.findComplaintsByRider(riderId);
+    if (!complaints || complaints.length === 0) {
+      throw new NotFoundError("No complaints found for this rider.");
+    }
+    return complaints;
+  }
+
+  async getLostItems(riderId, rideId) {
+    const items = await lostItemRepository.findLostItemsByRide(riderId, rideId);
+    if (!items || items.length === 0) {
+      throw new NotFoundError("No lost items reported for this ride.");
+    }
+    return items;
+  }
+
+  async reportLostItem(riderId, rideId, itemData) {
+    if (!itemData || !itemData.description) {
+      throw new ValidationError("Lost item description is required.");
+    }
+    const ride = await rideRepository.getRideById(rideId);
+    if (!ride || ride.rider_id !== riderId) {
+      throw new NotFoundError("Ride not found or does not belong to rider.");
+    }
+    return await lostItemRepository.reportLostItem(riderId, rideId, itemData.description);
+  }
+
+  // --------------------- 6. Wallet (via Python Razorpay) ---------------------
+  async addMoney({ user_id, amount, payment_method, bank_details }) {
+    // call Python wrapper
+    const paymentResult = await spawnPythonPayment({
+      action: "create_order",
       amount,
-      txn_type: "credit",
-      status: "pending",
+      currency: "INR",
+      user_id,
+      payment_method,
+      bank_details
     });
 
-    // delegate to Python for Razorpay integration
-    const result = await paymentService.addMoney({ user_id, amount });
+    if (!paymentResult.success) {
+      throw new Error("Payment failed");
+    }
 
-    return { txn, result };
+    // update wallet balance
+    const wallet = await walletRepository.getWalletByUserId(user_id);
+    const newBalance = parseFloat(wallet.balance) + parseFloat(amount);
+    await walletRepository.updateBalance(wallet.wallet_id, newBalance);
+
+    // log transaction
+    await walletTransactionRepository.addTransaction(wallet.wallet_id, amount, null);
+
+    return { success: true, newBalance };
   }
 }
-}
-export default new RiderService();
+
+export default new RideService();

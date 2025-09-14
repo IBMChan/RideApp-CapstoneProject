@@ -5,8 +5,8 @@
 
 // controllers/rider.controller.js
 import { ValidationError } from "../utils/appError.js";
-import * as riderService from "../services/riderService.js";
-import { addMoneyService } from "../services/riderService.js";
+import riderService from "../services/riderService.js";
+//import { addMoneyService } from "../services/riderService.js";
 
 // 1. Ride history
 export const getRideHistory = async (req, res, next) => {
@@ -170,7 +170,7 @@ export const reportLostItem = async (req, res, next) => {
 export const addMoney = async (req, res) => {
   try {
     const { user_id, amount, payment_method, bank_details } = req.body;
-    const result = await addMoneyService({ user_id: parseInt(user_id, 10), amount, payment_method, bank_details });
+    const result = await riderService({ user_id: parseInt(user_id, 10), amount, payment_method, bank_details });
     res.status(200).json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
