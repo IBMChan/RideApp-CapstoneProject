@@ -3,26 +3,25 @@ import driverController from '../controllers/driverController.js';
 
 const router = express.Router();
 
-
-
-//Profile
-// router.get("/profile", driverController.getProfile); //done
-
-router.get("/profile",driverController.getProfile);
-
-router.patch("/profile", driverController.updateProfile); //done
+// Profile
+router.get("/profile", driverController.getProfile);
+router.patch("/profile", driverController.updateProfile);
 
 // Ride History
-router.get("/rides",  driverController.getRideHistory); //done
+router.get("/rides", driverController.getRideHistory);
 
 // Payment History
-router.get("/payments", driverController.getPaymentHistory); //done 
+router.get("/payments", driverController.getPaymentHistory);
 
 // Vehicles
-router.post("/vehicles", driverController.addVehicle); //done 
-router.put("/vehicles/:vehicleId",driverController.updateVehicle); //done
-router.delete("/vehicles/:vehicleId", driverController.deleteVehicle); // done
+router.post("/vehicles", driverController.addVehicle);
+router.put("/vehicles/:vehicleId", driverController.updateVehicle);
+router.delete("/vehicles/:vehicleId", driverController.deleteVehicle);
 
 // Status
-router.put("/status",  driverController.updateStatus);//done
+router.put("/status", driverController.updateStatus);
+
+// Payment confirmation
+router.post("/payments/:payment_id/confirm", driverController.confirmPayment);
+
 export default router;

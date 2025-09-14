@@ -1,52 +1,35 @@
-//payment(paypal)
+// backend/services/paymentService.js
+import paymentRepository from "../repositories/mongodb/paymentRepository.js";
 
-import { execFile } from 'child_process';
-import { promisify } from 'util';
-import path from 'path';
-import fs from 'fs/promises';
-const execFileAsync = (file, args = []) =>
-  new Promise((resolve, reject) => {
-    execFile(file, args, {encoding: 'utf8'}, (err, stdout, stderr) => {
-      if (err) return reject(err);
-      try {
-        const j = JSON.parse(stdout);
-        return resolve(j);
-      } catch (e) {
-        return reject(new Error(`Invalid JSON from python: ${e.message} STDOUT:${stdout} STDERR:${stderr}`));
-      }
+class PaymentService {
+  // Create a payment for a ride (or return existing)
+  async createPaymentForRide({ ride_id, fare, mode = "cash" }) {
+    // Mode validation (we only handle cash/upi here)
+    if (!["cash", "upi"].includes(mode)) {
+      throw new Error("Unsupported mode for this flow. Use 'cash' or 'upi'.");
+    }
+    // ensure doc exists
+    return await paymentRepository.ensureForRide(ride_id, fare, mode);
+  }
+
+  async getPaymentByRide(ride_id) {
+    return await paymentRepository.findByRideId(ride_id);
+  }
+
+  async confirmPaymentByDriver(payment_id, driver_user_id) {
+    const payment = await paymentRepository.findById(payment_id);
+    if (!payment) throw new Error("Payment not found");
+    if (payment.status === "success") {
+      return payment; // already confirmed
+    }
+
+    const updated = await paymentRepository.updateStatus(payment_id, {
+      status: "success",
+      Payed_At: new Date(),
+      confirmed_by: driver_user_id, // optional audit field
     });
-  });
-
-const PY = process.env.PYTHON_PATH || 'python3';
-const RAZORPY = path.resolve('python/payments/razorpay_integration.py');
-
-/**
- * Create razorpay order via python
- * args: { amount: integer (paise), currency, receipt }
- */
-export async function createRazorpayOrder({ amount, currency = 'INR', receipt }) {
-  const payload = JSON.stringify({ action: 'create_order', amount, currency, receipt });
-  // We'll pass payload as single argument
-  const result = await execFileAsync(PY, [RAZORPY, payload]);
-  if (!result.ok) throw new Error(result.error || 'failed to create order');
-  return result.order;
+    return updated;
+  }
 }
 
-/**
- * Verify payment signature via python
- * params: { razorpay_order_id, razorpay_payment_id, razorpay_signature }
- */
-export async function verifyPaymentSignature({ razorpay_order_id, razorpay_payment_id, razorpay_signature }) {
-  const payload = JSON.stringify({ action: 'verify_signature', razorpay_order_id, razorpay_payment_id, razorpay_signature });
-  const result = await execFileAsync(PY, [RAZORPY, payload]);
-  return result.ok === true;
-}
-
-/**
- * capture payment
- */
-export async function capturePayment({ payment_id, amount }) {
-  const payload = JSON.stringify({ action: 'capture_payment', payment_id, amount });
-  const result = await execFileAsync(PY, [RAZORPY, payload]);
-  return result;
-}
+export default new PaymentService();

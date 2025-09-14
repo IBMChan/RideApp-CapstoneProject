@@ -1,5 +1,6 @@
 // controllers/rideController.js
 import RideService from "../services/rideService.js";
+import paymentService from "../services/paymentService.js";
 import redisClient from "../config/redisConfig.js";
 import { successResponse, errorResponse } from "../utils/apiResponse.js";
 
@@ -12,6 +13,13 @@ class RideController {
 
       const rideData = await redisClient.get(`ride:${ride.ride_id}`);
       const rideFromCache = rideData ? JSON.parse(rideData) : ride;
+
+      // Ensure a payment document is created for this ride (default mode cash for now)
+      await paymentService.createPaymentForRide({
+        ride_id: ride.ride_id,
+        fare: Number(ride.fare || req.body.fare || 0),
+        mode: "cash",
+      });
 
       return successResponse(
         res,
@@ -125,6 +133,41 @@ class RideController {
       const { id: user_id, role } = req.user;
       const rides = await RideService.listRides(user_id, role);
       return successResponse(res, "Rides listed successfully", { rides });
+    } catch (err) {
+      return errorResponse(res, err, err.statusCode || 400);
+    }
+  }
+
+  // Rider initiates payment (cash/upi) for a ride
+  async processPayment(req, res) {
+    try {
+      const { ride_id } = req.params;
+      const { mode } = req.body;
+
+      if (!mode || !["cash", "upi"].includes(mode)) {
+        return errorResponse(res, "mode must be 'cash' or 'upi'", 400);
+      }
+
+      const ride = await RideService.getRide(ride_id);
+      if (!ride) return errorResponse(res, "Ride not found", 404);
+
+      const allowedStatuses = ["in_progress", "completed"];
+      if (!allowedStatuses.includes(ride.status)) {
+        return errorResponse(res, "Payment allowed only for ongoing or completed rides", 400);
+      }
+
+      const payment = await paymentService.createPaymentForRide({
+        ride_id: ride.ride_id,
+        fare: Number(ride.fare || 0),
+        mode,
+      });
+
+      // Notify driver (placeholder - integrate notificationService here)
+      console.log(`[NOTIFY] Driver (${ride.driver_id}) confirm collection for payment_id=${payment.payment_id}`);
+
+      return successResponse(res, "Payment initiated (pending, awaiting driver confirmation)", {
+        payment,
+      });
     } catch (err) {
       return errorResponse(res, err, err.statusCode || 400);
     }

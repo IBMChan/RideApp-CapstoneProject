@@ -123,6 +123,23 @@ class DriverController {
       next(err);
     }
   }
+
+
+  // inside class DriverController
+
+  // ========== Payment Confirmation ==========
+  async confirmPayment(req, res, next) {
+    try {
+      const { payment_id } = req.params;
+      const driverId = 1; // or req.user.id when auth is ready
+
+      const confirmation = await DriverService.confirmPayment(driverId, payment_id);
+      res.json({ message: "Payment confirmed successfully", confirmation });
+    } catch (err) {
+      next(err);
+    }
+  }
+
 }
 
 export default new DriverController();

@@ -23,4 +23,10 @@ router.get("/history", RideController.getRideHistory);
 router.get("/list/:role", RideController.listRides);
 router.get("/:ride_id", RideController.getRide);
 
+
+
+//payment
+router.post("/:ride_id/status", RideController.updateRideStatus);
+router.post("/:ride_id/pay", RideController.processPayment);
+
 export default router;
