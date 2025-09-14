@@ -2,7 +2,8 @@
 //chandana - wallet management
 
 import userRepository from "../repositories/mysql/userRepository.js";
-import vehicleRepository from "../repositories/mysql/vehicleRepository.js"
+import vehicleRepository from "../repositories/mysql/vehicleRepository.js";
+import vehicleService from "./vehicleService.js";
 import walletRepository from "../repositories/postgres/walletRepository.js";
 import walletTransactionRepository from "../repositories/postgres/walletTransactionRepository.js";
 import paymentService from "./paymentService.js";
@@ -18,8 +19,8 @@ class DriverService {
     const allowedFields = ["full_name", "phone", "email"];
     const updates = {};
     if (!fields || typeof fields !== 'object') {
-        throw new Error("Invalid input data");
-   }
+      throw new Error("Invalid input data");
+    }
     for (const key of allowedFields) {
       if (fields[key]) updates[key] = fields[key];
     }
@@ -43,7 +44,7 @@ class DriverService {
     return await userRepository.findRidesByDriver(driverId);
   }
   // ==== Average Rating =====
-  async getAverageRating(driverId){
+  async getAverageRating(driverId) {
     return await userRepository.getAverageRatingByDriver(driverId);
   }
   // ===== Payment History =====
@@ -53,40 +54,79 @@ class DriverService {
   // Vehicle Management
   async addVehicle(driverId, vehicleData) {
     console.log("Debug: vehicleData =", vehicleData);
-    if (!vehicleData.model || !vehicleData.plate_no) {
-        throw new Error("Model and plate number are required");
+    if (!vehicleData || typeof vehicleData !== "object") {
+      throw new Error("Invalid vehicle data");
     }
-    return await vehicleRepository.create(driverId, vehicleData); 
+    if (!vehicleData.model || !vehicleData.plate_no) {
+      throw new Error("Model and plate number are required");
+    }
+
+    // Use vehicleService to create (it validates driver role)
+    const created = await vehicleService.createVehicle(driverId, vehicleData);
+    return created;
   }
 
+  // keep same function name: updateVehicle(driverId, vehicleId, vehicleData)
   async updateVehicle(driverId, vehicleId, vehicleData) {
+    // ensure ownership
     const vehicle = await vehicleRepository.findById(vehicleId);
-    if (!vehicle || vehicle.driver_id !== driverId) {
-        throw new Error("Vehicle not found or not owned by driver");
+    if (!vehicle || vehicle.driver_id !== Number(driverId)) {
+      throw new Error("Vehicle not found or not owned by driver");
     }
-    const allowedFields = ['color'];
+
+    // preserving your original constraint (only color) but allow status changes too
+    const allowedFields = ["color"];
     const filteredData = {};
     for (const key of allowedFields) {
-      if (vehicleData.hasOwnProperty(key)) {
-        filteredData[key] = vehicleData[key];
+      if (vehicleData.hasOwnProperty(key)) filteredData[key] = vehicleData[key];
+    }
+
+    // If a status change is requested, route through vehicleService so it deactivates other vehicles atomically
+    if (vehicleData.vehicle_status) {
+      const newStatus = vehicleData.vehicle_status;
+      // validate
+      if (!["active", "inactive"].includes(newStatus)) {
+        throw new Error("Invalid vehicle_status. Allowed: 'active' or 'inactive'");
       }
+      // call service that performs transactional activation
+      const updated = await vehicleService.setVehicleStatus(vehicleId, driverId, newStatus);
+      // also apply other small updates (like color) if provided
+      if (Object.keys(filteredData).length > 0) {
+        await vehicleRepository.update(vehicleId, filteredData);
+      }
+      return updated;
     }
-    if (!filteredData.color) {
-      throw new Error("Only 'color' field can be updated and must be provided");
+
+    if (Object.keys(filteredData).length === 0) {
+      throw new Error("Only 'color' field can be updated (or vehicle_status to toggle active/inactive)");
     }
-      return await vehicleRepository.update(vehicleId, filteredData); 
-    }
+
+    return await vehicleRepository.update(vehicleId, filteredData);
+  }
+
+  // keep same function name: deleteVehicle(driverId, vehicleId)
   async deleteVehicle(driverId, vehicleId) {
-    const vehicles = await vehicleRepository.getByDriverId(driverId); 
+    const vehicles = await vehicleRepository.getByDriverId(driverId);
     if (!vehicles || vehicles.length <= 1) {
-        throw new Error("At least one vehicle must remain. Cannot delete the only vehicle.");
+      throw new Error("At least one vehicle must remain. Cannot delete the only vehicle.");
     }
-    const vehicle = vehicles.find(v => v.vehicle_id === parseInt(vehicleId));
+    const vehicle = vehicles.find((v) => v.vehicle_id === Number(vehicleId));
     if (!vehicle) {
-        throw new Error("Vehicle not found or not owned by driver");
+      throw new Error("Vehicle not found or not owned by driver");
     }
-    return await vehicleRepository.delete(vehicleId); 
-    }
+
+    return await vehicleRepository.delete(vehicleId);
+  }
+
+  // new wrapper to list vehicles for controller convenience
+  async listVehicles(driverId) {
+    return await vehicleService.getVehiclesForDriver(driverId);
+  }
+
+  // new wrapper to set status via driver endpoints (keeps controller name simple)
+  async setVehicleStatus(driverId, vehicleId, status) {
+    return await vehicleService.setVehicleStatus(vehicleId, driverId, status);
+  }
   // ===== Status =====
   async updateStatus(driverId, is_live_currently) {
     if (!["yes", "no"].includes(is_live_currently)) {
@@ -95,7 +135,7 @@ class DriverService {
     return await userRepository.update(driverId, { is_live_currently });
   }
 
-    async withdrawMoney(user_id, amount) {
+  async withdrawMoney(user_id, amount) {
     const wallet = await walletRepository.findByUser(user_id);
     if (!wallet || wallet.balance < amount) {
       throw new Error("Insufficient wallet balance");

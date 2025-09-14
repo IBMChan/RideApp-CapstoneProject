@@ -8,7 +8,8 @@ import WalletService from "./wallet_service.js";
 import paymentService from "./paymentService.js";
 import { callPython } from "./pythonService.js";
 import path from "path";
-import { spawn } from "child_process";
+import { spawn } from 'child_process';
+import vehicleRepository from "../repositories/mysql/vehicleRepository.js";
 // import notificationService from "./notificationService"; // Optional notifications
 
 class RideService {
@@ -175,7 +176,14 @@ class RideService {
       throw new AppError("Driver already on another ride", 409, "DRIVER_BUSY");
     }
 
-    return await RideRepository.assignDriver(ride_id, driver_id);
+    // Find driver's active vehicle
+    const activeVehicle = await vehicleRepository.getActiveByDriver(driver_id);
+    if (!activeVehicle) {
+      throw new AppError("Driver has no active vehicle. Set one active before accepting rides.", 400, "NO_ACTIVE_VEHICLE");
+    }
+
+    // Assign driver and vehicle atomically (rideRepository.assignDriver should accept vehicle_id)
+    return await RideRepository.assignDriver(ride_id, driver_id, activeVehicle.vehicle_id);
   }
 
   async updateRideStatus(ride_id, status, userId, role) {
@@ -232,13 +240,42 @@ class RideService {
     return ride;
   }
 
-  async cancelRide(ride_id) {
+  // cancelRide: if cancel happens BEFORE expiry_time, unassign driver & vehicle and set status back to 'requested' (so re-matching can occur).
+  // Otherwise mark cancelled.
+  async cancelRide(ride_id, userId = null, role = null) {
     if (!ride_id) throw new AppError("Ride ID is required", 400, "MISSING_RIDE_ID");
 
-    const ride = await RideRepository.cancelRide(ride_id);
-    if (!ride) throw new AppError("Ride not found or cannot be cancelled", 404, "RIDE_NOT_FOUND");
+    const ride = await RideRepository.findById(ride_id);
+    if (!ride) throw new AppError("Ride not found", 404, "RIDE_NOT_FOUND");
 
-    return ride;
+    // optional: authorization - allow rider who created the ride or assigned driver to cancel
+    if (userId) {
+      const allowed =
+        role === "admin" ||
+        ride.rider_id === Number(userId) ||
+        (ride.driver_id && ride.driver_id === Number(userId));
+      if (!allowed) {
+        throw new AppError("Not authorized to cancel this ride", 403, "UNAUTHORIZED");
+      }
+    }
+
+    const now = new Date();
+    const expiry = ride.expiry_time ? new Date(ride.expiry_time) : null;
+
+    if (expiry && now < expiry) {
+      // Revert to requested and remove assignment
+      await ride.update({
+        driver_id: null,
+        vehicle_id: null,
+        status: "requested",
+      });
+      return ride;
+    } else {
+      // Past expiry -> cancel permanently
+      const cancelled = await RideRepository.cancelRide(ride_id);
+      if (!cancelled) throw new AppError("Unable to cancel ride", 500, "CANCEL_FAILED");
+      return cancelled;
+    }
   }
 
   async getOngoingRides(driver_id) {
