@@ -3,12 +3,16 @@
 // shriya : profile managemnetdr_status management(online, offline) , register a complaint  
 import User from "../../entities/userModel.js";
 import Vehicle from "../../entities/vehicleModel.js";
+import Ride from "../../entities/rideModel.js";       // Sequelize
+import Payment from "../../entities/paymentModel.js"; // Mongoose
+import Rating from "../../entities/ratingModel.js";   // Mongoose
+
 
 class UserRepository {
   async findById(id) {
     if (!id) return null;
     return await User.findByPk(id);
-  }
+  }      
 
   async findByEmail(email) {
     if (!email) return null;
@@ -68,6 +72,56 @@ class UserRepository {
   const user = await this.findById(id);
   return user && user.role === "driver";
 }
+async update(driverId, updates) {
+    const driver = await User.findByPk(driverId);
+    if (!driver) throw new Error("Driver not found");
+
+    await driver.update(updates);
+    return driver;
+  }
+   async findRidesByDriver(driverId) {
+    return Ride.findAll({
+      where: { driver_id: driverId },
+      // order: [["created_at", "DESC"]],
+    });
+  }
+
+  // ===== Payment History (Mongo/Mongoose) =====
+  async findPaymentsByDriver(driverId) {
+    return Payment.find({ driver_id: driverId })
+      .sort({ created_at: -1 })
+      .lean();
+  }
+
+  // ===== Average Rating for driver (Mongo/Mongoose) =====
+  async findRatingsByDriver(driverId) {
+    return Rating.find({ driver_id: driverId })
+      .sort({ created_at: -1 })
+      .lean();
+  }
+  // Average Rating for a Driver
+ async getAverageRatingByDriver(driverId) {
+  const result = await Rating.aggregate([
+    { $match: { driver_id: driverId } },
+    {
+      $group: {
+        _id: "$driver_id",
+        averageRating: { $avg: "$rating" },
+        totalRatings: { $sum: 1 }
+      }
+    }
+  ]);
+
+  if (result.length === 0) {
+    return { averageRating: null, totalRatings: 0 };
+  }
+
+  return {
+    averageRating: parseFloat(result[0].averageRating.toFixed(2)),
+    totalRatings: result[0].totalRatings,
+  };
+}
+
 }
 
 export default new UserRepository();

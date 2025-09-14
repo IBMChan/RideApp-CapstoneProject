@@ -1,25 +1,27 @@
 import express from 'express';
 import driverController from '../controllers/driverController.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
-
 const router = express.Router();
 
 // Profile
-router.get("/profile", authMiddleware, driverController.getProfile);
-router.patch("/profile", authMiddleware, driverController.updateProfile);
+router.get("/profile",authMiddleware, driverController.getProfile);
+router.patch("/profile",authMiddleware ,driverController.updateProfile);
 
 // Ride History
-router.get("/rides", authMiddleware, driverController.getRideHistory);
+router.get("/rides", authMiddleware,driverController.getRideHistory);
 
 // Payment History
-router.get("/payments", authMiddleware, driverController.getPaymentHistory);
+router.get("/payments", authMiddleware,driverController.getPaymentHistory);
 
+//Average rating 
+router.get("/rating",authMiddleware,driverController.getAverageRating);
 // Vehicles
-router.post("/vehicles", authMiddleware, driverController.addVehicle);
+router.post("/vehicles", authMiddleware,driverController.addVehicle);
 router.put("/vehicles/:vehicleId", authMiddleware, driverController.updateVehicle);
-router.delete("/vehicles/:vehicleId", authMiddleware, driverController.deleteVehicle);
+router.delete("/vehicles/:vehicleId", authMiddleware,driverController.deleteVehicle);
 
 // Status
+router.put("/status",authMiddleware,driverController.updateStatus);
 router.put("/status", authMiddleware, driverController.updateStatus);
 
 // Payment confirmation
