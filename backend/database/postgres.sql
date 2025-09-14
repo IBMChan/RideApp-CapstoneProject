@@ -3,7 +3,8 @@
 --wallet--
 CREATE TABLE wallet (
     wallet_id BIGSERIAL PRIMARY KEY,          -- auto-incrementing wallet ID
-    user_id INT NOT NULL,                     -- value provided by backend
+    user_id INT NOT NULL,                       -- value provided by backend
+    pin INT NOT NULL
     balance NUMERIC(12,2) DEFAULT 0.00 CHECK (balance >= 0),
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

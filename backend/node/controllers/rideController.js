@@ -1,26 +1,28 @@
-// controllers/rideController.js
 import RideService from "../services/rideService.js";
+import paymentService from "../services/paymentService.js";
 import redisClient from "../config/redisConfig.js";
 import { successResponse, errorResponse } from "../utils/apiResponse.js";
 
 class RideController {
-  // Rider creates a new ride
   async createRide(req, res) {
     try {
-      const rider_id = req.user?.id || 1; // TODO: replace with actual auth
+      const rider_id = req.user?.user_id;
       const { ride, matchedDrivers } = await RideService.createRide(req.body, rider_id);
 
       const rideData = await redisClient.get(`ride:${ride.ride_id}`);
       const rideFromCache = rideData ? JSON.parse(rideData) : ride;
 
+      // Ensure payment document is created for this ride (default cash mode)
+      await paymentService.createPaymentForRide({
+        ride_id: ride.ride_id,
+        fare: Number(ride.fare || req.body.fare || 0),
+        mode: "cash",
+      });
+
       return successResponse(
         res,
         "Ride created successfully. Drivers matched.",
-        {
-          ride_id: ride.ride_id,
-          ride: rideFromCache,
-          matchedDrivers,
-        },
+        { ride_id: ride.ride_id, ride: rideFromCache, matchedDrivers },
         201
       );
     } catch (err) {
@@ -28,21 +30,20 @@ class RideController {
     }
   }
 
-  // Driver gets pending rides
   async getPendingRides(req, res) {
     try {
-      const rides = await RideService.getPendingRidesForDriver();
+      const driver_id = req.user?.user_id;
+      const rides = await RideService.getPendingRidesForDriver(driver_id);
       return successResponse(res, "Pending rides fetched successfully", { rides });
     } catch (err) {
       return errorResponse(res, err, err.statusCode || 400);
     }
   }
 
-  // Driver accepts a ride
   async acceptRide(req, res) {
     try {
       const { ride_id } = req.params;
-      const driver_id = req.user?.id || 18; // fallback for testing
+      const driver_id = req.user?.user_id;
       const ride = await RideService.acceptRide(ride_id, driver_id);
       return successResponse(res, "Ride accepted successfully", { ride });
     } catch (err) {
@@ -50,13 +51,11 @@ class RideController {
     }
   }
 
-  // Update ride status
   async updateRideStatus(req, res) {
     try {
       const { ride_id } = req.params;
       const { status } = req.body;
-      const { id: userId, role } = req.user;
-
+      const { user_id: userId, role } = req.user;
       const ride = await RideService.updateRideStatus(ride_id, status, userId, role);
       return successResponse(res, "Ride status updated successfully", { ride });
     } catch (err) {
@@ -64,18 +63,17 @@ class RideController {
     }
   }
 
-  // Complete a ride
   async completeRide(req, res) {
     try {
       const { ride_id } = req.params;
-      const ride = await RideService.completeRide(ride_id);
-      return successResponse(res, "Ride completed successfully", { ride });
+      const user = req.user || {};
+      const ride = await RideService.completeRide(Number(ride_id), user);
+      return successResponse(res, "Ride completed", { ride });
     } catch (err) {
-      return errorResponse(res, err, err.statusCode || 400);
+      return errorResponse(res, err, err.statusCode || 500);
     }
   }
 
-  // Cancel a ride
   async cancelRide(req, res) {
     try {
       const { ride_id } = req.params;
@@ -86,10 +84,9 @@ class RideController {
     }
   }
 
-  // Get ongoing rides for a driver
   async getOngoingRides(req, res) {
     try {
-      const driver_id = req.user?.id;
+      const driver_id = req.user?.user_id;
       const rides = await RideService.getOngoingRides(driver_id);
       return successResponse(res, "Ongoing rides fetched successfully", { rides });
     } catch (err) {
@@ -97,10 +94,9 @@ class RideController {
     }
   }
 
-  // Get ride history for a driver
   async getRideHistory(req, res) {
     try {
-      const driver_id = req.user?.id;
+      const driver_id = req.user?.user_id;
       const rides = await RideService.getRideHistory(driver_id);
       return successResponse(res, "Ride history fetched successfully", { rides });
     } catch (err) {
@@ -108,7 +104,6 @@ class RideController {
     }
   }
 
-  // Get details of a single ride
   async getRide(req, res) {
     try {
       const { ride_id } = req.params;
@@ -119,14 +114,67 @@ class RideController {
     }
   }
 
-  // List all rides for a user (rider or driver)
   async listRides(req, res) {
     try {
-      const { id: user_id, role } = req.user;
+      const { user_id, role } = req.user;
       const rides = await RideService.listRides(user_id, role);
       return successResponse(res, "Rides listed successfully", { rides });
     } catch (err) {
       return errorResponse(res, err, err.statusCode || 400);
+    }
+  }
+
+  async processPayment(req, res) {
+    try {
+      const { ride_id } = req.params;
+      const { mode } = req.body;
+
+      if (!["cash", "upi", "wallet"].includes(mode)) {
+        return errorResponse(res, "Invalid payment mode", 400);
+      }
+
+      const ride = await RideService.getRide(Number(ride_id));
+      if (!ride) return errorResponse(res, "Ride not found", 404);
+      if (!["in_progress", "completed"].includes(ride.status)) {
+        return errorResponse(res, "Payment allowed only for ongoing/completed rides", 400);
+      }
+
+      const payment = await paymentService.createPaymentForRide({
+        ride_id: ride.ride_id,
+        fare: Number(ride.fare),
+        mode,
+      });
+
+      return successResponse(res, "Payment created", { payment });
+    } catch (err) {
+      return errorResponse(res, err, err.statusCode || 500);
+    }
+  }
+
+  async initiatePayment(req, res) {
+    try {
+      const { ride_id } = req.params;
+      const { mode } = req.body;
+      const rider_id = req.user?.user_id;
+
+      const result = await paymentService.initiatePayment({ ride_id, rider_id, mode });
+      return successResponse(res, "Payment initiation successful", result);
+    } catch (err) {
+      console.error("initiatePayment error:", err);
+      return errorResponse(res, err, err.statusCode || 500);
+    }
+  }
+
+  async confirmPayment(req, res) {
+    try {
+      const { ride_id } = req.params;
+      const driver_id = req.user?.user_id;
+
+      const result = await paymentService.confirmPayment({ ride_id, driver_id });
+      return successResponse(res, "Payment confirmed", result);
+    } catch (err) {
+      console.error("confirmPayment error:", err);
+      return errorResponse(res, err, err.statusCode || 500);
     }
   }
 }

@@ -29,8 +29,8 @@ Example:
   "payment_id": Number,
   "ride_id": Number,
   "fare": Number,
-  "status": "pending" | "success" | "failed" | "refunded",
-  "mode": "cash" | "card" | "upi" | "wallet",
+  "status": "pending" | "completed" | "failed" | 
+  "mode": "cash/upi" | "wallet",
   "paid_at": Date
 }
 

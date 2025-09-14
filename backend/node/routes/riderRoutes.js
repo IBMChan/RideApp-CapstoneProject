@@ -42,5 +42,12 @@ router.post("/lost-items/:riderId/:rideId",riderController.reportLostItem);
 // 6. Wallet management
 // Example: POST /api/rider/addMoney
 router.post("/addMoney", riderController.addMoney);
+// import express from "express";
+// import riderController from "../controllers/riderController.js";
+// import { authMiddleware } from "../middlewares/authMiddleware.js";
+
+// const router = express.Router();
+
+// router.post("/:rider_id/wallet/add-money", authMiddleware, riderController.addMoney);
 
 export default router;

@@ -18,7 +18,9 @@ import authRoutes from "./routes/authRoutes.js";
 import rideRoutes from "./routes/rideRoutes.js";
 import riderRoutes from "./routes/riderRoutes.js";
 import driverRoutes from "./routes/driverRoutes.js";
-
+// Note: Add paymentRoutes and walletRoutes if they exist and are to be used
+import paymentRoutes from "./routes/paymentRoutes.js";
+import walletRoutes from "./routes/walletRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT;
@@ -44,6 +46,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/rides", rideRoutes);
 app.use("/api/rider", riderRoutes);
 app.use("/api/driver", driverRoutes);
+app.use("/api/payment", paymentRoutes);      // Add payment routes
+app.use("/api/wallet", walletRoutes);        // Add wallet routes
 
     // Error Raksha & Harshit
 app.use(errorHandler);
@@ -78,9 +82,15 @@ app.use(errorHandler);
     await SavedLocation.sync({ alter: true });  // auto-create tables like saved_locations
     console.log("✅ PostgreSQL models synced.");
 
+<<<<<<< HEAD
     // // 5️⃣ Redis (optional)
     // await redisClient.connect();
     // console.log("✅ Redis connected");
+=======
+    // 5️⃣ Connect Redis
+    await redisClient.connect();
+    console.log("✅ Redis connected");
+>>>>>>> upstream/main
 
     // 6️⃣ Start server
     app.listen(PORT, () => {

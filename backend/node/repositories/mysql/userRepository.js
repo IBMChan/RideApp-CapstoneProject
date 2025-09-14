@@ -21,28 +21,126 @@ export const findUserById = async (userId) => {
   );
   return user || null;
 };
+import Vehicle from "../../entities/vehicleModel.js";
+import Ride from "../../entities/rideModel.js";       // Sequelize
+import Payment from "../../entities/paymentModel.js"; // Mongoose
+import Rating from "../../entities/ratingModel.js";   // Mongoose
 
-export const findByEmail = async (email) => {
-  if (!email) return null;
-  return await User.findOne({ where: { email } });
-};
 
-export const createUser = async (data) => {
-  return await User.create(data);
-};
+class UserRepository {
+  async findById(id) {
+    if (!id) return null;
+    return await User.findByPk(id);
+  }      
 
-export const updatePasswordByEmail = async (email, password_hash) => {
+  async findByEmail(email) {
+    if (!email) return null;
+    return await User.findOne({ where: { email } });
+  }
+
+  async findByRole(role) {
+    if (!role) return [];
+    return await User.findAll({ where: { role } });
+  }
+
+  async createUser(data) {
+    return await User.create(data);
+  }
+
+  async getDrivers() {
+  return await User.findAll({
+    where: { role: "driver", is_live_currently: "yes" },
+    attributes: ["user_id", "full_name", "phone"],
+    include: [
+      {
+        model: Vehicle,
+        attributes: ["make", "model", "vehicle_id"],
+        required: false,
+      },
+    ],
+  });
+}
+
+  async updatePasswordByEmail(email, password_hash) {
   const user = await User.findOne({ where: { email } });
   if (!user) return null;
   user.password_hash = password_hash;
   await user.save();
   return user;
-};
+}
 
-// ⭐ Added: update user profile
-export const updateUser = async (userId, updates) => {
-  const user = await User.findByPk(userId);
+  async updateUser(id, updates) {
+  const user = await this.findById(id);
   if (!user) return null;
-  await user.update(updates);
-  return user;
-};
+  return await user.update(updates);
+}
+
+  async deleteUser(id) {
+  const user = await this.findById(id);
+  if (!user) return null;
+  await user.destroy();
+  return true;
+}
+
+  async isRider(id) {
+  const user = await this.findById(id);
+  return user && user.role === "rider";
+}
+
+  async isDriver(id) {
+  const user = await this.findById(id);
+  return user && user.role === "driver";
+}
+async update(driverId, updates) {
+    const driver = await User.findByPk(driverId);
+    if (!driver) throw new Error("Driver not found");
+
+    await driver.update(updates);
+    return driver;
+  }
+   async findRidesByDriver(driverId) {
+    return Ride.findAll({
+      where: { driver_id: driverId },
+      // order: [["created_at", "DESC"]],
+    });
+  }
+
+  // ===== Payment History (Mongo/Mongoose) =====
+  async findPaymentsByDriver(driverId) {
+    return Payment.find({ driver_id: driverId })
+      .sort({ created_at: -1 })
+      .lean();
+  }
+
+  // ===== Average Rating for driver (Mongo/Mongoose) =====
+  async findRatingsByDriver(driverId) {
+    return Rating.find({ driver_id: driverId })
+      .sort({ created_at: -1 })
+      .lean();
+  }
+  // Average Rating for a Driver
+ async getAverageRatingByDriver(driverId) {
+  const result = await Rating.aggregate([
+    { $match: { driver_id: driverId } },
+    {
+      $group: {
+        _id: "$driver_id",
+        averageRating: { $avg: "$rating" },
+        totalRatings: { $sum: 1 }
+      }
+    }
+  ]);
+
+  if (result.length === 0) {
+    return { averageRating: null, totalRatings: 0 };
+  }
+
+  return {
+    averageRating: parseFloat(result[0].averageRating.toFixed(2)),
+    totalRatings: result[0].totalRatings,
+  };
+}
+
+}
+
+export default new UserRepository();
