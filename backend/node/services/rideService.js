@@ -4,16 +4,16 @@ import { spawn } from "child_process";
 import { callPython } from "./pythonService.js";
 import redisClient from "../config/redisConfig.js";
 import RideRepository from "../repositories/mysql/ridesRepository.js";
-import User from "../entities/userModel.js";
-import Vehicle from "../entities/vehicleModel.js";
 import AppError from "../utils/appError.js";
+import userRepository from "../repositories/mysql/userRepository.js";
 
 class RideService {
   // ---------------- Rider Methods ----------------
   async createRide(data, rider_id) {
     try {
-      if (!rider_id) {
-        throw new AppError("Rider ID is required", 400, "MISSING_RIDER_ID");
+      const isRider = await userRepository.isRider(rider_id);
+      if (!isRider) {
+        throw new AppError("Only riders can create a ride", 403, "RIDER_VALIDATION_ERROR");
       }
 
       const { pickup_loc, drop_loc } = data || {};
@@ -75,7 +75,7 @@ class RideService {
     if (!ride) throw new AppError("Ride not found", 404, "RIDE_NOT_FOUND");
 
     const pickup = JSON.parse(ride.pickup_loc);
-    const drivers = await getDrivers();
+    const drivers = await userRepository.getDrivers();
     if (!drivers?.length) {
       throw new AppError("No live drivers available", 404, "NO_DRIVERS_AVAILABLE");
     }
@@ -130,7 +130,12 @@ class RideService {
   }
 
   // ---------------- Driver Methods ----------------
-  async getPendingRidesForDriver() {
+  async getPendingRidesForDriver(driver_id) {
+    if (!driver_id) throw new AppError("Driver ID is required to fetch ongoing rides", 400, "MISSING_DRIVER_ID");
+    const isDriver = await userRepository.isDriver(driver_id);
+    if (!isDriver) {
+      throw new AppError("Only Drivers can see the pending Rides", 403, "RIDER_VALIDATION_ERROR");
+    }
     return await RideRepository.getPendingRides();
   }
 
@@ -140,6 +145,11 @@ class RideService {
 
     const ride = await RideRepository.findById(ride_id);
     if (!ride) throw new AppError("Ride not found", 404, "RIDE_NOT_FOUND");
+
+    const isDriver = await userRepository.isDriver(driver_id);
+    if (!isDriver) {
+      throw new AppError("Only Drivers can accept a ride", 403, "RIDER_VALIDATION_ERROR");
+    }
 
     if (ride.status !== "requested") {
       throw new AppError("Ride not available for acceptance", 400, "RIDE_UNAVAILABLE");
@@ -197,11 +207,19 @@ class RideService {
 
   async getOngoingRides(driver_id) {
     if (!driver_id) throw new AppError("Driver ID is required to fetch ongoing rides", 400, "MISSING_DRIVER_ID");
+    const isDriver = await userRepository.isDriver(driver_id);
+    if (!isDriver) {
+      throw new AppError("Only Drivers can get the Ongoing rides", 403, "RIDER_VALIDATION_ERROR");
+    }
     return await RideRepository.getOngoingRidesByDriver(driver_id);
   }
 
   async getRideHistory(driver_id) {
     if (!driver_id) throw new AppError("Driver ID is required to fetch ride history", 400, "MISSING_DRIVER_ID");
+    const isDriver = await userRepository.isDriver(driver_id);
+    if (!isDriver) {
+      throw new AppError("Only Drivers can get the Ride History", 403, "RIDER_VALIDATION_ERROR");
+    }
     return await RideRepository.getRideHistoryByDriver(driver_id);
   }
 
@@ -226,19 +244,6 @@ class RideService {
   }
 }
 
-// --------- Fetch live drivers ---------
-async function getDrivers() {
-  return await User.findAll({
-    where: { role: "driver", is_live_currently: "yes" },
-    attributes: ["user_id", "full_name", "phone"],
-    include: [
-      {
-        model: Vehicle,
-        attributes: ["make", "model", "vehicle_id"],
-        required: false,
-      },
-    ],
-  });
-}
+
 
 export default new RideService();

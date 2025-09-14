@@ -73,7 +73,7 @@ class RideRepository {
 
   async getOngoingRidesByDriver(driver_id) {
     return await Ride.findAll({
-      where: { driver_id, status: "in_progress" },
+      where: { driver_id, status: { [Op.in]: ["accepted", "in_progress"] }, },
       order: [["ride_date", "DESC"]],
     });
   }

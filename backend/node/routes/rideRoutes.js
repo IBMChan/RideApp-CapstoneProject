@@ -5,22 +5,26 @@
 // ride.routes.js
 import express from "express";
 import RideController from "../controllers/rideController.js";
+import { authMiddleware } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
 // Rider
-router.post("/create", RideController.createRide);
+router.post("/create", authMiddleware, (req, res) => RideController.createRide(req, res));
 
 
 // Driver
-router.post("/accept/:ride_id", RideController.acceptRide); // Here, no body needed. driver_id will be taken from auth. (req.user?.id)
+router.post("/accept/:ride_id", authMiddleware, (req, res) => RideController.acceptRide(req, res)); // Here, no body needed. driver_id will be taken from auth. (req.user?.id)
 router.post("/cancel/:ride_id", RideController.cancelRide); // No body here
-router.get("/pending", RideController.getPendingRides);
-router.get("/ongoing", RideController.getOngoingRides);
-router.get("/history", RideController.getRideHistory);
+router.post("/complete/:ride_id", authMiddleware, (req, res) => RideController.completeRide(req, res));
+
+router.get("/pending", authMiddleware, (req, res) => RideController.getPendingRides(req, res));
+router.get("/ongoing", authMiddleware, (req, res) => RideController.getOngoingRides(req, res));
+router.get("/history",authMiddleware, (req, res) => RideController.getRideHistory(req, res));
 
 // General
-router.get("/list/:role", RideController.listRides);
+router.patch("/status/:ride_id", authMiddleware, (req, res) => RideController.updateRideStatus(req, res));
+router.get("/list", authMiddleware, (req, res) => RideController.listRides(req, res));
 router.get("/:ride_id", RideController.getRide);
 
 export default router;

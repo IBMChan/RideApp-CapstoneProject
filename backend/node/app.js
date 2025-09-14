@@ -11,6 +11,7 @@ import { connectDB } from "./config/mongoConfig.js";
 import pool from "./config/postgres.js";
 import redisClient from "./config/redisConfig.js";
 
+
 // Routes
 import authRoutes from "./routes/authRoutes.js";
 import rideRoutes from "./routes/rideRoutes.js";
@@ -72,8 +73,8 @@ app.use("/api/driver", driverRoutes);
     console.log("✅ PostgreSQL connected:", res.rows[0].now);
 
     // // Connect Redis
-    // await redisClient.connect();
-    // console.log("✅ Redis connected");
+    await redisClient.connect();
+    console.log("✅ Redis connected");
 
     // 4️⃣ Start server
     app.listen(PORT, () => {
