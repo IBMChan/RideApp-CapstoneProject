@@ -4,12 +4,12 @@ import mongoose from "mongoose";
 const complaintSchema = new mongoose.Schema(
   {
     riderId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Number,
       ref: "User",
       required: true,
     },
     rideId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Number,
       ref: "Ride",
       required: true,
     },
