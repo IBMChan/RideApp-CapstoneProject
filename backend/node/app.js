@@ -82,15 +82,9 @@ app.use(errorHandler);
     await SavedLocation.sync({ alter: true });  // auto-create tables like saved_locations
     console.log("✅ PostgreSQL models synced.");
 
-<<<<<<< HEAD
-    // // 5️⃣ Redis (optional)
-    // await redisClient.connect();
-    // console.log("✅ Redis connected");
-=======
     // 5️⃣ Connect Redis
     await redisClient.connect();
     console.log("✅ Redis connected");
->>>>>>> upstream/main
 
     // 6️⃣ Start server
     app.listen(PORT, () => {
