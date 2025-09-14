@@ -3,16 +3,35 @@ import { successResponse, errorResponse } from "../utils/apiResponse.js";
 
 class PaymentController {
   // Rider initiates add-money (create razorpay order + txn)
-  async addMoney(req, res) {
+async addMoney(req, res) {
     try {
-      const { user_id } = req.params;
-      const { amount } = req.body;
-      const out = await paymentService.initiateAddMoney(Number(user_id), Number(amount));
-      return successResponse(res, "Add money initiated", out);
-    } catch (err) {
-      return errorResponse(res, err, err.statusCode || 500);
+      // Ensure trimming to avoid URL encoded chars (like %0D)
+      const user_id = Number(String(req.params.user_id).trim());
+      const amount = Number(req.body.amount);
+
+      if (!user_id || !amount || amount <= 0) {
+        return errorResponse(res, "Invalid user ID or amount", 400);
+      }
+
+      // Call payment service that talks to Python to create order + txn
+      const result = await paymentService.initiateAddMoney(user_id, amount);
+
+      // result should be an object like: { success: true, order: {...}, txn: {...} }
+      if (!result.success) {
+        return errorResponse(res, result.message || "Failed to initiate add money", 500);
+      }
+
+      // Send meaningful response including Razorpay order and txn ids
+      return successResponse(res, "Add money initiated successfully", {
+        razorpayOrder: result.order,
+        transaction: result.txn,
+      });
+    } catch (error) {
+      return errorResponse(res, error, error.statusCode || 500);
     }
   }
+
+
 
   // After frontend completes Razorpay checkout, calls verify
   async verifyAddMoney(req, res) {

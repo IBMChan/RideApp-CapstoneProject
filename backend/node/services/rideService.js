@@ -2,7 +2,7 @@ import redisClient from "../config/redisConfig.js";
 import RideRepository from "../repositories/mysql/ridesRepository.js";
 import AppError from "../utils/appError.js";
 import userRepository from "../repositories/mysql/userRepository.js";
-import PythonService from "./pythonService.js";
+import WalletService from "./wallet_service.js";
 import paymentService from "./paymentService.js";
 // import notificationService from "./notificationService"; // Optional notifications
 

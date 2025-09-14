@@ -5,16 +5,26 @@ import json
 from datetime import datetime
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from decimal import Decimal
 
 # local import of razorpay wrapper
-from razorpay import create_order as rz_create_order  # from razorpay.py above
+from razorpay_utils import create_order as rz_create_order 
 
 # DB connect using env vars
 PG_HOST = os.environ.get("PG_HOST", "localhost")
 PG_PORT = int(os.environ.get("PG_PORT", 5432))
 PG_DB = os.environ.get("PG_DB", "ibm_rideapp_capstone_db")
 PG_USER = os.environ.get("PG_USER", "postgres")
-PG_PASSWORD = os.environ.get("PG_PASSWORD", "")
+PG_PASSWORD = os.environ.get("PG_PASSWORD", "Postgres@ibm25")
+
+# Custom JSON encoder to handle Decimal and datetime objects
+class CustomEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, Decimal):
+            return float(o)
+        if isinstance(o, datetime):
+            return o.isoformat()
+        return super(CustomEncoder, self).default(o)
 
 def get_conn():
     return psycopg2.connect(host=PG_HOST, port=PG_PORT, dbname=PG_DB, user=PG_USER, password=PG_PASSWORD)
@@ -78,23 +88,49 @@ def cmd_verify_and_capture(txn_id, razorpay_payment_id, razorpay_signature=None)
         conn.close()
 
 def cmd_debit(user_id, amount, ride_id=None):
-    # debit user's wallet for ride fare (synchronous)
+    """
+    Debit the user's wallet synchronously for a ride fare.
+
+    Args:
+        user_id (int): ID of the user whose wallet is to be debited.
+        amount (float): Amount to debit.
+        ride_id (int, optional): Associated ride ID.
+
+    Returns:
+        dict: Success or failure result with message and transaction details.
+    """
     conn = get_conn()
     try:
         cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT * FROM wallet WHERE user_id=%s", (user_id,))
+
+        # Retrieve the wallet for the user
+        cur.execute("SELECT * FROM wallet WHERE user_id = %s", (user_id,))
         wallet = cur.fetchone()
-        if not wallet:
-            return {"success": False, "message": "no wallet"}
+
+        if wallet is None:
+            return {"success": False, "message": "Wallet not found for the user"}
+
         if float(wallet['balance']) < float(amount):
-            return {"success": False, "message": "insufficient balance"}
-        # create transaction debit pending->success (we do sync)
-        txn = add_wallet_transaction(conn, wallet['wallet_id'], credit=None, debit=amount, status='success')
-        # decrement balance
-        cur.execute("UPDATE wallet SET balance = balance - %s, last_updated = CURRENT_TIMESTAMP WHERE wallet_id = %s",
-                    (amount, wallet['wallet_id']))
+            return {"success": False, "message": "Insufficient wallet balance"}
+
+        # Create a debit transaction with status 'success' (immediate sync debit)
+        txn = add_wallet_transaction(
+            conn,
+            wallet['wallet_id'],
+            credit=None,
+            debit=amount,
+            status='success'
+        )
+
+        # Deduct the amount from wallet balance
+        cur.execute(
+            "UPDATE wallet SET balance = balance - %s, last_updated = CURRENT_TIMESTAMP WHERE wallet_id = %s",
+            (amount, wallet['wallet_id'])
+        )
         conn.commit()
-        return {"success": True, "message": f"debited {amount}", txn: txn}
+
+        return {"success": True, "message": f"Debited {amount} from wallet", "txn": txn}
+
     finally:
         conn.close()
 
@@ -121,7 +157,7 @@ def usage():
 
 if __name__ == "__main__":
     # CLI: action and args, output JSON to stdout
-    # actions: credit user_id amount   -> creates razorpay order and pending txn
+    # actions: credit user_id amount     -> creates razorpay order and pending txn
     #          verify txn_id razorpay_payment_id -> capture and credit wallet
     #          debit user_id amount ride_id -> synchronous debit for ride payment
     #          withdraw user_id amount -> initiate withdrawal (pending)
@@ -150,4 +186,5 @@ if __name__ == "__main__":
     except Exception as e:
         out = {"success": False, "error": str(e)}
 
-    print(json.dumps(out))
+    # Use the custom encoder to handle Decimal and datetime objects
+    print(json.dumps(out, cls=CustomEncoder))

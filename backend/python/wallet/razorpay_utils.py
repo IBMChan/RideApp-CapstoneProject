@@ -1,8 +1,11 @@
 import os
 import razorpay
 
-KEY_ID = os.environ.get("RAZORPAY_KEY_ID")
-KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET")
+KEY_ID = "rzp_test_RHUCZ5IRQt5aBC"
+KEY_SECRET = "u2M8oLtxU1WEjmDFVW0p3o9L"
+
+# RAZORPAY_KEY_ID=rzp_test_RHUCZ5IRQt5aBC
+# RAZORPAY_KEY_SECRET=u2M8oLtxU1WEjmDFVW0p3o9L
 
 client = razorpay.Client(auth=(KEY_ID, KEY_SECRET))
 

@@ -1,8 +1,9 @@
 import PaymentRepo from "../repositories/mongodb/paymentRepository.js";
-import pythonService from "./pythonService.js";
+import WalletService from "./wallet_service.js";
 import WalletRepo from "../repositories/postgres/walletRepository.js";
 import WalletTxnRepo from "../repositories/postgres/walletTransactionRepository.js";
 import AppError from "../utils/appError.js";
+import wallet_service from "./wallet_service.js";
 
 class PaymentService {
   // Create or find existing payment for a ride
@@ -25,19 +26,19 @@ class PaymentService {
 
   // Wallet flows via Python service
   async initiateAddMoney(user_id, amount) {
-    return pythonService.walletCredit(user_id, amount);
+    return wallet_service.walletCredit(user_id, amount);
   }
 
   async verifyAddMoney(txn_id, razorpay_payment_id) {
-    return pythonService.walletVerify(txn_id, razorpay_payment_id);
+    return wallet_service.walletVerify(txn_id, razorpay_payment_id);
   }
 
   async debitWalletForRide(user_id, amount, ride_id) {
-    return pythonService.walletDebit(user_id, amount, ride_id);
+    return  wallet_service.walletDebit(user_id, amount, ride_id);
   }
 
   async initiateWithdraw(user_id, amount) {
-    return pythonService.walletWithdraw(user_id, amount);
+    return wallet_service.walletWithdraw(user_id, amount);
   }
 
   async initiatePayment(riderId, ride_id, fare, mode) {
