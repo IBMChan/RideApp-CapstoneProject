@@ -91,7 +91,9 @@ export const shareRideStatus = async (req, res, next) => {
 // 5. Complaints + Lost items
 export const registerComplaint = async (req, res, next) => {
   try {
-    const riderId = req.user?.id ? parseInt(req.user.id, 10) : parseInt(req.params.riderId, 10);
+    // const riderId = req.user?.id ? parseInt(req.user.id, 10) : parseInt(req.params.riderId, 10);
+    // const rideId = parseInt(req.params.rideId, 10);
+    const riderId = parseInt(req.body.riderId, 10); // ✅ from query string
     const rideId = parseInt(req.params.rideId, 10);
     const complaint = await riderService.registerComplaint(riderId, rideId, req.body);
     res.status(201).json(complaint);
