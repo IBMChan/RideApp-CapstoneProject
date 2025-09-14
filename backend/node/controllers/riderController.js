@@ -102,10 +102,42 @@ export const registerComplaint = async (req, res, next) => {
 
 export const getLostItems = async (req, res, next) => {
   try {
-    const riderId = req.user?.id ? parseInt(req.user.id, 10) : parseInt(req.params.riderId, 10);
+    // const riderId = req.user?.id ? parseInt(req.user.id, 10) : parseInt(req.params.riderId, 10);
+    // const rideId = parseInt(req.params.rideId, 10);
+    const riderId = parseInt(req.query.riderId, 10); // ✅ from query string
     const rideId = parseInt(req.params.rideId, 10);
+
+    if (isNaN(riderId) || isNaN(rideId)) {
+      return res.status(400).json({ error: "Invalid riderId or rideId" });
+    }
     const items = await riderService.getLostItems(riderId, rideId);
     res.json(items);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// --------------------- Report Lost Item ---------------------
+export const reportLostItem = async (req, res, next) => {
+  try {
+    const { riderId, rideId } = req.params;
+    const { description } = req.body;
+
+    if (!riderId || !rideId) {
+      throw new ValidationError("Valid riderId and rideId are required.");
+    }
+
+    const lostItem = await riderService.reportLostItem(
+      parseInt(riderId, 10),
+      parseInt(rideId, 10),
+      { description }
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "Lost item reported successfully",
+      data: lostItem,
+    });
   } catch (err) {
     next(err);
   }

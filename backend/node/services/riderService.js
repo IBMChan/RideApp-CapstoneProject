@@ -86,16 +86,20 @@ export const shareRideStatus = async (riderId, rideId, phoneNumber) => {
 export const registerComplaint = async (riderId, rideId, data) => {
   if (!data || !data.message) throw new ValidationError("Complaint message is required.");
 
-  const ride = await rideRepository.findRideByRider(rideId, riderId);
-  if (!ride) throw new NotFoundError("Ride not found or does not belong to rider.");
+  const ride = await rideRepository.getRideById(rideId);
+  if (!ride || ride.rider_id !== riderId) {
+    throw new NotFoundError("Ride not found or does not belong to rider.");
+  }
 
   const complaint = await complaintRepository.createComplaint(riderId, rideId, data.message);
   return complaint;
 };
 
 export const getLostItems = async (riderId, rideId) => {
-  const ride = await rideRepository.findRideByRider(rideId, riderId);
-  if (!ride) throw new NotFoundError("Ride not found or does not belong to rider.");
+  // const ride = await rideRepository.getRideById(rideId);
+  // if (!ride || ride.rider_id !== riderId) {
+  //   throw new NotFoundError("Ride not found or does not belong to rider.");
+  // }
 
   const items = await lostItemRepository.findLostItemsByRide(riderId, rideId);
   if (!items || items.length === 0) {
@@ -103,7 +107,29 @@ export const getLostItems = async (riderId, rideId) => {
   }
 
   return items;
-}
+};
+
+export const reportLostItem = async (riderId, rideId, itemData) => {
+  if (!itemData || !itemData.description) {
+    throw new ValidationError("Lost item description is required.");
+  }
+
+  // make sure ride exists and belongs to rider
+  const ride = await rideRepository.getRideById(rideId);
+  if (!ride || ride.rider_id !== riderId) {
+    throw new NotFoundError("Ride not found or does not belong to rider.");
+  }
+
+  // create lost item record in MongoDB
+  const lostItem = await lostItemRepository.reportLostItem(
+    riderId,
+    rideId,
+    itemData.description
+  );
+
+  return lostItem;
+};
+
 export const addMoneyService = async ({ user_id, amount, payment_method, bank_details }) => {
     // Call Python Razorpay script
     const paymentResult = await spawnPythonPayment({ action: 'create_order', amount, currency: 'INR', user_id, payment_method, bank_details });

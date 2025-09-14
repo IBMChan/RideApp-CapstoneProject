@@ -4,12 +4,12 @@ import mongoose from "mongoose";
 const lostItemSchema = new mongoose.Schema(
   {
     riderId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Number,
       ref: "User",
       required: true,
     },
     rideId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Number,
       ref: "Ride",
       required: true,
     },
@@ -31,5 +31,5 @@ const lostItemSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const LostItem = mongoose.model("LostItem", lostItemSchema);
+const LostItem = mongoose.model("LostItem", lostItemSchema, "lost_items");
 export default LostItem;

@@ -34,6 +34,8 @@ router.post("/share-ride/:rideId", riderController.shareRideStatus);
 router.post("/complaints/:rideId", riderController.registerComplaint);
 // Example: GET /api/rider/lost-items/15?riderId=2
 router.get("/lost-items/:rideId", riderController.getLostItems);
+// report item
+router.post("/lost-items/:riderId/:rideId",riderController.reportLostItem);
 
 // 6. Wallet management
 // Example: POST /api/rider/addMoney
