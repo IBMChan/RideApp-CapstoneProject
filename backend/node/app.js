@@ -8,7 +8,8 @@ import cookieParser from "cookie-parser";
 import mysql from "mysql2/promise";
 import sequelize from "./config/sqlConfig.js";
 import { connectDB } from "./config/mongoConfig.js";
-import pool from "./config/postgres.js";
+import pgSequelize from "./config/postgreConfig.js";  // Raksha & Harshit
+import SavedLocation  from "./entities/savLocModel.js";  // Raksha & Harshit
 import { errorHandler } from "./middlewares/errorHandler.js"; // Raksha & Harshit
 import redisClient from "./config/redisConfig.js";
 
@@ -72,8 +73,10 @@ app.use(errorHandler);
     console.log("✅ Sequelize models synced successfully.");
 
     // 4️⃣ Connect PostgreSQL
-    const res = await pool.query("SELECT NOW()");
-    console.log("✅ PostgreSQL connected:", res.rows[0].now);
+    await pgSequelize.authenticate();
+    console.log("✅ PostgreSQL Sequelize connection established.");
+    await SavedLocation.sync({ alter: true });  // auto-create tables like saved_locations
+    console.log("✅ PostgreSQL models synced.");
 
     // // 5️⃣ Redis (optional)
     // await redisClient.connect();

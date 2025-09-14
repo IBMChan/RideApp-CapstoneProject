@@ -2,7 +2,9 @@
 //chandana - wallet management 
 //error handler
 
+
 // controllers/rider.controller.js
+import { ValidationError } from "../utils/appError.js";
 import * as riderService from "../services/riderService.js";
 import { addMoneyService } from "../services/riderService.js";
 
@@ -53,6 +55,9 @@ export const getSavedLocations = async (req, res, next) => {
 export const addSavedLocation = async (req, res, next) => {
   try {
     const riderId = req.user?.id ? parseInt(req.user.id, 10) : parseInt(req.params.riderId, 10);
+    if (isNaN(riderId)) {
+      throw new ValidationError("Valid riderId is required.");
+    }
     const location = await riderService.addSavedLocation(riderId, req.body);
     res.status(201).json(location);
   } catch (err) {

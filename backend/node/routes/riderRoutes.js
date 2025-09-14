@@ -18,10 +18,12 @@ router.get("/profile/:riderId", riderController.getProfile);
 router.put("/profile/:riderId", riderController.updateProfile);
 
 // 3. Saved locations
-// Example: GET /api/rider/locations?riderId=2
-router.get("/locations", riderController.getSavedLocations);
-router.post("/locations", riderController.addSavedLocation);
-router.delete("/locations/:id", riderController.deleteSavedLocation);
+// Example: GET  /api/rider/2/locations
+// Example: POST /api/rider/2/locations
+// Example: DELETE /api/rider/2/locations/5
+router.get("/:riderId/locations", riderController.getSavedLocations);
+router.post("/:riderId/locations", riderController.addSavedLocation);
+router.delete("/:riderId/locations/:id", riderController.deleteSavedLocation);
 
 // 4. Share ride status
 // Example: POST /api/rider/share-ride/15
