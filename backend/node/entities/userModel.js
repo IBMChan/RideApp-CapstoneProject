@@ -1,82 +1,23 @@
 import { DataTypes } from "sequelize";
-import { sequelize } from "../config/sqlConfig";
+import sequelize from "../config/sqlConfig.js";
 
-const User = sequelize.define(
-  "User",
-  {
-    user_id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    full_name: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    },
-    phone: {
-      type: DataTypes.STRING(15),
-      allowNull: false,
-      unique: {
-        name: "unique_phone",
-        msg: "Phone must be unique",
-      },
-    },
-    email: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-      unique: {
-        name: "unique_email",
-        msg: "Email must be unique",
-      },
-      validate: {
-        isEmail: { msg: "Invalid email format" },
-      },
-    },
-    role: {
-      type: DataTypes.ENUM("driver", "rider", "admin"),
-      allowNull: false,
-    },
-    license: {
-      type: DataTypes.STRING(100),
-      allowNull: true, // enforce in service if role=driver
-    },
-    kyc_document: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
-    },
-    password_hash: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-    },
-    gender: {
-      type: DataTypes.ENUM("male", "female", "other"),
-      allowNull: true,
-    },
-    wallet_balance: {
-      type: DataTypes.DECIMAL(10, 2),
-      defaultValue: 0.0,
-    },
-    total_earnings: {
-      type: DataTypes.DECIMAL(10, 2),
-      defaultValue: 0.0,
-    },
-    status: {
-      type: DataTypes.ENUM("active", "inactive"),
-      defaultValue: "active",
-    },
-    is_live_currently: {
-      type: DataTypes.ENUM("yes", "no"),
-      defaultValue: "no",
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
-  },
-  {
-    timestamps: false,
-    tableName: "users",
-  }
-);
+const User = sequelize.define("User", {
+  user_id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+  full_name: { type: DataTypes.STRING, allowNull: false },
+  phone: { type: DataTypes.STRING, allowNull: false, unique: true },
+  email: { type: DataTypes.STRING, allowNull: false, unique: true },
+  role: { type: DataTypes.ENUM("driver", "rider", "admin"), allowNull: false },
+  license: { type: DataTypes.STRING },
+  password_hash: { type: DataTypes.STRING, allowNull: false },
+  gender: { type: DataTypes.STRING },
+  kyc_type: { type: DataTypes.ENUM("pan", "aadhaar"), defaultValue: null },
+  kyc_document: { type: DataTypes.STRING },
+  emailVerified: { type: DataTypes.BOOLEAN, defaultValue: false },
+  phoneVerified: { type: DataTypes.BOOLEAN, defaultValue: false },
+  status: { type: DataTypes.ENUM("active", "inactive"), defaultValue: "active" },
+  is_live_currently: { type: DataTypes.ENUM("yes", "no"), defaultValue: "yes" },
+}, {
+  timestamps: false   // ✅ goes here, outside fields
+});
 
 export default User;

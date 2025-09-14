@@ -1,31 +1,40 @@
-//harshit and raksha // funcitonalities: 1. ride history 2. profile management(cloud image upload) 3. saved location (managing) 4. share status(twilio to whatsapp) 5. find a lost item/contact driver or previous rides/register a complaint
-//chandana - wallet management 
-//error handler
+// routes/riderRoutes.js
+// Raksha & Harshit (rides, profile, locations, complaints, lost items)
+// Chandana - wallet management
+// Error handler integrated globally in app.js
 
-// routes/rider.routes.js
 import express from "express";
 import * as riderController from "../controllers/riderController.js";
 
 const router = express.Router();
 
 // 1. Ride history
+// Example: GET /api/rider/history/2
 router.get("/history/:riderId", riderController.getRideHistory);
 
 // 2. Profile management
+// Example: GET /api/rider/profile/2
 router.get("/profile/:riderId", riderController.getProfile);
-router.put("/profile:riderId", riderController.updateProfile);
+router.put("/profile/:riderId", riderController.updateProfile);
 
-// 3. Saved locations (future use, db table yet to come)
+// 3. Saved locations
+// Example: GET /api/rider/locations?riderId=2
 router.get("/locations", riderController.getSavedLocations);
 router.post("/locations", riderController.addSavedLocation);
 router.delete("/locations/:id", riderController.deleteSavedLocation);
 
-// 4. Share ride status (Twilio integration later)
+// 4. Share ride status
+// Example: POST /api/rider/share-ride/15
 router.post("/share-ride/:rideId", riderController.shareRideStatus);
 
 // 5. Complaints + Lost items
-// Complaints + Lost items
+// Example: POST /api/rider/complaints/15
 router.post("/complaints/:rideId", riderController.registerComplaint);
+// Example: GET /api/rider/lost-items/15?riderId=2
 router.get("/lost-items/:rideId", riderController.getLostItems);
+
+// 6. Wallet management
+// Example: POST /api/rider/addMoney
+router.post("/addMoney", riderController.addMoney);
 
 export default router;

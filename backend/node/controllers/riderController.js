@@ -4,11 +4,12 @@
 
 // controllers/rider.controller.js
 import * as riderService from "../services/riderService.js";
+import { addMoneyService } from "../services/riderService.js";
 
 // 1. Ride history
 export const getRideHistory = async (req, res, next) => {
   try {
-    const riderId = req.user?.id || req.params.riderId; // auth or param
+    const riderId = req.user?.id ? parseInt(req.user.id, 10) : parseInt(req.params.riderId, 10);
     console.log("Rider History called with riderId:", riderId);
     const rides = await riderService.getRideHistory(riderId);
     res.json(rides);
@@ -20,7 +21,7 @@ export const getRideHistory = async (req, res, next) => {
 // 2. Profile management
 export const getProfile = async (req, res, next) => {
   try {
-    const riderId = req.user?.id || req.params.riderId;
+    const riderId = req.user?.id ? parseInt(req.user.id, 10) : parseInt(req.params.riderId, 10);
     const profile = await riderService.getProfile(riderId);
     res.json(profile);
   } catch (err) {
@@ -30,7 +31,7 @@ export const getProfile = async (req, res, next) => {
 
 export const updateProfile = async (req, res, next) => {
   try {
-    const riderId = req.user?.id || req.params.riderId;
+    const riderId = req.user?.id ? parseInt(req.user.id, 10) : parseInt(req.params.riderId, 10);
     const updated = await riderService.updateProfile(riderId, req.body);
     res.json(updated);
   } catch (err) {
@@ -41,7 +42,7 @@ export const updateProfile = async (req, res, next) => {
 // 3. Saved locations
 export const getSavedLocations = async (req, res, next) => {
   try {
-    const riderId = req.user?.id || req.params.riderId;
+    const riderId = req.user?.id ? parseInt(req.user.id, 10) : parseInt(req.params.riderId, 10);
     const locations = await riderService.getSavedLocations(riderId);
     res.json(locations);
   } catch (err) {
@@ -51,7 +52,7 @@ export const getSavedLocations = async (req, res, next) => {
 
 export const addSavedLocation = async (req, res, next) => {
   try {
-    const riderId = req.user?.id || req.params.riderId;
+    const riderId = req.user?.id ? parseInt(req.user.id, 10) : parseInt(req.params.riderId, 10);
     const location = await riderService.addSavedLocation(riderId, req.body);
     res.status(201).json(location);
   } catch (err) {
@@ -61,8 +62,8 @@ export const addSavedLocation = async (req, res, next) => {
 
 export const deleteSavedLocation = async (req, res, next) => {
   try {
-    const riderId = req.user?.id || req.params.riderId;
-    await riderService.deleteSavedLocation(riderId, req.params.id);
+    const riderId = req.user?.id ? parseInt(req.user.id, 10) : parseInt(req.params.riderId, 10);
+    await riderService.deleteSavedLocation(riderId, parseInt(req.params.id, 10));
     res.status(204).send();
   } catch (err) {
     next(err);
@@ -72,9 +73,9 @@ export const deleteSavedLocation = async (req, res, next) => {
 // 4. Share ride status
 export const shareRideStatus = async (req, res, next) => {
   try {
-    const riderId = req.user?.id || req.params.riderId;
-    const { rideId } = req.params;
-    const { phoneNumber } = req.body; // recipient of SMS/WhatsApp
+    const riderId = req.user?.id ? parseInt(req.user.id, 10) : parseInt(req.params.riderId, 10);
+    const rideId = parseInt(req.params.rideId, 10);
+    const { phoneNumber } = req.body;
     await riderService.shareRideStatus(riderId, rideId, phoneNumber);
     res.json({ message: "Ride status shared successfully" });
   } catch (err) {
@@ -85,13 +86,9 @@ export const shareRideStatus = async (req, res, next) => {
 // 5. Complaints + Lost items
 export const registerComplaint = async (req, res, next) => {
   try {
-    const riderId = req.user?.id || req.params.riderId;
-    const { rideId } = req.params;
-    const complaint = await riderService.registerComplaint(
-      riderId,
-      rideId,
-      req.body
-    );
+    const riderId = req.user?.id ? parseInt(req.user.id, 10) : parseInt(req.params.riderId, 10);
+    const rideId = parseInt(req.params.rideId, 10);
+    const complaint = await riderService.registerComplaint(riderId, rideId, req.body);
     res.status(201).json(complaint);
   } catch (err) {
     next(err);
@@ -100,11 +97,22 @@ export const registerComplaint = async (req, res, next) => {
 
 export const getLostItems = async (req, res, next) => {
   try {
-    const riderId = req.user?.id || req.params.riderId;
-    const { rideId } = req.params;
+    const riderId = req.user?.id ? parseInt(req.user.id, 10) : parseInt(req.params.riderId, 10);
+    const rideId = parseInt(req.params.rideId, 10);
     const items = await riderService.getLostItems(riderId, rideId);
     res.json(items);
   } catch (err) {
     next(err);
+  }
+};
+
+// Wallet management
+export const addMoney = async (req, res) => {
+  try {
+    const { user_id, amount, payment_method, bank_details } = req.body;
+    const result = await addMoneyService({ user_id: parseInt(user_id, 10), amount, payment_method, bank_details });
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };

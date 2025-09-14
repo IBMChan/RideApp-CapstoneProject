@@ -3,12 +3,6 @@ import mongoose from "mongoose";
 
 const lostItemSchema = new mongoose.Schema(
   {
-    item_id: {
-      type: Number,
-      unique: true,
-      index: true,
-      required: true,
-    },
     riderId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
