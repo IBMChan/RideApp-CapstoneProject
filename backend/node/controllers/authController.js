@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { signToken } from "../utils/jwtHelper.js";
-import { findByEmail, createUser, updatePasswordByEmail } from "../repositories/mysql/userRepository.js";
+import userRepository from "../repositories/mysql/userRepository.js";
 import { sendEmailOTP, sendSmsOTP, verifyOTP } from "../services/notificationService.js";
 
 const pendingUsers = new Map();
@@ -8,14 +8,14 @@ const resetSessions = new Map(); // email -> { expiresAt, otp }
 
 export const initiateSignup = async (req, res) => {
   try {
-    const { full_name, phone, email, role, password, license, gender,kyc_type, kyc_document } = req.body;
+    const { full_name, phone, email, role, password, license, gender, kyc_type, kyc_document } = req.body;
     if (role === "driver" && !license) return res.status(400).json({ message: "License number is required for drivers" });
     if (!full_name || !email || !phone || !role || !password) return res.status(400).json({ message: "Missing required fields" });
-    if (await findByEmail(email)) return res.status(409).json({ message: "Email already in use" });
+    if (await userRepository.findByEmail(email)) return res.status(409).json({ message: "Email already in use" });
 
     const password_hash = await bcrypt.hash(password, 10);
     const pendingId = `${email}:${Date.now()}`;
-    pendingUsers.set(pendingId, { full_name, phone, email, role, license: role === "driver" ? license : null, password_hash,kyc_type, kyc_document, gender });
+    pendingUsers.set(pendingId, { full_name, phone, email, role, license: role === "driver" ? license : null, password_hash, kyc_type, kyc_document, gender });
 
     const emailOtp = await sendEmailOTP(email);
     const phoneOtp = await sendSmsOTP(phone, email);
@@ -38,7 +38,7 @@ export const completeSignup = async (req, res) => {
     const phoneCheck = verifyOTP(pendingUser.phone, phoneOtp);
     if (!phoneCheck.valid) return res.status(401).json({ message: "Invalid or expired phone OTP" });
 
-    const user = await createUser({ ...pendingUser, emailVerified: true, phoneVerified: true });
+    const user = await userRepository.createUser({ ...pendingUser, emailVerified: true, phoneVerified: true });
     pendingUsers.delete(pendingId);
 
     const userId = user.user_id ?? user.id;
@@ -53,31 +53,60 @@ export const completeSignup = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await findByEmail(email);
+    const user = await userRepository.findByEmail(email);
     if (!user) return res.status(401).json({ message: "Invalid credentials" });
-    if (!user.emailVerified || !user.phoneVerified) return res.status(403).json({ message: "Email or phone not verified" });
+    if (!user.emailVerified || !user.phoneVerified)
+      return res.status(403).json({ message: "Email or phone not verified" });
+
     const ok = await bcrypt.compare(password, user.password_hash);
     if (!ok) return res.status(401).json({ message: "Invalid credentials" });
-    if (user.role === "driver" && !user.license) return res.status(403).json({ message: "Driver account incomplete. License required." });
+
+    if (user.role === "driver" && !user.license)
+      return res.status(403).json({ message: "Driver account incomplete. License required." });
+
     const userId = user.user_id ?? user.id;
     const token = signToken({ user_id: userId, role: user.role });
-    res.json({ message: "Login successful", token, user: { user_id: userId, full_name: user.full_name, role: user.role } });
+
+    // ✅ Set token in HTTP-only cookie
+    res.cookie("token", token, {
+      httpOnly: true,      // JS cannot access this cookie
+      secure: process.env.NODE_ENV === "production", // only https in prod
+      sameSite: "strict",  // prevents CSRF
+      maxAge: 24 * 60 * 60 * 1000 // 1 day
+    });
+
+    return res.json({
+      message: "Login successful",
+      user: { user_id: userId, full_name: user.full_name, role: user.role }
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Login failed" });
   }
 };
 
+
 // Stateless JWT logout: client should discard token. For demo, just respond OK.
 export const logout = async (_req, res) => {
-  return res.json({ message: "Logged out" });
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    return res.json({ message: "Logged out successfully" });
+  } catch (err) {
+    console.error("Logout error:", err);
+    return res.status(500).json({ message: "Logout failed" });
+  }
 };
 
 // Forgot password: send OTP to email for verification
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    const user = await findByEmail(email);
+    const user = await userRepository.findByEmail(email);
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const emailOtp = await sendEmailOTP(email);
@@ -100,7 +129,7 @@ export const resetPassword = async (req, res) => {
     if (!check.valid) return res.status(401).json({ message: check.message || "Invalid or expired OTP" });
 
     const password_hash = await bcrypt.hash(newPassword, 10);
-    const user = await updatePasswordByEmail(email, password_hash);
+    const user = await userRepository.updatePasswordByEmail(email, password_hash);
     if (!user) return res.status(404).json({ message: "User not found" });
 
     return res.json({ message: "Password reset successful" });
