@@ -32,6 +32,8 @@ router.post("/share-ride/:rideId", riderController.shareRideStatus);
 // 5. Complaints + Lost items
 // Example: POST /api/rider/complaints/15
 router.post("/complaints/:rideId", riderController.registerComplaint);
+//get complaint
+router.get("/complaints", riderController.getComplaints);
 // Example: GET /api/rider/lost-items/15?riderId=2
 router.get("/lost-items/:rideId", riderController.getLostItems);
 // report item

@@ -102,6 +102,27 @@ export const registerComplaint = async (req, res, next) => {
   }
 };
 
+// controllers/riderController.js
+export const getComplaints = async (req, res, next) => {
+  try {
+    const riderId = parseInt(req.query.riderId, 10);
+
+    if (isNaN(riderId)) {
+      return res.status(400).json({ error: "Valid riderId is required." });
+    }
+
+    const complaints = await riderService.getComplaints(riderId);
+
+    res.json({
+      success: true,
+      data: complaints,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
 export const getLostItems = async (req, res, next) => {
   try {
     // const riderId = req.user?.id ? parseInt(req.user.id, 10) : parseInt(req.params.riderId, 10);

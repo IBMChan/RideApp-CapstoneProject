@@ -95,6 +95,16 @@ export const registerComplaint = async (riderId, rideId, data) => {
   return complaint;
 };
 
+export const getComplaints = async (riderId) => {
+  const complaints = await complaintRepository.findComplaintsByRider(riderId);
+
+  if (!complaints || complaints.length === 0) {
+    throw new NotFoundError("No complaints found for this rider.");
+  }
+
+  return complaints;
+};
+
 export const getLostItems = async (riderId, rideId) => {
   // const ride = await rideRepository.getRideById(rideId);
   // if (!ride || ride.rider_id !== riderId) {

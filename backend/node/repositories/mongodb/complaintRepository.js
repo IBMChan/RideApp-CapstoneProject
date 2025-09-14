@@ -11,7 +11,6 @@ export const createComplaint = async (riderId, rideId, message) => {
 };
 
 export const findComplaintsByRider = async (riderId) => {
-  // riderId is a Number now
   return await Complaint.find({ riderId }).sort({ createdAt: -1 });
 };
 
