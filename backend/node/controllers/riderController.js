@@ -110,7 +110,7 @@ export const getLostItems = async (req, res, next) => {
     if (isNaN(riderId) || isNaN(rideId)) {
       return res.status(400).json({ error: "Invalid riderId or rideId" });
     }
-    const items = await riderService.getLostItems(riderId, rideId);
+    const items = await riderService.getLostItems(rideId, riderId);
     res.json(items);
   } catch (err) {
     next(err);
