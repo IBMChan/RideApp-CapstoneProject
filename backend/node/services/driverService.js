@@ -3,6 +3,9 @@
 
 import DriverRepository from "../repositories/mysql/userRepository.js";
 import vehicleRepository from "../repositories/mysql/vehicleRepository.js"
+import walletRepository from "../repositories/postgres/walletRepository.js";
+import walletTransactionRepository from "../repositories/postgres/walletTransactionRepository.js";
+import paymentService from "./paymentService.js";
 
 class DriverService {
   // ===== Profile =====
@@ -88,6 +91,24 @@ class DriverService {
       throw new Error("Invalid status. Must be 'yes' or 'no' ");
     }
     return await DriverRepository.update(driverId, { is_live_currently });
+  }
+
+    async withdrawMoney(user_id, amount) {
+    const wallet = await walletRepository.findByUser(user_id);
+    if (!wallet || wallet.balance < amount) {
+      throw new Error("Insufficient wallet balance");
+    }
+
+    const txn = await walletTransactionRepository.create({
+      user_id,
+      amount,
+      txn_type: "debit",
+      status: "pending",
+    });
+
+    const result = await paymentService.withdrawMoney({ user_id, amount });
+
+    return { txn, result };
   }
 }
 

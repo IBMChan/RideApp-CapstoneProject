@@ -11,13 +11,14 @@ import { connectDB } from "./config/mongoConfig.js";
 import pool from "./config/postgres.js";
 import redisClient from "./config/redisConfig.js";
 
-
 // Routes
 import authRoutes from "./routes/authRoutes.js";
 import rideRoutes from "./routes/rideRoutes.js";
-// import riderRoutes from "./routes/riderRoutes.js";
+import riderRoutes from "./routes/riderRoutes.js";
 import driverRoutes from "./routes/driverRoutes.js";
-
+// Note: Add paymentRoutes and walletRoutes if they exist and are to be used
+import paymentRoutes from "./routes/paymentRoutes.js";
+import walletRoutes from "./routes/walletRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -41,8 +42,10 @@ app.get("/", (_req, res) => {
 // ---------- Routes ----------
 app.use("/api/auth", authRoutes);
 app.use("/api/rides", rideRoutes);
-// app.use("/api/rider", riderRoutes);
+app.use("/api/rider", riderRoutes);
 app.use("/api/driver", driverRoutes);
+app.use("/api/payment", paymentRoutes);      // Add payment routes
+app.use("/api/wallet", walletRoutes);        // Add wallet routes
 
 // ---------- Server & DB Connections ----------
 (async () => {
@@ -72,11 +75,11 @@ app.use("/api/driver", driverRoutes);
     const res = await pool.query("SELECT NOW()");
     console.log("✅ PostgreSQL connected:", res.rows[0].now);
 
-    // // Connect Redis
+    // 5️⃣ Connect Redis
     await redisClient.connect();
     console.log("✅ Redis connected");
 
-    // 4️⃣ Start server
+    // 6️⃣ Start server
     app.listen(PORT, () => {
       console.log(`🚀 Server running at http://localhost:${PORT}`);
     });

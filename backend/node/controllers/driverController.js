@@ -3,27 +3,8 @@
 // backend/node/controllers/driverController.js
 // import {withdrawMoney } from "../services/driverService.js";
 import DriverService from "../services/driverService.js";
+import { successResponse, errorResponse } from "../utils/apiResponse.js";
 
-
-// export const withdrawMoneyFromWallet = async (req, res, next) => {
-//   try {
-//     const userId = req.user.user_id; // Assume auth middleware populates req.user
-//     const { amount, accountDetails } = req.body;
-
-//     if (!amount || amount <= 0) {
-//       return res.status(400).json({ error: "Invalid amount" });
-//     }
-
-//     if (!accountDetails) {
-//       return res.status(400).json({ error: "Account details required" });
-//     }
-
-//     const result = await withdrawMoney(userId, amount, accountDetails);
-//     res.status(200).json(result);
-//   } catch (err) {
-//     next(err);
-//   }
-// };
 
 class DriverController {
   // ========== Profile ==========
@@ -137,6 +118,17 @@ class DriverController {
       res.json({ message: "Payment confirmed successfully", confirmation });
     } catch (err) {
       next(err);
+    }
+  }
+
+    async withdrawMoney(req, res) {
+    try {
+      const { driver_id } = req.params;
+      const { amount } = req.body;
+      const result = await driverService.withdrawMoney(driver_id, amount);
+      return successResponse(res, "Withdrawal initiated", result);
+    } catch (err) {
+      return errorResponse(res, err, err.statusCode || 400);
     }
   }
 

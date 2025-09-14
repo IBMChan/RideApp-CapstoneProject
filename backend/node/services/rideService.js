@@ -1,14 +1,10 @@
-// services/rideService.js
-import path from "path";
-import { spawn } from "child_process";
-import { callPython } from "./pythonService.js";
 import redisClient from "../config/redisConfig.js";
 import RideRepository from "../repositories/mysql/ridesRepository.js";
 import AppError from "../utils/appError.js";
 import userRepository from "../repositories/mysql/userRepository.js";
-
+import PythonService from "./pythonService.js";
 import paymentService from "./paymentService.js";
-// import notificationService from "./notificationService";
+// import notificationService from "./notificationService"; // Optional notifications
 
 class RideService {
   // ---------------- Rider Methods ----------------
@@ -29,10 +25,10 @@ class RideService {
         throw new AppError("You already have an ongoing ride", 409, "RIDE_ALREADY_EXISTS");
       }
 
-      // --- Call Python script for distance & fare ---
+      // --- Call Python to calculate distance and fare ---
       let result;
       try {
-        result = await callPython("fare", { pickup: pickup_loc, drop: drop_loc });
+        result = await PythonService.callPython("fare", { pickup: pickup_loc, drop: drop_loc });
       } catch (err) {
         console.error("PYTHON error:", err.message);
         throw new AppError("Unable to calculate fare and distance", 500, "PYTHON_SERVICE_ERROR");
@@ -60,7 +56,7 @@ class RideService {
         }
       }
 
-      // ensure a payment document exists for every ride (default mode = 'cash')
+      // Ensure a payment document exists for this ride (default mode = 'cash')
       try {
         await paymentService.createPaymentForRide({
           ride_id: ride.ride_id,
@@ -68,7 +64,6 @@ class RideService {
           mode: "cash",
         });
       } catch (err) {
-        // don't fail ride creation if payment doc creation fails — log and continue
         console.error("Failed to create payment doc for ride:", err.message);
       }
 
@@ -106,7 +101,7 @@ class RideService {
           lat: pickup.lat + (Math.random() - 0.5) * 0.1,
           lng: pickup.lng + (Math.random() - 0.5) * 0.1,
         };
-        const result = await callPython("distance", { pickup, drop: driverLoc });
+        const result = await PythonService.callPython("distance", { pickup, drop: driverLoc });
         row.push(result?.distance || 9999);
       }
       costMatrix.push(row);
@@ -194,7 +189,6 @@ class RideService {
     if (role === "driver" && !["accepted", "in_progress", "completed", "cancelled"].includes(status)) {
       throw new AppError("Driver cannot set this status", 403, "STATUS_FORBIDDEN");
     }
-
     if (role === "rider" && status !== "cancelled") {
       throw new AppError("Rider can only cancel rides", 403, "STATUS_FORBIDDEN");
     }
@@ -203,37 +197,31 @@ class RideService {
   }
 
   async completeRide(ride_id) {
-    if (!ride_id) throw new AppError("Ride ID is required", 400, "MISSING_RIDE_ID");
+    if (!ride_id) throw new AppError("Missing ride_id", 400);
 
     const ride = await RideRepository.completeRide(ride_id);
-    if (!ride) throw new AppError("Ride not found or cannot be completed", 404, "RIDE_NOT_FOUND");
+    if (!ride) throw new AppError("Ride not found", 404);
 
-    // business action: when ride completes we can create/ensure payment doc and notify driver that collection is required for cash/upi
-    try {
-      const payment = await paymentService.createPaymentForRide({
-        ride_id: ride.ride_id,
-        fare: Number(ride.fare || 0),
-        mode: "cash", // default; controllers can override if rider requested UPI
-      });
-
-      // notify driver (use notificationService if available)
+    const payment = await paymentService.getPaymentByRide(ride.ride_id);
+    if (payment && payment.mode === "wallet" && payment.status === "pending") {
       try {
-        if (ride.driver_id && notificationService?.notifyDriver) {
-          await notificationService.notifyDriver(ride.driver_id, {
-            title: "Payment pending",
-            body: `Payment ${payment.payment_id} pending for ride ${ride.ride_id}. Please confirm when collected.`,
-            payment_id: payment.payment_id,
-            ride_id: ride.ride_id,
-          });
+        const debitResult = await paymentService.debitWalletForRide(ride.rider_id, Number(ride.fare), ride.ride_id);
+        if (debitResult && debitResult.success) {
+          await paymentService.confirmPaymentByDriver(ride.ride_id); // mark payment success
         } else {
-          console.log(`Notify driver ${ride.driver_id}: confirm payment ${payment.payment_id} for ride ${ride.ride_id}`);
+          console.error("Debit failed:", debitResult);
         }
-      } catch (notifyErr) {
-        console.error("Failed to notify driver about payment:", notifyErr.message);
+      } catch (err) {
+        console.error("debit exception:", err);
       }
-    } catch (err) {
-      console.error("Failed to ensure payment on ride completion:", err.message);
-      // don't block ride completion if payment doc creation fails
+    } else {
+      if (!payment) {
+        await paymentService.createPaymentForRide({
+          ride_id: ride.ride_id,
+          fare: ride.fare,
+          mode: "cash",
+        });
+      }
     }
 
     return ride;
@@ -250,6 +238,7 @@ class RideService {
 
   async getOngoingRides(driver_id) {
     if (!driver_id) throw new AppError("Driver ID is required to fetch ongoing rides", 400, "MISSING_DRIVER_ID");
+
     const isDriver = await userRepository.isDriver(driver_id);
     if (!isDriver) {
       throw new AppError("Only Drivers can get the Ongoing rides", 403, "RIDER_VALIDATION_ERROR");
@@ -259,6 +248,7 @@ class RideService {
 
   async getRideHistory(driver_id) {
     if (!driver_id) throw new AppError("Driver ID is required to fetch ride history", 400, "MISSING_DRIVER_ID");
+
     const isDriver = await userRepository.isDriver(driver_id);
     if (!isDriver) {
       throw new AppError("Only Drivers can get the Ride History", 403, "RIDER_VALIDATION_ERROR");
@@ -287,12 +277,6 @@ class RideService {
   }
 
   // ---------------- Payment-related business logic ----------------
-
-  /**
-   * Initiate a payment for a ride (cash / upi)
-   * - Only allowed if ride status is in_progress or completed
-   * - Creates a payment doc (pending) and notifies the driver for manual confirmation
-   */
   async initiatePayment(ride_id, mode = "cash") {
     if (!ride_id) throw new AppError("Ride ID is required", 400, "MISSING_RIDE_ID");
     if (!["cash", "upi"].includes(mode)) throw new AppError("Unsupported mode", 422, "INVALID_MODE");
@@ -305,65 +289,50 @@ class RideService {
       throw new AppError("Payment can only be initiated for ongoing or completed rides", 400, "INVALID_RIDE_STATUS");
     }
 
-    // create or return existing payment document
     const payment = await paymentService.createPaymentForRide({
       ride_id: ride.ride_id,
       fare: Number(ride.fare || 0),
       mode,
     });
 
-    // notify driver
+    // Notify driver (optional)
     try {
-      if (ride.driver_id && notificationService?.notifyDriver) {
-        await notificationService.notifyDriver(ride.driver_id, {
-          title: "Payment collection requested",
-          body: `Please confirm collection for payment ${payment.payment_id} (ride ${ride.ride_id})`,
-          payment_id: payment.payment_id,
-          ride_id: ride.ride_id,
-        });
+      if (ride.driver_id /* && notificationService?.notifyDriver */) {
+        // await notificationService.notifyDriver(ride.driver_id, {
+        //   title: "Payment collection requested",
+        //   body: `Please confirm collection for payment ${payment.payment_id} (ride ${ride.ride_id})`,
+        //   payment_id: payment.payment_id,
+        //   ride_id: ride.ride_id,
+        // });
       } else {
         console.log(`Notify driver ${ride.driver_id}: confirm payment ${payment.payment_id} for ride ${ride.ride_id}`);
       }
     } catch (err) {
       console.error("Notification failed:", err.message);
     }
-
     return payment;
   }
 
-  /**
-   * Driver confirms a cash/upi payment. Validates that:
-   * - payment exists
-   * - associated ride exists and belongs to the driver
-   * - payment is pending (or not already success)
-   */
   async confirmPayment(payment_id, driver_id) {
     if (!payment_id) throw new AppError("Payment ID is required", 400, "MISSING_PAYMENT_ID");
     if (!driver_id) throw new AppError("Driver ID is required", 400, "MISSING_DRIVER_ID");
 
-    const payment = await paymentService.getPaymentByRide(payment_id) // careful: this returns by ride_id in some implementations
-      .catch(() => null);
+    const payment = await paymentService.getPaymentByRide(payment_id).catch(() => null);
 
-    // paymentService in your code exposes findById/paymentRepository.findById. We'll prefer paymentService.findById if implemented.
-    // To be robust, attempt multiple ways:
     let paymentDoc = null;
     if (payment && payment.payment_id === Number(payment_id)) {
       paymentDoc = payment;
     } else {
-      // try paymentService.findById if present
       if (typeof paymentService.findById === "function") {
         paymentDoc = await paymentService.findById(Number(payment_id));
       } else {
-        // fallback: query the payment repository directly (assumes it exists)
-        // require repository lazily to avoid circular imports in some setups
-        const paymentRepo = await import("../repositories/mongodb/paymentRepository.js").then(m => m.default);
+        const paymentRepo = await import("../repositories/mongodb/paymentRepository.js").then((m) => m.default);
         paymentDoc = await paymentRepo.findById(Number(payment_id));
       }
     }
 
     if (!paymentDoc) throw new AppError("Payment not found", 404, "PAYMENT_NOT_FOUND");
 
-    // get ride linked to payment
     const ride = await RideRepository.findById(paymentDoc.ride_id);
     if (!ride) throw new AppError("Associated ride not found", 404, "RIDE_NOT_FOUND");
 
@@ -372,28 +341,20 @@ class RideService {
     }
 
     if (paymentDoc.status === "success") {
-      // already confirmed
       return paymentDoc;
     }
 
-    // perform confirmation
     const updated = await paymentService.confirmPaymentByDriver(Number(payment_id), Number(driver_id));
     return updated;
   }
 
-  /**
-   * Get pending payments awaiting driver confirmation for a driver
-   * Returns array of { ride, payment }
-   */
   async getPendingPaymentsForDriver(driver_id) {
     if (!driver_id) throw new AppError("Driver ID required", 400, "MISSING_DRIVER_ID");
 
-    // fetch ongoing rides for driver
     const rides = await RideRepository.getOngoingRidesByDriver(driver_id);
     const pending = [];
 
     for (const ride of rides) {
-      // fetch payment for this ride (if exists)
       const payment = await paymentService.getPaymentByRide(ride.ride_id).catch(() => null);
       if (payment && payment.status === "pending" && ["cash", "upi"].includes(payment.mode)) {
         pending.push({ ride, payment });
@@ -403,7 +364,5 @@ class RideService {
     return pending;
   }
 }
-
-
 
 export default new RideService();

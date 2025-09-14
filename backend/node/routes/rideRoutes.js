@@ -1,36 +1,21 @@
-//laxmikanth: notification(email(smtp) - phone (firebase))
-//prathik : book ride - ride accpet - ride cancel - basic functionalities wrt ride
-//payment(paypal) and rating functionalities(r_to_d, d_to_r)
-
-// ride.routes.js
-import express from "express";
-import RideController from "../controllers/rideController.js";
+import { Router } from "express";
+import rideController from "../controllers/rideController.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 
-const router = express.Router();
+const router = Router();
 
-// Rider
-router.post("/create", authMiddleware, (req, res) => RideController.createRide(req, res));
-
-
-// Driver
-router.post("/accept/:ride_id", authMiddleware, (req, res) => RideController.acceptRide(req, res)); // Here, no body needed. driver_id will be taken from auth. (req.user?.id)
-router.post("/cancel/:ride_id", RideController.cancelRide); // No body here
-router.post("/complete/:ride_id", authMiddleware, (req, res) => RideController.completeRide(req, res));
-
-router.get("/pending", authMiddleware, (req, res) => RideController.getPendingRides(req, res));
-router.get("/ongoing", authMiddleware, (req, res) => RideController.getOngoingRides(req, res));
-router.get("/history",authMiddleware, (req, res) => RideController.getRideHistory(req, res));
-
-// General
-router.patch("/status/:ride_id", authMiddleware, (req, res) => RideController.updateRideStatus(req, res));
-router.get("/list", authMiddleware, (req, res) => RideController.listRides(req, res));
-router.get("/:ride_id", RideController.getRide);
-
-
-
-//payment
-router.post("/:ride_id/status", RideController.updateRideStatus);
-router.post("/:ride_id/pay", RideController.processPayment);
+router.post("/create", authMiddleware, rideController.createRide);
+router.get("/pending", authMiddleware, rideController.getPendingRides);
+router.post("/accept/:ride_id", authMiddleware, rideController.acceptRide);
+router.patch("/status/:ride_id", authMiddleware, rideController.updateRideStatus);
+router.post("/complete/:ride_id", authMiddleware, rideController.completeRide);
+router.post("/cancel/:ride_id", authMiddleware, rideController.cancelRide);
+router.get("/ongoing", authMiddleware, rideController.getOngoingRides);
+router.get("/history", authMiddleware, rideController.getRideHistory);
+router.get("/list", authMiddleware, rideController.listRides);
+router.get("/:ride_id", authMiddleware, rideController.getRide);
+router.post("/:ride_id/payment", authMiddleware, rideController.processPayment);
+router.post("/:ride_id/initiate-payment", authMiddleware, rideController.initiatePayment);
+router.post("/:ride_id/confirm-payment", authMiddleware, rideController.confirmPayment);
 
 export default router;

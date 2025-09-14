@@ -2,29 +2,20 @@
 //chandana - wallet management 
 //error handler
 // backend/node/controllers/riderController.js
-import { addMoney } from "../services/riderService.js";
+import riderService from "../services/riderService.js";
+import { successResponse, errorResponse } from "../utils/apiResponse.js";
 
-export const addMoneyToWallet = async (req, res, next) => {
-  try {
-    // Use req.body.user_id for testing instead of req.user.user_id
-    const userId = req.body.user_id;
-    const { amount, accountDetails } = req.body;
-
-    if (!userId) {
-      return res.status(400).json({ error: "user_id is required for testing" });
+class RiderController {
+  async addMoney(req, res) {
+    try {
+      const { rider_id } = req.params;
+      const { amount } = req.body;
+      const result = await riderService.addMoney(rider_id, amount);
+      return successResponse(res, "Money added to wallet", result);
+    } catch (err) {
+      return errorResponse(res, err, err.statusCode || 400);
     }
-
-    if (!amount || amount <= 0) {
-      return res.status(400).json({ error: "Invalid amount" });
-    }
-
-    if (!accountDetails) {
-      return res.status(400).json({ error: "Account details required" });
-    }
-
-    const result = await addMoney(userId, amount, accountDetails);
-    res.status(200).json(result);
-  } catch (err) {
-    next(err);
   }
-};
+}
+
+export default new RiderController();

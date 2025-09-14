@@ -1,0 +1,153 @@
+# backend/python/wallet/wallet_service.py
+import os
+import sys
+import json
+from datetime import datetime
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
+# local import of razorpay wrapper
+from razorpay import create_order as rz_create_order  # from razorpay.py above
+
+# DB connect using env vars
+PG_HOST = os.environ.get("PG_HOST", "localhost")
+PG_PORT = int(os.environ.get("PG_PORT", 5432))
+PG_DB = os.environ.get("PG_DB", "ibm_rideapp_capstone_db")
+PG_USER = os.environ.get("PG_USER", "postgres")
+PG_PASSWORD = os.environ.get("PG_PASSWORD", "")
+
+def get_conn():
+    return psycopg2.connect(host=PG_HOST, port=PG_PORT, dbname=PG_DB, user=PG_USER, password=PG_PASSWORD)
+
+# Utility helpers
+def ensure_wallet_exists(conn, user_id):
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur.execute("SELECT * FROM wallet WHERE user_id = %s", (user_id,))
+    wallet = cur.fetchone()
+    if not wallet:
+        cur.execute("INSERT INTO wallet (user_id, balance) VALUES (%s, %s) RETURNING *", (user_id, 0.00))
+        conn.commit()
+        wallet = cur.fetchone()
+    cur.close()
+    return wallet
+
+def add_wallet_transaction(conn, wallet_id, credit, debit, status, razorpay_order_id=None, note=None):
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur.execute("""
+        INSERT INTO wallet_transaction (wallet_id, credit, debit, txn_date, status, razorpay_payment_id)
+        VALUES (%s, %s, %s, CURRENT_TIMESTAMP, %s, %s) RETURNING *
+    """, (wallet_id, credit, debit, status, razorpay_order_id))
+    row = cur.fetchone()
+    conn.commit()
+    cur.close()
+    return row
+
+def cmd_credit(user_id, amount):
+    # create razorpay order, then mark transaction pending (frontend will collect payment via order)
+    conn = get_conn()
+    try:
+        wallet = ensure_wallet_exists(conn, user_id)
+        # create razorpay order in paise
+        order = rz_create_order(int(float(amount) * 100))
+        # log transaction with pending status
+        txn = add_wallet_transaction(conn, wallet['wallet_id'], credit=amount, debit=None, status='pending', razorpay_order_id=order['id'])
+        return {"success": True, "order": order, "txn": txn}
+    finally:
+        conn.close()
+
+def cmd_verify_and_capture(txn_id, razorpay_payment_id, razorpay_signature=None):
+    # For simplicity we assume capture is done on Razorpay or autopayment_capture. We just update records.
+    conn = get_conn()
+    try:
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("SELECT * FROM wallet_transaction WHERE transc_id = %s", (txn_id,))
+        txn = cur.fetchone()
+        if not txn:
+            return {"success": False, "message": "txn not found"}
+        # if pending -> mark success and update wallet balance
+        if txn['status'] != 'pending':
+            return {"success": False, "message": "txn not pending"}
+        # update wallet balance
+        cur.execute("UPDATE wallet SET balance = balance + %s, last_updated = CURRENT_TIMESTAMP WHERE wallet_id = %s",
+                    (txn['credit'], txn['wallet_id']))
+        cur.execute("UPDATE wallet_transaction SET status='success', razorpay_payment_id=%s WHERE transc_id=%s",
+                    (razorpay_payment_id, txn_id))
+        conn.commit()
+        return {"success": True, "message": "wallet credited"}
+    finally:
+        conn.close()
+
+def cmd_debit(user_id, amount, ride_id=None):
+    # debit user's wallet for ride fare (synchronous)
+    conn = get_conn()
+    try:
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("SELECT * FROM wallet WHERE user_id=%s", (user_id,))
+        wallet = cur.fetchone()
+        if not wallet:
+            return {"success": False, "message": "no wallet"}
+        if float(wallet['balance']) < float(amount):
+            return {"success": False, "message": "insufficient balance"}
+        # create transaction debit pending->success (we do sync)
+        txn = add_wallet_transaction(conn, wallet['wallet_id'], credit=None, debit=amount, status='success')
+        # decrement balance
+        cur.execute("UPDATE wallet SET balance = balance - %s, last_updated = CURRENT_TIMESTAMP WHERE wallet_id = %s",
+                    (amount, wallet['wallet_id']))
+        conn.commit()
+        return {"success": True, "message": f"debited {amount}", txn: txn}
+    finally:
+        conn.close()
+
+def cmd_withdraw(user_id, amount, dest_details=None):
+    # For driver withdrawal: create a pending debit tx and mark pending while external payout would be processed.
+    conn = get_conn()
+    try:
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("SELECT * FROM wallet WHERE user_id=%s", (user_id,))
+        wallet = cur.fetchone()
+        if not wallet:
+            return {"success": False, "message": "no wallet"}
+        if float(wallet['balance']) < float(amount):
+            return {"success": False, "message": "insufficient balance"}
+        # create pending debit txn (payout)
+        txn = add_wallet_transaction(conn, wallet['wallet_id'], credit=None, debit=amount, status='pending')
+        # **NOTE**: actual external payout (bank/UPI) must be implemented. For now we mark pending and return order.
+        return {"success": True, "message": "withdrawal initiated", "txn": txn}
+    finally:
+        conn.close()
+
+def usage():
+    return {"success": False, "message": "usage: python wallet_service.py action [params]"}
+
+if __name__ == "__main__":
+    # CLI: action and args, output JSON to stdout
+    # actions: credit user_id amount   -> creates razorpay order and pending txn
+    #          verify txn_id razorpay_payment_id -> capture and credit wallet
+    #          debit user_id amount ride_id -> synchronous debit for ride payment
+    #          withdraw user_id amount -> initiate withdrawal (pending)
+    args = sys.argv[1:]
+    if not args:
+        print(json.dumps(usage()))
+        sys.exit(1)
+
+    action = args[0]
+
+    try:
+        if action == "credit":
+            user_id = int(args[1]); amount = float(args[2])
+            out = cmd_credit(user_id, amount)
+        elif action == "verify":
+            txn_id = int(args[1]); rp_payment_id = args[2]
+            out = cmd_verify_and_capture(txn_id, rp_payment_id)
+        elif action == "debit":
+            user_id = int(args[1]); amount = float(args[2]); ride_id = args[3] if len(args) > 3 else None
+            out = cmd_debit(user_id, amount, ride_id)
+        elif action == "withdraw":
+            user_id = int(args[1]); amount = float(args[2])
+            out = cmd_withdraw(user_id, amount)
+        else:
+            out = usage()
+    except Exception as e:
+        out = {"success": False, "error": str(e)}
+
+    print(json.dumps(out))
