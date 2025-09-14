@@ -4,7 +4,7 @@ import sequelize from "../config/sqlConfig.js";
 const User = sequelize.define("User", {
   user_id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
   full_name: { type: DataTypes.STRING, allowNull: false },
-  phone: { type: DataTypes.STRING, allowNull: false, unique: true },
+  phone: { type: DataTypes.STRING, allowNull: false },
   email: { type: DataTypes.STRING, allowNull: false, unique: true },
   role: { type: DataTypes.ENUM("driver", "rider", "admin"), allowNull: false },
   license: { type: DataTypes.STRING },
@@ -16,8 +16,12 @@ const User = sequelize.define("User", {
   phoneVerified: { type: DataTypes.BOOLEAN, defaultValue: false },
   status: { type: DataTypes.ENUM("active", "inactive"), defaultValue: "active" },
   is_live_currently: { type: DataTypes.ENUM("yes", "no"), defaultValue: "yes" },
+    wallet_balance: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.0 },
+  total_earnings: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.0 },
 }, {
-  timestamps: false   // ✅ goes here, outside fields
+    timestamps: true,
+    underscored: true,  
+    tableName: "users",    // ✅ goes here, outside fields
 });
 
 export default User;
