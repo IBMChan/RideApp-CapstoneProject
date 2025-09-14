@@ -1,28 +1,95 @@
 // shriya : profile managemnet, ride history, payment history, vahicle management, dr_status management(online, offline) , register a complaint  
 //chandana - wallet management
-import { walletRepository } from '../repositories/postgres/walletRepositoy.js';
-import { walletTransactionRepository } from '../repositories/postgres/walletTransactionRepository.js';
-import { spawnPythonPayment } from '../config/razorpayConfig.js';
 
-export const withdrawMoneyService = async ({ user_id, amount, payment_method, bank_details }) => {
-    const wallet = await walletRepository.getWalletByUserId(user_id);
+import DriverRepository from "../repositories/mysql/userRepository.js";
+import vehicleRepository from "../repositories/mysql/vehicleRepository.js"
 
-    if (parseFloat(wallet.balance) < parseFloat(amount)) {
-        throw new Error('Insufficient balance');
+class DriverService {
+  // ===== Profile =====
+  async getProfile(driverId) {
+    const driver = await DriverRepository.findById(driverId);
+    if (!driver) throw new Error("Driver not found");
+    return driver;
+  }
+  async updateProfile(driverId, fields) {
+    const allowedFields = ["full_name", "phone", "email"];
+    const updates = {};
+    if (!fields || typeof fields !== 'object') {
+        throw new Error("Invalid input data");
+   }
+    for (const key of allowedFields) {
+      if (fields[key]) updates[key] = fields[key];
     }
 
-    // Call Python Razorpay script for payout
-    const payoutResult = await spawnPythonPayment({ action: 'payout', amount, currency: 'INR', user_id, payment_method, bank_details });
-
-    if (!payoutResult.success) {
-        throw new Error('Payout failed');
+    if (Object.keys(updates).length === 0) {
+      throw new Error("No valid fields provided for update");
     }
 
-    const newBalance = parseFloat(wallet.balance) - parseFloat(amount);
-    await walletRepository.updateBalance(wallet.wallet_id, newBalance);
+    if (updates.phone && !/^[0-9]{10}$/.test(updates.phone)) {
+      throw new Error("Phone number must be 10 digits");
+    }
+    if (updates.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(updates.email)) {
+      throw new Error("Invalid email format");
+    }
 
-    // Log transaction
-    await walletTransactionRepository.addTransaction(wallet.wallet_id, null, amount);
+    return await DriverRepository.update(driverId, updates);
+  }
 
-    return { success: true, newBalance };
-};
+  // ===== Ride History =====
+  async getRideHistory(driverId) {
+    return await DriverRepository.findRidesByDriver(driverId);
+  }
+
+  // ===== Payment History =====
+  async getPaymentHistory(driverId) {
+    return await DriverRepository.findPaymentsByDriver(driverId);
+  }
+
+  // Vehicle Management
+  async addVehicle(driverId, vehicleData) {
+    console.log("Debug: vehicleData =", vehicleData);
+    if (!vehicleData.model || !vehicleData.plate_no) {
+        throw new Error("Model and plate number are required");
+    }
+    return await vehicleRepository.create(driverId, vehicleData); 
+  }
+
+  async updateVehicle(driverId, vehicleId, vehicleData) {
+    const vehicle = await vehicleRepository.findById(vehicleId);
+    if (!vehicle || vehicle.driver_id !== driverId) {
+        throw new Error("Vehicle not found or not owned by driver");
+    }
+    const allowedFields = ['color'];
+    const filteredData = {};
+    for (const key of allowedFields) {
+      if (vehicleData.hasOwnProperty(key)) {
+        filteredData[key] = vehicleData[key];
+      }
+    }
+    if (!filteredData.color) {
+      throw new Error("Only 'color' field can be updated and must be provided");
+    }
+      return await vehicleRepository.update(vehicleId, filteredData); 
+    }
+  async deleteVehicle(driverId, vehicleId) {
+    const vehicles = await vehicleRepository.getByDriverId(driverId); 
+    if (!vehicles || vehicles.length <= 1) {
+        throw new Error("At least one vehicle must remain. Cannot delete the only vehicle.");
+    }
+    const vehicle = vehicles.find(v => v.vehicle_id === parseInt(vehicleId));
+    if (!vehicle) {
+        throw new Error("Vehicle not found or not owned by driver");
+    }
+    return await vehicleRepository.delete(vehicleId); 
+    }
+  // ===== Status =====
+  async updateStatus(driverId, is_live_currently) {
+    if (!["yes", "no"].includes(is_live_currently)) {
+      throw new Error("Invalid status. Must be 'yes' or 'no' ");
+    }
+    return await DriverRepository.update(driverId, { is_live_currently });
+  }
+}
+
+
+export default new DriverService();
