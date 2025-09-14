@@ -1,13 +1,13 @@
 // shriya : profile managemnet, ride history, payment history, vahicle management, dr_status management(online, offline) , register a complaint  
 //chandana - wallet management
 
-import DriverRepository from "../repositories/mysql/userRepository.js";
+import userRepository from "../repositories/mysql/userRepository.js";
 import vehicleRepository from "../repositories/mysql/vehicleRepository.js"
 
 class DriverService {
   // ===== Profile =====
   async getProfile(driverId) {
-    const driver = await DriverRepository.findById(driverId);
+    const driver = await userRepository.findById(driverId);
     if (!driver) throw new Error("Driver not found");
     return driver;
   }
@@ -32,19 +32,21 @@ class DriverService {
       throw new Error("Invalid email format");
     }
 
-    return await DriverRepository.update(driverId, updates);
+    return await userRepository.update(driverId, updates);
   }
 
   // ===== Ride History =====
   async getRideHistory(driverId) {
-    return await DriverRepository.findRidesByDriver(driverId);
+    return await userRepository.findRidesByDriver(driverId);
   }
-
+  // ==== Average Rating =====
+  async getAverageRating(driverId){
+    return await userRepository.getAverageRatingByDriver(driverId);
+  }
   // ===== Payment History =====
   async getPaymentHistory(driverId) {
-    return await DriverRepository.findPaymentsByDriver(driverId);
+    return await userRepository.findPaymentsByDriver(driverId);
   }
-
   // Vehicle Management
   async addVehicle(driverId, vehicleData) {
     console.log("Debug: vehicleData =", vehicleData);
@@ -87,7 +89,7 @@ class DriverService {
     if (!["yes", "no"].includes(is_live_currently)) {
       throw new Error("Invalid status. Must be 'yes' or 'no' ");
     }
-    return await DriverRepository.update(driverId, { is_live_currently });
+    return await userRepository.update(driverId, { is_live_currently });
   }
 }
 
