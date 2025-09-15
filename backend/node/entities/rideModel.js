@@ -87,4 +87,3 @@ User.hasMany(Ride, { foreignKey: "rider_id", as: "RidesAsRider" });
 User.hasMany(Ride, { foreignKey: "driver_id", as: "RidesAsDriver" });
 
 export default Ride;
-
