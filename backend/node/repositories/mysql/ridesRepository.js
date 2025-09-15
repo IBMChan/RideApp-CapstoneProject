@@ -28,11 +28,7 @@ class RideRepository {
   async assignDriver(ride_id, driver_id, vehicle_id = null) {
     const ride = await this.findById(ride_id);
     if (!ride) return null;
-    return await ride.update({
-      driver_id,
-      vehicle_id,
-      status: "accepted",
-    });
+    return await ride.update({ driver_id, vehicle_id, status: "accepted" });
   }
 
   async completeRide(ride_id) {

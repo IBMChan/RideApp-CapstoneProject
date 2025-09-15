@@ -3,7 +3,7 @@ import { successResponse, errorResponse } from "../utils/apiResponse.js";
 
 class PaymentController {
   // Rider initiates add-money (create razorpay order + txn)
-async addMoney(req, res) {
+  async addMoney(req, res) {
     try {
       // Ensure trimming to avoid URL encoded chars (like %0D)
       const user_id = Number(String(req.params.user_id).trim());
@@ -30,8 +30,6 @@ async addMoney(req, res) {
       return errorResponse(res, error, error.statusCode || 500);
     }
   }
-
-
 
   // After frontend completes Razorpay checkout, calls verify
   async verifyAddMoney(req, res) {
@@ -61,8 +59,14 @@ async addMoney(req, res) {
     try {
       const { ride_id } = req.params;
       const { mode } = req.body;
-      if (!["cash", "upi", "wallet"].includes(mode)) return errorResponse(res, "Invalid mode", 400);
-      const payment = await paymentService.createPaymentForRide({ ride_id: Number(ride_id), mode });
+
+      if (!["cash", "upi", "wallet"].includes(mode)) {
+        return errorResponse(res, "Invalid mode", 400);
+      }
+
+      // Call payment service method that also handles wallet debit if mode is wallet
+      const payment = await paymentService.initiateRidePayment(Number(ride_id), mode);
+
       return successResponse(res, "Payment initiated", payment);
     } catch (err) {
       return errorResponse(res, err, err.statusCode || 500);

@@ -1,77 +1,84 @@
-import PaymentRepo from "../repositories/mongodb/paymentRepository.js";
-import WalletService from "./wallet_service.js";
-import WalletRepo from "../repositories/postgres/walletRepository.js";
-import WalletTxnRepo from "../repositories/postgres/walletTransactionRepository.js";
-import AppError from "../utils/appError.js";
-import wallet_service from "./wallet_service.js";
+import paymentService from "../services/paymentService.js";
+import { successResponse, errorResponse } from "../utils/apiResponse.js";
 
-class PaymentService {
-  // Create or find existing payment for a ride
-  async createPaymentForRide({ ride_id, fare = 0, mode = "cash" }) {
-    let existing = await PaymentRepo.findByRide(ride_id);
-    if (existing) return existing;
-    return PaymentRepo.create({ ride_id, fare, mode });
-  }
+class PaymentController {
+  // Rider initiates add-money (create razorpay order + txn)
+  async addMoney(req, res) {
+    try {
+      const user_id = Number(String(req.params.user_id).trim());
+      const amount = Number(req.body.amount);
 
-  async getPaymentByRide(ride_id) {
-    return PaymentRepo.findByRide(ride_id);
-  }
+      if (!user_id || !amount || amount <= 0) {
+        return errorResponse(res, "Invalid user ID or amount", 400);
+      }
 
-  async confirmPaymentByDriver(ride_id) {
-    const payment = await PaymentRepo.findByRide(ride_id);
-    if (!payment) throw new AppError("Payment not found", 404);
-    if (payment.status === "success") return payment;
-    return PaymentRepo.updateByRideId(ride_id, { status: "success", Payed_At: new Date() });
-  }
+      const result = await paymentService.initiateAddMoney(user_id, amount);
 
-  // Wallet flows via Python service
-  async initiateAddMoney(user_id, amount) {
-    return wallet_service.walletCredit(user_id, amount);
-  }
+      if (!result.success) {
+        return errorResponse(res, result.message || "Failed to initiate add money", 500);
+      }
 
-  async verifyAddMoney(txn_id, razorpay_payment_id) {
-    return wallet_service.walletVerify(txn_id, razorpay_payment_id);
-  }
-
-  async debitWalletForRide(user_id, amount, ride_id) {
-    return  wallet_service.walletDebit(user_id, amount, ride_id);
-  }
-
-  async initiateWithdraw(user_id, amount) {
-    return wallet_service.walletWithdraw(user_id, amount);
-  }
-
-  async initiatePayment(riderId, ride_id, fare, mode) {
-    // Your rideRepository import needed here if used, or adjust accordingly
-    const ride = await PaymentRepo.findByRide(ride_id); // or appropriate ride repo call
-    if (!ride) throw new AppError("Ride not found", 404);
-
-    if (!["completed", "in_progress"].includes(ride.status)) {
-      throw new AppError("Ride must be in progress or completed to pay", 400);
+      return successResponse(res, "Add money initiated successfully", {
+        razorpayOrder: result.order,
+        transaction: result.txn,
+      });
+    } catch (error) {
+      return errorResponse(res, error, error.statusCode || 500);
     }
-
-    const payment = await PaymentRepo.create({
-      ride_id,
-      fare,
-      mode,
-      status: "pending",
-    });
-    return payment;
   }
 
-  async confirmPayment(driverId, payment_id) {
-    const payment = await PaymentRepo.findById(payment_id);
-    if (!payment) throw new AppError("Payment not found", 404);
-
-    if (!["cash", "upi"].includes(payment.mode)) {
-      throw new AppError("Only cash/UPI payments require driver confirmation", 400);
+  // After frontend completes Razorpay checkout, calls verify
+  async verifyAddMoney(req, res) {
+    try {
+      const { txn_id, razorpay_payment_id } = req.body;
+      const out = await paymentService.verifyAddMoney(Number(txn_id), String(razorpay_payment_id));
+      return successResponse(res, "Add money verification result", out);
+    } catch (err) {
+      return errorResponse(res, err, err.statusCode || 500);
     }
+  }
 
-    payment.status = "success";
-    payment.Payed_At = new Date();
-    await payment.save();
-    return payment;
+  // Driver withdraw money from wallet
+  async withdraw(req, res) {
+    try {
+      const { user_id } = req.params;
+      const { amount } = req.body;
+      const out = await paymentService.initiateWithdraw(Number(user_id), Number(amount));
+      return successResponse(res, "Withdrawal initiated", out);
+    } catch (err) {
+      return errorResponse(res, err, err.statusCode || 500);
+    }
+  }
+
+  // Rider initiates ride payment by cash/upi/wallet
+  async initiateRidePayment(req, res) {
+    try {
+      const { ride_id } = req.params;
+      const { mode } = req.body;
+
+      if (!["cash", "upi", "wallet"].includes(mode)) {
+        return errorResponse(res, "Invalid mode", 400);
+      }
+
+      // Use paymentService method that handles wallet debit & creates payment doc accordingly
+      const payment = await paymentService.initiateRidePayment(Number(ride_id), mode);
+
+      return successResponse(res, "Payment initiated", payment);
+    } catch (err) {
+      return errorResponse(res, err, err.statusCode || 500);
+    }
+  }
+
+  // Driver confirms ride payment collection (cash/upi)
+  async confirmRidePayment(req, res) {
+    try {
+      const { ride_id } = req.params;
+      const out = await paymentService.confirmPaymentByDriver(Number(ride_id));
+      return successResponse(res, "Payment confirmed by driver", out);
+    } catch (err) {
+      return errorResponse(res, err, err.statusCode || 500);
+    }
   }
 }
 
-export default new PaymentService();
+export default new PaymentController();
