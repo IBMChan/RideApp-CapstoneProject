@@ -123,7 +123,8 @@ class RideService {
 
     return new Promise((resolve, reject) => {
       const matcherPath = path.resolve(
-        "./cpp/matcher" + (process.platform === "win32" ? ".exe" : "")
+        "./cpp/matcher.exe"
+        // "./cpp/matcher" + (process.platform === "win32" ? ".exe" : "")
       );
       const child = spawn(matcherPath);
 

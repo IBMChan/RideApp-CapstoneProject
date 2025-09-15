@@ -1,5 +1,10 @@
-*.env
-node_modules/
-package.json
+backend/.env
+backend/package.json
+backend/package-lock.json
+requirements.txt
+backend/node_modules
+.gitignore
 package-lock.json
+package.json
+node_modules
 *.venv

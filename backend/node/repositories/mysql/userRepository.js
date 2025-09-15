@@ -1,7 +1,26 @@
-//harshit and raksha : rider functionalities.
-//laxmikanth : notfication and registering
-// shriya : profile managemnetdr_status management(online, offline) , register a complaint  
+// repositories/mysql/userRepository.js
+// harshit and raksha : rider functionalities.
+// laxmikanth : notification and registering
+// shriya : profile management, driver_status management(online, offline), register a complaint  
+
 import User from "../../entities/userModel.js";
+import mysqlSequelize from "../../config/dbConfig.js";
+import { QueryTypes } from "sequelize";
+
+export const findUserById = async (userId) => {
+  const [user] = await mysqlSequelize.query(
+    `SELECT user_id, full_name, phone, email, role, license, kyc_type,
+            kyc_document, gender, wallet_balance, total_earnings, status,
+            is_live_currently, created_at
+     FROM users
+     WHERE user_id = ?`,
+    {
+      replacements: [userId],
+      type: QueryTypes.SELECT,
+    }
+  );
+  return user || null;
+};
 import Vehicle from "../../entities/vehicleModel.js";
 import Ride from "../../entities/rideModel.js";       // Sequelize
 import Payment from "../../entities/paymentModel.js"; // Mongoose
