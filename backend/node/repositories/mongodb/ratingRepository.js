@@ -3,8 +3,9 @@
 // Shriya - fetch ratings/averages
 // Raksha & Harshit - Rider → Driver ratings
 
-import Rating from "../../entities/ratingModel.js";
 
+import Ride from "../../entities/rideModel.js";   
+import Rating from "../../entities/ratingModel.js" 
 // ---------------- Rider → Driver (r_to_d) ----------------
 
 // 1. Create/Add Rating
@@ -101,8 +102,6 @@ export const deleteDriverToRiderRating = async (rideId, driverId) => {
   );
 };
 
-import Ride from "../../entities/rideModel.js";   
-import Rating from "../../entities/ratingModel.js" 
 class RatingRepository{
     async findRideidByDriver(driverId) {
       return Ride.findAll({
