@@ -94,19 +94,29 @@ async update(driverId, updates) {
   }
 
   // ===== Average Rating for driver (Mongo/Mongoose) =====
-  async findRatingsByDriver(driverId) {
-    return Rating.find({ driver_id: driverId })
-      .sort({ created_at: -1 })
-      .lean();
+  async findRideidByDriver(driverId) {
+  return Ride.findAll({
+    where: { driver_id: driverId },
+    attributes: ['ride_id'], // only fetch ride_id
+    // order: [["created_at", "DESC"]], // Uncomment if needed
+  });
   }
   // Average Rating for a Driver
  async getAverageRatingByDriver(driverId) {
+  const rides = await findRideidByDriver(driverId);
+
+  const rideIds = rides.map(ride => ride.ride_id);
+
+  if (!rideIds.length) {
+    return { averageRating: null, totalRatings: 0 };
+  }
+
   const result = await Rating.aggregate([
-    { $match: { driver_id: driverId } },
+    { $match: { ride_id: { $in: rideIds }, "r_to_d.rate": { $ne: null } } },
     {
       $group: {
-        _id: "$driver_id",
-        averageRating: { $avg: "$rating" },
+        _id: null,
+        averageRating: { $avg: "$r_to_d.rate" },
         totalRatings: { $sum: 1 }
       }
     }
@@ -120,7 +130,7 @@ async update(driverId, updates) {
     averageRating: parseFloat(result[0].averageRating.toFixed(2)),
     totalRatings: result[0].totalRatings,
   };
-}
+  }
 
 }
 
