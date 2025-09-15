@@ -107,6 +107,23 @@ export const shareRideStatusEmail = async (req, res, next) => {
   }
 };
 
+// --------------------- SOS ---------------------
+export const sendSOS = async (req, res, next) => {
+  try {
+    const riderId = parseInt(req.params.riderId, 10);
+    const { recipientEmail, customMessage } = req.body;
+
+    if (!recipientEmail) {
+      return res.status(400).json({ error: "Recipient email is required." });
+    }
+
+    const result = await riderService.sendSOS(riderId, recipientEmail, customMessage);
+    res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
 
 // --------------------- 5. Complaints + Lost items ---------------------
 export const registerComplaint = async (req, res, next) => {

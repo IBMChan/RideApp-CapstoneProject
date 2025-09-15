@@ -201,6 +201,72 @@ class RideService {
     return { success: true, newBalance };
   }
 
+// --------------------- SOS Functionality ---------------------
+async sendSOS(riderId, recipientEmail, customMessage) {
+  const rider = await userRepository.findById(riderId);
+  if (!rider) throw new NotFoundError("Rider not found");
+
+  const ride = await rideRepository.getLatestRideByRider(riderId);
+  const driver = ride ? await userRepository.findById(ride.driver_id) : null;
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  // ✅ Friendly + formatted SOS message
+  const htmlMessage = customMessage || `
+    <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+      <h2 style="color: #d9534f;">🚨 Emergency Alert 🚨</h2>
+      <p>
+        You are receiving this email because you are listed as an 
+        <strong>emergency contact</strong> for 
+        <strong>${rider.full_name || "Your Contact"}</strong>.
+      </p>
+      <p>
+        They have triggered an <strong>SOS alert</strong>. 
+        Please try to reach them immediately and ensure their safety.
+      </p>
+      
+      <h3 style="margin-top: 20px; color: #555;">🚖 Ride Details</h3>
+      <ul>
+        <li><strong>Pickup:</strong> ${ride?.pickup_loc || "Not available"}</li>
+        <li><strong>Drop:</strong> ${ride?.drop_loc || "Not available"}</li>
+      </ul>
+
+      <h3 style="margin-top: 20px; color: #555;">👨‍✈️ Driver Details</h3>
+      <ul>
+        <li><strong>Name:</strong> ${driver?.full_name || "Not available"}</li>
+        <li><strong>Phone:</strong> ${driver?.phone || "Not available"}</li>
+        <li><strong>Email:</strong> ${driver?.email || "Not available"}</li>
+      </ul>
+
+      <p style="margin-top: 25px; font-size: 14px; color: #777;">
+        This is an automated message from <strong>RideApp</strong>. 
+        Please take necessary action.
+      </p>
+    </div>
+  `;
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: recipientEmail,
+    subject: "🚨 SOS Alert - Immediate Attention Needed",
+    html: htmlMessage, // ✅ Use HTML instead of plain text
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    return { success: true, message: "SOS alert sent successfully" };
+  } catch (error) {
+    console.error("❌ Error sending SOS:", error);
+    throw new Error("Failed to send SOS email");
+  }
+}
+
   // --------------------- 7. Ratings ---------------------
 
   // Rider → Driver
