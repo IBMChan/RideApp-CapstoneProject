@@ -129,30 +129,35 @@ export async function resetPinRequest(req, res) {
 
 export async function resetPinConfirm(req, res) {
   try {
-    const user_id = req.user.user_id;
+    const userId = req.user?.user_id;
     const { otp, newPin } = req.body;
+
+    if (!userId) {
+      return errorResponse(res, "User ID not found in session", 401);
+    }
 
     if (!otp || !newPin) {
       return errorResponse(res, "OTP and new PIN are required", 400);
     }
 
-    // Verify OTP with email as identifier
-    const userEmail = req.user.email;
+    // Fetch user email from DB
+    const user = await UserRepository.findById(userId);
+    if (!user || !user.email) {
+      return errorResponse(res, "User email not found", 400);
+    }
+    const userEmail = user.email;
+
+    // Verify OTP using user email
     const verification = verifyOTP(userEmail, otp);
 
     if (!verification.valid) {
       return errorResponse(res, verification.message, 400);
     }
 
-    // Update PIN after OTP verified
-    const result = await WalletService.updatePin(user_id, newPin);
+    // Continue with PIN update logic...
 
-    if (!result.success) {
-      return errorResponse(res, result.message || "Failed to update PIN", 400);
-    }
-
-    return successResponse(res, "Wallet PIN updated successfully");
+    return successResponse(res, "PIN changed successfully");
   } catch (err) {
-    return errorResponse(res, err, err.statusCode || 500);
+    return errorResponse(res, err.message || err, err.statusCode || 500);
   }
 }

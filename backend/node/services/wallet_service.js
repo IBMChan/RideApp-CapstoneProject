@@ -86,14 +86,17 @@ class WalletService {
       return { success: false, message: "PIN must be at least 4 digits" };
     }
 
+    // Find wallet by user ID
     const wallet = await WalletRepository.findByUser(user_id);
     if (!wallet) {
       throw new AppError("Wallet not found", 404);
     }
 
+    // Update PIN in DB
     const updatedWallet = await WalletRepository.updatePin(user_id, newPin);
     return { success: true, wallet: updatedWallet };
   }
+
 
   async getTransactions(user_id) {
     const wallet = await WalletRepository.findByUser(user_id);
@@ -103,6 +106,34 @@ class WalletService {
 
     return transactions;
   }
+async initiateWithdraw(user_id, amount, pin) {
+  // Find wallet and verify PIN
+  const wallet = await WalletRepository.findByUser(user_id);
+  if (!wallet) {
+    throw new AppError("Wallet not found", 404);
+  }
+  if (String(wallet.pin) !== String(pin)) {
+    return { success: false, message: "Invalid wallet PIN" };
+  }
+
+  // Check balance
+  if (wallet.balance < amount) {
+    return { success: false, message: "Insufficient balance" };
+  }
+
+  // Call python service to withdraw amount
+  const result = await this.walletWithdraw(user_id, amount);
+
+  if (!result.success) {
+    return { success: false, message: result.message || "Withdrawal failed" };
+  }
+
+  // Optional: update local DB wallet balance if needed here
+
+  return { success: true, message: "Withdrawal successful", data: result };
+}
+
+
   async initiateAddMoney(user_id, amount, pin) {
   // Validate pin and wallet existence
   const wallet = await WalletRepository.findByUser(user_id);

@@ -1,13 +1,12 @@
 import pool from "../../config/postgresConfig.js";
 
 class WalletRepository {
-  async findByUser(user_id) {
-    const { rows } = await pool.query("SELECT * FROM wallet WHERE user_id = $1", [user_id]);
-    return rows[0];
-  }
+      async findByUser(user_id) {
+    const res = await pool.query("SELECT * FROM wallet WHERE user_id = $1 LIMIT 1", [user_id]);
+    return res.rows[0];
+   }
 
-
-    async createForUserWithPin(user_id, pin) {
+  async createForUserWithPin(user_id, pin) {
     const { rows } = await pool.query(
       "INSERT INTO wallet (user_id, balance, pin) VALUES ($1, $2, $3) RETURNING *",
       [user_id, 0.00, pin]
@@ -22,13 +21,12 @@ class WalletRepository {
     );
     return rows[0];
   }
-
-  async updatePin(user_id, newPin) {
-    const { rows } = await pool.query(
-      "UPDATE wallet SET pin = $1, last_updated = CURRENT_TIMESTAMP WHERE user_id = $2 RETURNING *",
+  static async updatePin(user_id, newPin) {
+    const res = await db.query(
+      "UPDATE wallet SET pin = $1 WHERE user_id = $2 RETURNING *",
       [newPin, user_id]
     );
-    return rows[0];
+    return res.rows[0];
   }
 }
 

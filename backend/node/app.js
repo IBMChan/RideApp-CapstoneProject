@@ -1,5 +1,6 @@
 // app.js - Unified Entry Point
 
+process.env.TZ = "Asia/Kolkata";
 import { config as configDotenv } from "dotenv";
 configDotenv();
 
@@ -19,6 +20,8 @@ import driverRoutes from "./routes/driverRoutes.js";
 // Note: Add paymentRoutes and walletRoutes if they exist and are to be used
 import paymentRoutes from "./routes/paymentRoutes.js";
 import walletRoutes from "./routes/walletRoutes.js";
+
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -45,7 +48,13 @@ app.use("/api/rides", rideRoutes);
 app.use("/api/rider", riderRoutes);
 app.use("/api/driver", driverRoutes);
 app.use("/api/payment", paymentRoutes);      // Add payment routes
-app.use("/api/wallet", walletRoutes);        // Add wallet routes
+app.use("/api/wallet", walletRoutes);  // Add wallet routes
+
+const utcMillis = Date.now();
+const dateInIST = new Date(utcMillis).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+
+console.log("IST date time:", dateInIST);
+
 
 // ---------- Server & DB Connections ----------
 (async () => {
