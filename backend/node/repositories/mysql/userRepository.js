@@ -1,12 +1,28 @@
-//harshit and raksha : rider functionalities.
-//laxmikanth : notfication and registering
-// shriya : profile managemnetdr_status management(online, offline) , register a complaint  
-import User from "../../entities/userModel.js";
-import Vehicle from "../../entities/vehicleModel.js";
-import Ride from "../../entities/rideModel.js";       // Sequelize
-import Payment from "../../entities/paymentModel.js"; // Mongoose
-import Rating from "../../entities/ratingModel.js";   // Mongoose
+// repositories/mysql/userRepository.js
+// harshit and raksha : rider functionalities.
+// laxmikanth : notification and registering
+// shriya : profile management, driver_status management(online, offline), register a complaint  
 
+import User from "../../entities/userModel.js";
+import mysqlSequelize from "../../config/dbConfig.js";
+import { QueryTypes } from "sequelize";
+
+export const findUserById = async (userId) => {
+  const [user] = await mysqlSequelize.query(
+    `SELECT user_id, full_name, phone, email, role, license, kyc_type,
+            kyc_document, gender, status,
+            is_live_currently, created_at
+     FROM users
+     WHERE user_id = ?`,
+    {
+      replacements: [userId],
+      type: QueryTypes.SELECT,
+    }
+  );
+  return user || null;
+};
+import Vehicle from "../../entities/vehicleModel.js";
+import Ride from "../../entities/rideModel.js";     
 
 class UserRepository {
   async findById(id) {
@@ -85,53 +101,6 @@ async update(driverId, updates) {
       // order: [["created_at", "DESC"]],
     });
   }
-
-  // ===== Payment History (Mongo/Mongoose) =====
-  async findPaymentsByDriver(driverId) {
-    return Payment.find({ driver_id: driverId })
-      .sort({ created_at: -1 })
-      .lean();
-  }
-
-  // ===== Average Rating for driver (Mongo/Mongoose) =====
-  async findRideidByDriver(driverId) {
-  return Ride.findAll({
-    where: { driver_id: driverId },
-    attributes: ['ride_id'], // only fetch ride_id
-    // order: [["created_at", "DESC"]], // Uncomment if needed
-  });
-  }
-  // Average Rating for a Driver
- async getAverageRatingByDriver(driverId) {
-  const rides = await findRideidByDriver(driverId);
-
-  const rideIds = rides.map(ride => ride.ride_id);
-
-  if (!rideIds.length) {
-    return { averageRating: null, totalRatings: 0 };
-  }
-
-  const result = await Rating.aggregate([
-    { $match: { ride_id: { $in: rideIds }, "r_to_d.rate": { $ne: null } } },
-    {
-      $group: {
-        _id: null,
-        averageRating: { $avg: "$r_to_d.rate" },
-        totalRatings: { $sum: 1 }
-      }
-    }
-  ]);
-
-  if (result.length === 0) {
-    return { averageRating: null, totalRatings: 0 };
-  }
-
-  return {
-    averageRating: parseFloat(result[0].averageRating.toFixed(2)),
-    totalRatings: result[0].totalRatings,
-  };
-  }
-
 }
 
 export default new UserRepository();

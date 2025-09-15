@@ -58,9 +58,9 @@ int main() {
 
 // // Composite cost function
 // double computeCost(const Driver& d) {
-//     double w1 = 0.7, w2 = 0.2, w3 = 0.1, w4 = -0.05; 
+//     double w1 = 0.7, w2 = 0.2, w3 = 0.1, w4 = -0.05;
 //     // lower is better
-//     return w1 * d.distance 
+//     return w1 * d.distance
 //          + w2 * (5.0 - d.rating)   // better rating = lower cost
 //          + w3 * d.cancelRate       // frequent cancellations = penalty
 //          + w4 * d.idleMinutes;     // idle longer = priority

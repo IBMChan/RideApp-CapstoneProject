@@ -9,7 +9,9 @@ import cookieParser from "cookie-parser";
 import mysql from "mysql2/promise";
 import sequelize from "./config/sqlConfig.js";
 import { connectDB } from "./config/mongoConfig.js";
-import pool from "./config/postgresConfig.js";
+import pgSequelize from "./config/postgreConfig.js";  // Raksha & Harshit
+import SavedLocation  from "./entities/savLocModel.js";  // Raksha & Harshit
+import { errorHandler } from "./middlewares/errorHandler.js"; // Raksha & Harshit
 import redisClient from "./config/redisConfig.js";
 
 // Routes
@@ -24,7 +26,7 @@ import walletRoutes from "./routes/walletRoutes.js";
 
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 
 // ---------- Middlewares ----------
 app.use(express.json());
@@ -49,6 +51,9 @@ app.use("/api/rider", riderRoutes);
 app.use("/api/driver", driverRoutes);
 app.use("/api/payment", paymentRoutes);      // Add payment routes
 app.use("/api/wallet", walletRoutes);  // Add wallet routes
+
+    // Error Raksha & Harshit
+app.use(errorHandler);
 
 const utcMillis = Date.now();
 const dateInIST = new Date(utcMillis).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
@@ -77,12 +82,14 @@ console.log("IST date time:", dateInIST);
     // 3️⃣ Sequelize Auth & Sync
     await sequelize.authenticate();
     console.log("✅ Sequelize connection established successfully.");
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({alter: false, force: false}); // ⚠️ Dev-only
     console.log("✅ Sequelize models synced successfully.");
 
     // 4️⃣ Connect PostgreSQL
-    const res = await pool.query("SELECT NOW()");
-    console.log("✅ PostgreSQL connected:", res.rows[0].now);
+    await pgSequelize.authenticate();
+    console.log("✅ PostgreSQL Sequelize connection established.");
+    await SavedLocation.sync({ alter: true });  // auto-create tables like saved_locations
+    console.log("✅ PostgreSQL models synced.");
 
     // 5️⃣ Connect Redis
     await redisClient.connect();

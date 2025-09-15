@@ -105,6 +105,10 @@ class RideRepository {
       order: [["ride_date", "DESC"]],
     });
   }
+  
+  async getRideById(ride_id) {
+    return await Ride.findByPk(ride_id);
+  }
 
   async getRidesByRider(rider_id) {
     return await Ride.findAll({
@@ -112,6 +116,14 @@ class RideRepository {
       order: [["ride_date", "DESC"]],
     });
   }
+  async updateRide(ride_id, updates) {
+    return await Ride.update(updates, { where: { ride_id } });
+  }
+
+  async deleteRide(ride_id) {
+    return await Ride.destroy({ where: { ride_id } });
+  }
+
 
   async getRidesByDriver(driver_id) {
     return await Ride.findAll({
