@@ -44,6 +44,12 @@ class UserRepository {
     return await User.create(data);
   }
 
+  async findAll() {
+  const [rows] = await mysqlSequelize.query('SELECT * FROM users');
+  return rows;
+}
+
+
   async getDrivers() {
   return await User.findAll({
     where: { role: "driver", is_live_currently: "yes" },
