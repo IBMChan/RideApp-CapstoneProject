@@ -48,6 +48,13 @@ class RideRepository {
   async cancelRide(ride_id) {
     const ride = await this.findById(ride_id);
     if (!ride) return null;
+    const now = new Date();
+    const expiry = new Date(ride.expiry_time); // assuming your model has expiry_time
+
+    if (now < expiry) {
+      // before expiry → revert back to "requested"
+      return await ride.update({ status: "requested", driver_id: null, vehicle_id: null });
+    }
     return await ride.update({ status: "cancelled" });
   }
 

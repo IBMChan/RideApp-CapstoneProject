@@ -121,11 +121,16 @@ class RideService {
       costMatrix.push(row);
     }
 
+    console.log(riders, driverCount);
+    console.log(costMatrix);
+
     return new Promise((resolve, reject) => {
       const matcherPath = path.resolve(
-        "./cpp/matcher" + (process.platform === "win32" ? ".exe" : "")
+        "./cpp/matcher.exe"
+        // "./cpp/matcher" + (process.platform === "win32" ? ".exe" : "")
       );
       const child = spawn(matcherPath);
+      console.log(matcherPath);
 
       let stdout = "";
       let stderr = "";
@@ -134,6 +139,7 @@ class RideService {
       child.stderr.on("data", (data) => (stderr += data.toString()));
 
       child.on("close", (code) => {
+        console.log(code);
         if (code !== 0) {
           console.error("C++ matcher error:", stderr);
           return reject(new AppError("Driver matching failed", 500, "MATCHER_ERROR"));
@@ -191,7 +197,10 @@ class RideService {
     }
 
     // Assign driver and vehicle atomically (rideRepository.assignDriver should accept vehicle_id)
-    return await RideRepository.assignDriver(ride_id, driver_id, activeVehicle.vehicle_id);
+
+    const res = await RideRepository.assignDriver(ride_id, driver_id, activeVehicle.vehicle_id);
+    console.log("email sent");
+    return res;
   }
 
   async updateRideStatus(ride_id, status, userId, role, pin = null) {
