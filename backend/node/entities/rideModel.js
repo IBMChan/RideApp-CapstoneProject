@@ -50,6 +50,10 @@ const Ride = sequelize.define(
       type: DataTypes.DECIMAL(10, 2),
       allowNull: true,
     },
+    ride_pin: {
+      type: DataTypes.STRING(6),
+      allowNull: true,
+    },
     ride_date: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,

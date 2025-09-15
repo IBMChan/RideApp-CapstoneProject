@@ -3,7 +3,7 @@ import { Op } from "sequelize";
 
 class RideRepository {
   // Create ride (expiry_time auto-set by model hook)
-  async create({ rider_id, pickup_loc, drop_loc, distance, fare, vehicle_id = null }) {
+  async create({ rider_id, pickup_loc, drop_loc, distance, fare, vehicle_id = null, ride_pin = null }) {
     return await Ride.create({
       rider_id,
       pickup_loc,
@@ -12,6 +12,7 @@ class RideRepository {
       fare,
       vehicle_id,
       status: "requested",
+      ride_pin
     });
   }
 
@@ -19,9 +20,16 @@ class RideRepository {
     return await Ride.findByPk(ride_id);
   }
 
-  async updateStatus(ride_id, status) {
+  async updateStatus(ride_id, status, pin = null) {
     const ride = await this.findById(ride_id);
     if (!ride) return null;
+
+    if (status === "in_progress") {
+      if (!pin || pin !== ride.ride_pin) {
+        return null;
+      }
+    }
+
     return await ride.update({ status });
   }
 
@@ -64,7 +72,17 @@ class RideRepository {
   }
 
   async getPendingRides() {
-    return await Ride.findAll({ where: { status: "requested" } });
+    const rides = await Ride.findAll({
+      where: { status: "requested" },
+      attributes: { exclude: ["ride_pin"] },
+      raw: true, // returns plain objects instead of Sequelize instances
+    });
+
+    return rides.map((ride) => ({
+      ...ride,
+      pickup_loc: ride.pickup_loc ? JSON.parse(ride.pickup_loc) : null,
+      drop_loc: ride.drop_loc ? JSON.parse(ride.drop_loc) : null,
+    }));
   }
 
   async getOngoingRidesByDriver(driver_id) {
@@ -105,6 +123,12 @@ class RideRepository {
 
   async getAll() {
     return await Ride.findAll({ order: [["ride_date", "DESC"]] });
+  }
+
+  async clearSensitiveFields(ride_id) {
+    const ride = await this.findById(ride_id);
+    if (!ride) return null;
+    return await ride.update({ driver_id: null, vehicle_id: null, ride_pin: null });
   }
 }
 

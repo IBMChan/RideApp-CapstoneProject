@@ -12,17 +12,33 @@ class RideController {
       const rideData = await redisClient.get(`ride:${ride.ride_id}`);
       const rideFromCache = rideData ? JSON.parse(rideData) : ride;
 
+      const rideWithoutPin = {
+        "ride_id": rideFromCache.ride_id,
+        "rider_id": rideFromCache.rider_id,
+        "driver_id": rideFromCache.driver_id,
+        "pickup_loc": JSON.parse(rideFromCache.pickup_loc),
+        "drop_loc": JSON.parse(rideFromCache.drop_loc),
+        "fare": rideFromCache.fare,
+        "distance": rideFromCache.distance,
+        "status": rideFromCache.status,
+        "ride_date": rideFromCache.ride_date,
+        "expiry_time": rideFromCache.expiry_time,
+      };
+
       // Ensure payment document is created for this ride (default cash mode)
-      await paymentService.createPaymentForRide({
-        ride_id: ride.ride_id,
-        fare: Number(ride.fare || req.body.fare || 0),
-        mode: "cash",
-      });
+      // await paymentService.createPaymentForRide({
+      //   ride_id: ride.ride_id,
+      //   fare: Number(ride.fare || req.body.fare || 0),
+      //   mode: "cash",
+      // });
+
+      // delete rideFromCache.dataValues.ride_pin;
 
       return successResponse(
         res,
         "Ride created successfully. Drivers matched.",
-        { ride_id: ride.ride_id, ride: rideFromCache, matchedDrivers },
+        { ride_id: ride.ride_id, ride: rideWithoutPin, matchedDrivers },
+        // { ride_id: ride.ride_id, ride: rideFromCache, matchedDrivers },
         201
       );
     } catch (err) {
@@ -45,6 +61,23 @@ class RideController {
       const { ride_id } = req.params;
       const driver_id = req.user?.user_id;
       const ride = await RideService.acceptRide(ride_id, driver_id);
+
+      delete ride.dataValues.ride_pin;
+
+      // const rideWithoutPin = {
+      //   "ride_id": ride.ride_id,
+      //   "rider_id": ride.rider_id,
+      //   "driver_id": ride.driver_id,
+      //   "vehicle_id": ride.vehicle_id,
+      //   "pickup_loc": ride.pickup_loc,
+      //   "drop_loc": ride.drop_loc,
+      //   "fare": ride.fare,
+      //   "distance": ride.distance,
+      //   "status": ride.status,
+      //   "ride_date": ride.ride_date,
+      //   "expiry_time": ride.expiry_time,
+      // };
+
       return successResponse(res, "Ride accepted successfully", { ride });
     } catch (err) {
       return errorResponse(res, err, err.statusCode || 400);
@@ -54,9 +87,12 @@ class RideController {
   async updateRideStatus(req, res) {
     try {
       const { ride_id } = req.params;
-      const { status } = req.body;
+      const { status, pin } = req.body;
       const { user_id: userId, role } = req.user;
-      const ride = await RideService.updateRideStatus(ride_id, status, userId, role);
+      const ride = await RideService.updateRideStatus(ride_id, status, userId, role, pin);
+      if (role === "driver") {
+        delete ride.dataValues.ride_pin;
+      }
       return successResponse(res, "Ride status updated successfully", { ride });
     } catch (err) {
       return errorResponse(res, err, err.statusCode || 400);
@@ -68,6 +104,7 @@ class RideController {
       const { ride_id } = req.params;
       const user = req.user || {};
       const ride = await RideService.completeRide(Number(ride_id), user);
+      delete ride.dataValues.ride_pin;
       return successResponse(res, "Ride completed", { ride });
     } catch (err) {
       return errorResponse(res, err, err.statusCode || 500);
@@ -78,6 +115,7 @@ class RideController {
     try {
       const { ride_id } = req.params;
       const ride = await RideService.cancelRide(ride_id);
+      delete ride.dataValues.ride_pin;
       return successResponse(res, "Ride cancelled successfully", { ride });
     } catch (err) {
       return errorResponse(res, err, err.statusCode || 400);
@@ -88,6 +126,7 @@ class RideController {
     try {
       const driver_id = req.user?.user_id;
       const rides = await RideService.getOngoingRides(driver_id);
+      // delete rides.dataValues.ride_pin;
       return successResponse(res, "Ongoing rides fetched successfully", { rides });
     } catch (err) {
       return errorResponse(res, err, err.statusCode || 400);
@@ -98,6 +137,7 @@ class RideController {
     try {
       const driver_id = req.user?.user_id;
       const rides = await RideService.getRideHistory(driver_id);
+      // delete ride.dataValues.ride_pin;
       return successResponse(res, "Ride history fetched successfully", { rides });
     } catch (err) {
       return errorResponse(res, err, err.statusCode || 400);
@@ -107,10 +147,27 @@ class RideController {
   async getRide(req, res) {
     try {
       const { ride_id } = req.params;
+      const { role, user_id } = req.user;
+
       const ride = await RideService.getRide(ride_id);
-      return successResponse(res, "Ride fetched successfully", { ride });
+
+      if (!ride) throw new Error("Ride not found");
+
+      // Hide PIN for driver
+      if (role === "driver") {
+        delete ride.dataValues.ride_pin;
+      }
+
+      // Show PIN only for rider after driver accepted
+      if (role === "rider") {
+        if (!ride.driver_id) {
+          delete ride.dataValues.ride_pin;
+        }
+      }
+
+      return successResponse(res, "Ride details", { ride });
     } catch (err) {
-      return errorResponse(res, err, err.statusCode || 404);
+      return errorResponse(res, err, err.statusCode || 400);
     }
   }
 
