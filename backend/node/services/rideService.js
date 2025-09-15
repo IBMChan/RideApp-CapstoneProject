@@ -139,6 +139,7 @@ class RideService {
         "./cpp/matcher" + (process.platform === "win32" ? ".exe" : "")
       );
       const child = spawn(matcherPath);
+      console.log(matcherPath);
 
       let stdout = "";
       let stderr = "";
