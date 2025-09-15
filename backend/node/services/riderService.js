@@ -1,13 +1,17 @@
+//harshit and raksha // funcitonalities: 1. ride history 2. profile management(cloud image upload) 3. saved location (managing) 4. share status(twilio to whatsapp) 5. find a lost item/contact driver or previous rides/register a complaint
+//chandana - wallet management 
+//error handler
+
+// services/rider.service.js
 import rideRepository from "../repositories/mysql/ridesRepository.js";
 import userRepository, { findUserById } from "../repositories/mysql/userRepository.js";
 import * as savedLocRepository from "../repositories/postgres/saveLocRepository.js";
 import * as complaintRepository from "../repositories/mongodb/complaintRepository.js";
 import * as lostItemRepository from "../repositories/mongodb/lostItemRepository.js";
-
+import * as ratingRepository from "../repositories/mongodb/ratingRepository.js";
 import * as walletRepository from "../repositories/postgres/walletRepository.js";
 import walletTransactionRepository from "../repositories/postgres/walletTransactionRepository.js";
 import { spawnPythonPayment } from "../config/razorpayConfig.js";
-// import razorpay from "../config/razorpayConfig.js"
 
 import { NotFoundError, ValidationError } from "../utils/appError.js";
 
@@ -107,7 +111,6 @@ class RideService {
 
   // --------------------- 6. Wallet (via Python Razorpay) ---------------------
   async addMoney({ user_id, amount, payment_method, bank_details }) {
-    // call Python wrapper
     const paymentResult = await spawnPythonPayment({
       action: "create_order",
       amount,
@@ -121,15 +124,61 @@ class RideService {
       throw new Error("Payment failed");
     }
 
-    // update wallet balance
     const wallet = await walletRepository.getWalletByUserId(user_id);
     const newBalance = parseFloat(wallet.balance) + parseFloat(amount);
     await walletRepository.updateBalance(wallet.wallet_id, newBalance);
 
-    // log transaction
     await walletTransactionRepository.addTransaction(wallet.wallet_id, amount, null);
 
     return { success: true, newBalance };
+  }
+
+  // --------------------- 7. Ratings ---------------------
+
+  // Rider → Driver
+  async rateDriver(riderId, rideId, driverId, rate, comment) {
+    if (!rate || rate < 1 || rate > 5) {
+      throw new ValidationError("Rating must be between 1 and 5.");
+    }
+    return await ratingRepository.addRiderToDriverRating(rideId, riderId, driverId, rate, comment);
+  }
+
+  async getDriverRating(rideId, riderId) {
+    return await ratingRepository.getRiderToDriverRating(rideId, riderId);
+  }
+
+  async updateDriverRating(riderId, rideId, { rate, comment }) {
+    if (rate && (rate < 1 || rate > 5)) {
+      throw new ValidationError("Rating must be between 1 and 5.");
+    }
+    return await ratingRepository.updateRiderToDriverRating(rideId, riderId, rate, comment);
+  }
+
+  async deleteDriverRating(rideId, riderId) {
+    return await ratingRepository.deleteRiderToDriverRating(rideId, riderId);
+  }
+
+  // Driver → Rider
+  async rateRider(driverId, rideId, riderId, rate, comment) {
+    if (!rate || rate < 1 || rate > 5) {
+      throw new ValidationError("Rating must be between 1 and 5.");
+    }
+    return await ratingRepository.addDriverToRiderRating(rideId, driverId, riderId, rate, comment);
+  }
+
+  async getRiderRating(rideId, driverId) {
+    return await ratingRepository.getDriverToRiderRating(rideId, driverId);
+  }
+
+  async updateRiderRating(driverId, rideId, { rate, comment }) {
+    if (rate && (rate < 1 || rate > 5)) {
+      throw new ValidationError("Rating must be between 1 and 5.");
+    }
+    return await ratingRepository.updateDriverToRiderRating(rideId, driverId, rate, comment);
+  }
+
+  async deleteRiderRating(rideId, driverId) {
+    return await ratingRepository.deleteDriverToRiderRating(rideId, driverId);
   }
 }
 
