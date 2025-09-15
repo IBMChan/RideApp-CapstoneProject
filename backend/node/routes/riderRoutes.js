@@ -26,8 +26,7 @@ router.post("/:riderId/locations", riderController.addSavedLocation);
 router.delete("/:riderId/locations/:id", riderController.deleteSavedLocation);
 
 // ---------------- 4. Share ride status ----------------
-// Example: POST /api/rider/share-ride/15
-router.post("/share-ride/:rideId", riderController.shareRideStatus);
+router.post("/share-ride-email/:rideId", riderController.shareRideStatusEmail);
 
 // ---------------- 5. Complaints + Lost items ----------------
 // Example: POST /api/rider/complaints/15

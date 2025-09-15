@@ -88,19 +88,25 @@ export const deleteSavedLocation = async (req, res, next) => {
 };
 
 // --------------------- 4. Share ride status ---------------------
-export const shareRideStatus = async (req, res, next) => {
+// --------------------- Share Ride Status via Email ---------------------
+export const shareRideStatusEmail = async (req, res, next) => {
   try {
-    const riderId = req.user?.id
-      ? parseInt(req.user.id, 10)
-      : parseInt(req.params.riderId, 10);
+    const riderId = parseInt(req.body.riderId, 10);
     const rideId = parseInt(req.params.rideId, 10);
-    const { phoneNumber } = req.body;
-    await riderService.shareRideStatus(riderId, rideId, phoneNumber);
-    res.json({ message: "Ride status shared successfully" });
+    const { recipientEmail } = req.body;
+
+    if (isNaN(riderId) || isNaN(rideId)) {
+      return res.status(400).json({ error: "Valid riderId and rideId are required." });
+    }
+
+    const result = await riderService.shareRideStatus(riderId, rideId, recipientEmail);
+
+    res.status(200).json(result);
   } catch (err) {
     next(err);
   }
 };
+
 
 // --------------------- 5. Complaints + Lost items ---------------------
 export const registerComplaint = async (req, res, next) => {
