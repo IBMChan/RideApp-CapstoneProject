@@ -135,10 +135,14 @@ export const getLostItems = async (req, res, next) => {
   try {
     const riderId = parseInt(req.query.riderId, 10);
     const rideId = parseInt(req.params.rideId, 10);
+
+    console.log(`${riderId} ${rideId}`);
+    
+
     if (isNaN(riderId) || isNaN(rideId)) {
       return res.status(400).json({ error: "Invalid riderId or rideId" });
     }
-    const items = await riderService.getLostItems(riderId, rideId);
+    const items = await riderService.getLostItems(rideId, riderId);
     res.json(items);
   } catch (err) {
     next(err);
@@ -149,6 +153,7 @@ export const reportLostItem = async (req, res, next) => {
   try {
     const { riderId, rideId } = req.params;
     const { description } = req.body;
+    
     if (!riderId || !rideId) {
       throw new ValidationError("Valid riderId and rideId are required.");
     }
