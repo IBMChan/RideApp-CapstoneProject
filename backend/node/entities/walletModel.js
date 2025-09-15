@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../config/postgres.js";
+import sequelize from "../config/postgresCongif.js";
 
 const Wallet = sequelize.define("wallet", {
   wallet_id: {

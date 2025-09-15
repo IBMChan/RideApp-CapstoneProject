@@ -8,7 +8,7 @@ import cookieParser from "cookie-parser";
 import mysql from "mysql2/promise";
 import sequelize from "./config/sqlConfig.js";
 import { connectDB } from "./config/mongoConfig.js";
-import pool from "./config/postgres.js";
+import pool from "./config/postgresConfig.js";
 import redisClient from "./config/redisConfig.js";
 
 // Routes
