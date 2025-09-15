@@ -10,7 +10,7 @@ import { QueryTypes } from "sequelize";
 export const findUserById = async (userId) => {
   const [user] = await mysqlSequelize.query(
     `SELECT user_id, full_name, phone, email, role, license, kyc_type,
-            kyc_document, gender, wallet_balance, total_earnings, status,
+            kyc_document, gender, status,
             is_live_currently, created_at
      FROM users
      WHERE user_id = ?`,

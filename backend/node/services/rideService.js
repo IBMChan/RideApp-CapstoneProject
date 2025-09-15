@@ -10,7 +10,7 @@ import { callPython } from "./pythonService.js";
 import path from "path";
 import { spawn } from 'child_process';
 import vehicleRepository from "../repositories/mysql/vehicleRepository.js";
-
+import crypto from "crypto";
 // import notificationService from "./notificationService"; // Optional notifications
 
 class RideService {
@@ -45,7 +45,8 @@ class RideService {
         throw new AppError("Invalid fare/distance returned from Python service", 500, "FARE_CALC_ERROR");
       }
 
-      const pin = Math.floor(100000 + Math.random() * 900000).toString();
+      const pin = crypto.randomInt(100000, 999999).toString();
+      console.log(pin);
 
       const ride = await RideRepository.create({
         rider_id,
@@ -77,9 +78,21 @@ class RideService {
       //   console.error("Failed to create payment doc for ride:", err.message);
       // }
 
-      // delete ride.dataValues.ride_pin;
+      delete ride.dataValues.ride_pin;
 
-      
+      // const rideWithoutPin = {
+      //   "ride_id": ride.ride_id,
+      //   "rider_id": ride.rider_id,
+      //   "driver_id": ride.driver_id,
+      //   "vehicle_id": ride.vehicle_id,
+      //   "pickup_loc": ride.pickup_loc,
+      //   "drop_loc": ride.drop_loc,
+      //   "fare": ride.fare,
+      //   "distance": ride.distance,
+      //   "status": ride.status,
+      //   "ride_date": ride.ride_date,
+      //   "expiry_time": ride.expiry_time,
+      // };
 
       const matchedDrivers = await this.matchDrivers(ride.ride_id);
       return { ride, matchedDrivers };
@@ -123,10 +136,10 @@ class RideService {
 
     return new Promise((resolve, reject) => {
       const matcherPath = path.resolve(
-        "./cpp/matcher.exe"
-        // "./cpp/matcher" + (process.platform === "win32" ? ".exe" : "")
+        "./cpp/matcher" + (process.platform === "win32" ? ".exe" : "")
       );
       const child = spawn(matcherPath);
+      console.log(matcherPath);
 
       let stdout = "";
       let stderr = "";
@@ -332,88 +345,6 @@ class RideService {
 
     throw new AppError("Invalid role for listing rides", 400, "INVALID_ROLE");
   }
-
-  // ---------------- Payment-related business logic ----------------
-  // async initiatePayment(ride_id, mode = "cash") {
-  //   if (!ride_id) throw new AppError("Ride ID is required", 400, "MISSING_RIDE_ID");
-  //   if (!["cash", "upi"].includes(mode)) throw new AppError("Unsupported mode", 422, "INVALID_MODE");
-
-  //   const ride = await RideRepository.findById(ride_id);
-  //   if (!ride) throw new AppError("Ride not found", 404, "RIDE_NOT_FOUND");
-
-  //   const allowedStatuses = ["in_progress", "completed"];
-  //   if (!allowedStatuses.includes(ride.status)) {
-  //     throw new AppError("Payment can only be initiated for ongoing or completed rides", 400, "INVALID_RIDE_STATUS");
-  //   }
-
-  //   const payment = await paymentService.createPaymentForRide({
-  //     ride_id: ride.ride_id,
-  //     fare: Number(ride.fare || 0),
-  //     mode,
-  //   });
-
-  //   // Notify driver (optional)
-  //   try {
-  //     if (ride.driver_id /* && notificationService?.notifyDriver */) {
-  //       // await notificationService.notifyDriver(ride.driver_id, {
-  //       //   title: "Payment collection requested",
-  //       //   body: `Please confirm collection for payment ${payment.payment_id} (ride ${ride.ride_id})`,
-  //       //   payment_id: payment.payment_id,
-  //       //   ride_id: ride.ride_id,
-  //       // });
-  //     } else {
-  //       console.log(`Notify driver ${ride.driver_id}: confirm payment ${payment.payment_id} for ride ${ride.ride_id}`);
-  //     }
-  //   } catch (err) {
-  //     console.error("Notification failed:", err.message);
-  //   }
-  //   return payment;
-  // }
-
-  // async confirmPayment(payment_id, driver_id) {
-  //   if (!payment_id) throw new AppError("Payment ID is required", 400, "MISSING_PAYMENT_ID");
-  //   if (!driver_id) throw new AppError("Driver ID is required", 400, "MISSING_DRIVER_ID");
-
-  //   let paymentDoc = null;
-  //   if (typeof paymentService.findById === "function") {
-  //     paymentDoc = await paymentService.findById(Number(payment_id));
-  //   } else {
-  //     const paymentRepo = await import("../repositories/mongodb/paymentRepository.js").then((m) => m.default);
-  //     paymentDoc = await paymentRepo.findById(Number(payment_id));
-  //   }
-
-  //   if (!paymentDoc) throw new AppError("Payment not found", 404, "PAYMENT_NOT_FOUND");
-
-  //   const ride = await RideRepository.findById(paymentDoc.ride_id);
-  //   if (!ride) throw new AppError("Associated ride not found", 404, "RIDE_NOT_FOUND");
-
-  //   if (ride.driver_id !== Number(driver_id)) {
-  //     throw new AppError("Driver not authorized to confirm this payment", 403, "UNAUTHORIZED_DRIVER");
-  //   }
-
-  //   if (paymentDoc.status === "success") {
-  //     return paymentDoc;
-  //   }
-
-  //   const updated = await paymentService.confirmPaymentByDriver(Number(payment_id), Number(driver_id));
-  //   return updated;
-  // }
-
-  // async getPendingPaymentsForDriver(driver_id) {
-  //   if (!driver_id) throw new AppError("Driver ID required", 400, "MISSING_DRIVER_ID");
-
-  //   const rides = await RideRepository.getOngoingRidesByDriver(driver_id);
-  //   const pending = [];
-
-  //   for (const ride of rides) {
-  //     const payment = await paymentService.getPaymentByRide(ride.ride_id).catch(() => null);
-  //     if (payment && payment.status === "pending" && ["cash", "upi"].includes(payment.mode)) {
-  //       pending.push({ ride, payment });
-  //     }
-  //   }
-
-  //   return pending;
-  // }
 }
 
 export default new RideService();

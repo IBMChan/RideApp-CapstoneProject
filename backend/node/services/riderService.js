@@ -10,8 +10,7 @@ import * as complaintRepository from "../repositories/mongodb/complaintRepositor
 import * as lostItemRepository from "../repositories/mongodb/lostItemRepository.js";
 import * as ratingRepository from "../repositories/mongodb/ratingRepository.js";
 import * as walletRepository from "../repositories/postgres/walletRepository.js";
-import walletTransactionRepository from "../repositories/postgres/walletTransactionRepository.js";
-import { spawnPythonPayment } from "../config/razorpayConfig.js";
+
 
 import { NotFoundError, ValidationError } from "../utils/appError.js";
 
@@ -107,30 +106,6 @@ class RideService {
       throw new NotFoundError("Ride not found or does not belong to rider.");
     }
     return await lostItemRepository.reportLostItem(riderId, rideId, itemData.description);
-  }
-
-  // --------------------- 6. Wallet (via Python Razorpay) ---------------------
-  async addMoney({ user_id, amount, payment_method, bank_details }) {
-    const paymentResult = await spawnPythonPayment({
-      action: "create_order",
-      amount,
-      currency: "INR",
-      user_id,
-      payment_method,
-      bank_details
-    });
-
-    if (!paymentResult.success) {
-      throw new Error("Payment failed");
-    }
-
-    const wallet = await walletRepository.getWalletByUserId(user_id);
-    const newBalance = parseFloat(wallet.balance) + parseFloat(amount);
-    await walletRepository.updateBalance(wallet.wallet_id, newBalance);
-
-    await walletTransactionRepository.addTransaction(wallet.wallet_id, amount, null);
-
-    return { success: true, newBalance };
   }
 
   // --------------------- 7. Ratings ---------------------

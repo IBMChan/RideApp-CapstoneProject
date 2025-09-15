@@ -39,9 +39,6 @@ router.get("/lost-items/:rideId", riderController.getLostItems);
 // Example: POST /api/rider/lost-items/2/15
 router.post("/lost-items/:riderId/:rideId", riderController.reportLostItem);
 
-// ---------------- 6. Wallet management ----------------
-// Example: POST /api/rider/addMoney
-router.post("/addMoney", riderController.addMoney);
 
 // ---------------- 7. Ratings (Rider → Driver) ----------------
 // Rider gives rating to driver for a ride
