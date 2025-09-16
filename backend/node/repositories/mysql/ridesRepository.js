@@ -143,12 +143,7 @@ class RideRepository {
   async getAll() {
     return await Ride.findAll({ order: [["ride_date", "DESC"]] });
   }
-<<<<<<< HEAD
     async clearSensitiveFields(ride_id) {
-=======
-
-  async clearSensitiveFields(ride_id) {
->>>>>>> 0086879138d6681c9b1c73c2ea0616b3eabee161
     const ride = await this.findById(ride_id);
     if (!ride) return null;
     return await ride.update({ driver_id: null, vehicle_id: null, ride_pin: null });
@@ -160,11 +155,6 @@ class RideRepository {
       where: { rider_id },
       order: [["ride_date", "DESC"]],
     });
-<<<<<<< HEAD
-=======
-  }
-}
->>>>>>> 0086879138d6681c9b1c73c2ea0616b3eabee161
 
 }
 }

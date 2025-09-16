@@ -303,12 +303,14 @@ async sendSOS(riderId, recipientEmail, customMessage) {
     return await ratingRepository.getDriverToRiderRating(rideId, driverId);
   }
 
-  async updateRiderRating(driverId, rideId, { rate, comment }) {
-    if (rate && (rate < 1 || rate > 5)) {
-      throw new ValidationError("Rating must be between 1 and 5.");
-    }
-    return await ratingRepository.updateDriverToRiderRating(rideId, driverId, rate, comment);
+  async updateRiderRating(driverId, riderId, { rate, comment }) {
+  if (!rate || rate < 1 || rate > 5) {
+    throw new ValidationError("Rate must be between 1 and 5");
   }
+
+  const updated = await ratingRepository.updateDriverToRiderRating(driverId, riderId, { rate, comment });
+  return updated;
+}
 
   async deleteRiderRating(rideId, driverId) {
     return await ratingRepository.deleteDriverToRiderRating(rideId, driverId);
