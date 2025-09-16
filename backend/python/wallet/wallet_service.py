@@ -1,4 +1,4 @@
-# backend/python/wallet/wallet_service.py
+# backend/python/wallet/walletService.py
 import os
 import sys
 import json
