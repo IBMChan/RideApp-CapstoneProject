@@ -45,18 +45,4 @@ router.get("/lost-items/:rideId", riderController.getLostItems);
 router.post("/lost-items/:riderId/:rideId", riderController.reportLostItem);
 
 
-// ---------------- 7. Ratings (Rider → Driver) ----------------
-// Rider gives rating to driver for a ride
-router.post("/rate/:rideId", riderController.rateDriver);
-router.get("/rate/:rideId", riderController.getDriverRating);
-router.put("/rate/:rideId", riderController.updateDriverRating);
-router.delete("/rate/:rideId", riderController.deleteDriverRating);
-
-// ---------------- 8. Ratings (Driver → Rider) ----------------
-// Driver gives rating to rider for a ride
-router.post("/rate-rider/:rideId", riderController.rateRider);
-router.get("/rate-rider/:rideId", riderController.getRiderRating);
-router.put("/rate-rider/:rideId", riderController.updateRiderRating);
-router.delete("/rate-rider/:rideId", riderController.deleteRiderRating);
-
 export default router;
