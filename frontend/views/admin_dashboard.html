@@ -1,0 +1,181 @@
+<?php
+// admin_dashboard.php
+session_start();
+// Simple auth check (example)
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+    header("Location: admin_login.php");
+    exit();
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — RideApp</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <!-- Font Awesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* Sidebar Adjustments */
+    .sidebar {
+      width: 240px;
+      background: #D9D9D9;
+      border-right: 1px solid #ccc;
+      overflow-y: hidden; /* No scrollbar */
+    }
+    .sidebar.collapsed {
+      width: 80px;
+    }
+
+    .main-content {
+      margin-left: 240px;
+    }
+    .sidebar.collapsed ~ .main-content {
+      margin-left: 80px;
+    }
+
+    /* Sidebar links */
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      color: #245F73;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+    .sidebar-link:hover,
+    .sidebar-link.active {
+      background: #517891;
+      color: #fff;
+    }
+
+    .sidebar-menu {
+      display: flex;
+      flex-direction: column;
+      height: calc(100% - 60px); /* leave space for logout */
+    }
+
+    /* Sidebar logout at bottom */
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 14px 20px;
+    }
+    .sidebar-footer .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #245F73;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+    }
+    .sidebar-footer .logout-btn:hover {
+      background: #517891;
+    }
+
+    /* Card in Main Body */
+    .welcome-card {
+      max-width: 500px;
+      margin: 60px auto;
+      padding: 40px;
+      text-align: center;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .welcome-card h1 {
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+    }
+    .welcome-card span {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    /* Toggle button */
+    .toggle-btn {
+      top: 15px;
+      right: -18px;
+      width: 32px;
+      height: 32px;
+      font-size: 1rem;
+      line-height: 32px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">RideApp</div>
+    <nav class="header-nav">
+      <a href="#" class="nav-link">Home</a>
+      <a href="admin_logout.php" class="nav-link">Logout</a>
+      <a href="#" class="nav-link">Placeholder</a>
+    </nav>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <button class="toggle-btn" id="toggleBtn"><i class="fas fa-angle-double-left"></i></button>
+    <ul class="sidebar-menu">
+      <li><a href="#" class="sidebar-link active"><i class="fas fa-users"></i><span>View Users</span></a></li>
+      <li><a href="#" class="sidebar-link"><i class="fas fa-car"></i><span>Rides</span></a></li>
+      <li><a href="#" class="sidebar-link"><i class="fas fa-truck"></i><span>Vehicles</span></a></li>
+      <li><a href="#" class="sidebar-link"><i class="fas fa-credit-card"></i><span>Payments</span></a></li>
+      <li><a href="#" class="sidebar-link"><i class="fas fa-wallet"></i><span>Wallet & Transactions</span></a></li>
+      <li><a href="#" class="sidebar-link"><i class="fas fa-ticket-alt"></i><span>Tickets</span></a></li>
+      <li><a href="#" class="sidebar-link"><i class="fas fa-clipboard-list"></i><span>Logs</span></a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <form method="POST" action="admin_logout.php">
+        <button class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </form>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="welcome-card">
+      <span>🙏</span>
+      <h1>Welcome to Admin Management</h1>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div>&copy; 2025 RideApp. All Rights Reserved.</div>
+    <div class="footer-links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Support</a>
+    </div>
+  </footer>
+
+  <!-- Script for toggle + active link -->
+  <script>
+    const toggleBtn = document.getElementById("toggleBtn");
+    const sidebar = document.getElementById("sidebar");
+    toggleBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("collapsed");
+      toggleBtn.innerHTML = sidebar.classList.contains("collapsed") 
+        ? '<i class="fas fa-angle-double-right"></i>' 
+        : '<i class="fas fa-angle-double-left"></i>';
+    });
+
+    // Highlight active sidebar link
+    const links = document.querySelectorAll(".sidebar-link");
+    links.forEach(link => {
+      link.addEventListener("click", () => {
+        links.forEach(l => l.classList.remove("active"));
+        link.classList.add("active");
+      });
+    });
+  </script>
+</body>
+</html>

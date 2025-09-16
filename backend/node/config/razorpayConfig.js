@@ -15,7 +15,7 @@ export default razorpay;
 // Python wrapper (named export)
 export const spawnPythonPayment = (params) => {
   return new Promise((resolve, reject) => {
-    const python = spawn("python", ["./backend/python/wallet/wallet_service.py", JSON.stringify(params)]);
+    const python = spawn("python", ["./backend/python/wallet/walletService.py", JSON.stringify(params)]);
 
     let output = "";
     python.stdout.on("data", (data) => (output += data.toString()));

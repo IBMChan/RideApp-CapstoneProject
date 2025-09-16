@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RideApp — Go anywhere</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">🚗 RideApp</div>
+    <nav class="header-nav">
+      <a class="btn" href="public/login.html">Login</a>
+      <a class="btn outline" href="public/signup.html">Signup</a>
+      <a class="btn" href="public/admin_login.php">Admin</a>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Hero Section -->
+    <section class="hero">
+      <h1>Welcome to RideApp</h1>
+      <p>Book rides faster, safer, and smarter. Connect with verified drivers and enjoy transparent fares.</p>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    &copy; <span id="year"></span> RideApp — All rights reserved
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
