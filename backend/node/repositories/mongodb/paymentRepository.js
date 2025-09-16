@@ -10,8 +10,18 @@ class PaymentRepository {
   async findByRide(ride_id) {
     return Payment.findOne({ ride_id });
   }
+
+  async findByMode(mode) {
+  return Payment.find({ mode }).lean();
+}
+
+  
   async findById(payment_id) {
     return Payment.findOne({ payment_id: payment_id });
+  }
+
+    async findAll() {
+    return Payment.find().lean();
   }
 
   async updateByPaymentId(payment_id, data) {

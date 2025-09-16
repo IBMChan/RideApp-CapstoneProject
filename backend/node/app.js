@@ -14,6 +14,8 @@ import pgSequelize from "./config/postgreConfig.js";  // Raksha & Harshit
 import SavedLocation  from "./entities/savLocModel.js";  // Raksha & Harshit
 import { errorHandler } from "./middlewares/errorHandler.js"; // Raksha & Harshit
 import redisClient from "./config/redisConfig.js";
+import Wallet from "./entities/walletModel.js";
+import WalletTransaction from "./entities/walletTransactionModel.js";
 
 // Routes
 import adminRoutes from "./routes/adminRoutes.js";
@@ -95,6 +97,10 @@ console.log("IST date time:", dateInIST);
     console.log("✅ PostgreSQL Sequelize connection established.");
     await SavedLocation.sync({ alter: true });  // auto-create tables like saved_locations
     console.log("✅ PostgreSQL models synced.");
+    await Wallet.sync({ alter: true });
+    console.log("✅ Wallet table synced (created if not exists).");
+    await WalletTransaction.sync({ alter: true });
+    console.log("✅ WalletTransaction table synced (created if not exists).");
 
     // 5️⃣ Connect Redis
     await redisClient.connect();

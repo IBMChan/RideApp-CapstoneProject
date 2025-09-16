@@ -1,4 +1,4 @@
-import WalletService from "../services/wallet_service.js";
+import WalletService from "../services/walletService.js";
 import UserRepository from "../repositories/mysql/userRepository.js";
 import { successResponse, errorResponse } from "../utils/apiResponse.js";
 import { sendEmailOTP, verifyOTP } from "../services/notificationService.js"; // your provided otp service
