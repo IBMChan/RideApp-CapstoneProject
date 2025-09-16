@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Signup — RideApp</title>
+    <title>Admin — RideApp</title>
     <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
+    <header>
+        <h1>Admin Dashboard</h1>
+    </header>
     <section class="hero">
         <div class="form-container">
-            <h2>Signup</h2>
-            <form>
-                <input type="text" name="name" placeholder="Full Name" required>
+            <h2>Admin Login</h2>
+            <form method="POST" action="admin_login_process.php">
                 <input type="email" name="email" placeholder="Email" required>
                 <input type="password" name="password" placeholder="Password" required>
-                <button class="btn" type="submit">Signup</button>
+                <button class="btn" type="submit">Login</button>
             </form>
         </div>
     </section>
