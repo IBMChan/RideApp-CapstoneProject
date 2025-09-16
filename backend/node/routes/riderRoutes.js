@@ -5,17 +5,18 @@
 
 import express from "express";
 import * as riderController from "../controllers/riderController.js";
+import { authMiddleware } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
 // ---------------- 1. Ride history ----------------
 // Example: GET /api/rider/history/2
-router.get("/history/:riderId", riderController.getRideHistory);
+router.get("/history/:riderId",authMiddleware, riderController.getRideHistory);
 
 // ---------------- 2. Profile management ----------------
 // Example: GET /api/rider/profile/2
-router.get("/profile/:riderId", riderController.getProfile);
-router.put("/profile/:riderId", riderController.updateProfile);
+router.get("/profile/:riderId",authMiddleware, riderController.getProfile);
+router.put("/profile/:riderId",authMiddleware, riderController.updateProfile);
 
 // ---------------- 3. Saved locations ----------------
 // Example: GET  /api/rider/2/locations

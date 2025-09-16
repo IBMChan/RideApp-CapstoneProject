@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../config/postgresCongif.js";
+import pgSequelize from "../config/postgreConfig.js";
 
-const Wallet = sequelize.define("wallet", {
+const Wallet =  pgSequelize.define("wallet", {
   wallet_id: {
     type: DataTypes.BIGINT,
     autoIncrement: true,
