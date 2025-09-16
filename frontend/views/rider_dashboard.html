@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rider Dashboard — RideApp</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <script src="/assets/js/authGuard.js"></script>
+</head>
+<body>
+  <header>
+    <h1>RideApp — Rider Dashboard</h1>
+  </header>
+
+  <main class="dashboard">
+    <div class="card">
+      <h2>Welcome, Rider 🚗</h2>
+      <p>Book your next ride with a single click.</p>
+      <button class="btn">Book a Ride</button>
+      <br>
+      <button class="btn-secondary" id="logoutBtn">Logout</button>
+    </div>
+
+    <div class="card">
+      <h2>Your Ride History</h2>
+      <p>No rides booked yet.</p>
+    </div>
+  </main>
+
+  <footer>
+    &copy; <span id="year"></span> RideApp
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      document.cookie.split(";").forEach(c => {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+      window.location.href = "/index.html";
+    });
+
+    window.onload = async () => {
+      const user = await checkAuth(true);
+      if (user?.role !== "rider") {
+        alert("Access denied! Only riders allowed.");
+        window.location.href = "../login.html";
+      }
+    };
+  </script>
+</body>
+</html>

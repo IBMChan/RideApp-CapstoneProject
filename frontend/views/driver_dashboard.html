@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Driver Dashboard — RideApp</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <header>
+    <h1>RideApp — Driver Dashboard</h1>
+  </header>
+
+  <main class="dashboard">
+    <div class="card">
+      <h2>Welcome, Driver 🚕</h2>
+      <p>Ready to accept new ride requests.</p>
+      <button class="btn">Go Online</button>
+      <br>
+      <button class="btn-secondary" id="logoutBtn">Logout</button>
+    </div>
+
+    <div class="card">
+      <h2>Earnings</h2>
+      <p>You haven’t completed any rides yet.</p>
+    </div>
+  </main>
+
+  <footer>
+    &copy; <span id="year"></span> RideApp
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      document.cookie.split(";").forEach(c => {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+      window.location.href = "../index.html";
+    });
+  </script>
+</body>
+</html>
