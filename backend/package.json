@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "nodemon ./node/app.js",
     "dev": "nodemon ./node/app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "author": "",
   "license": "ISC",
@@ -25,5 +26,9 @@
     "razorpay": "^2.9.6",
     "redis": "^5.8.2",
     "sequelize": "^6.37.7"
+  },
+  "devDependencies": {
+    "cross-env": "^10.0.0",
+    "jest": "^30.1.3"
   }
 }

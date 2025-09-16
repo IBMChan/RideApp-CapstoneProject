@@ -31,7 +31,6 @@ class WalletTransactionRepository {
     return rows;
   }
 
-  // New method to fetch transactions by wallet_id, most recent first
   async findByWallet(wallet_id) {
     const { rows } = await pgSequelize.query(
       "SELECT * FROM wallet_transaction WHERE wallet_id = $1 ORDER BY txn_date DESC",
