@@ -1,4 +1,4 @@
-import pool from "../../config/postgres.js";
+import pool from '../../config/postgresConfig.js';
 
 class WalletTransactionRepository {
   async create({ wallet_id, credit = null, debit = null, status = "pending", razorpay_payment_id = null }) {
@@ -21,6 +21,22 @@ class WalletTransactionRepository {
       [status, razorpay_payment_id, txn_id]
     );
     return rows[0];
+  }
+
+
+  async findAll() {
+  const { rows } = await pool.query('SELECT * FROM wallet_transaction');
+  return rows;
+}
+
+
+  // New method to fetch transactions by wallet_id, most recent first
+  async findByWallet(wallet_id) {
+    const { rows } = await pool.query(
+      "SELECT * FROM wallet_transaction WHERE wallet_id = $1 ORDER BY txn_date DESC",
+      [wallet_id]
+    );
+    return rows;
   }
 }
 

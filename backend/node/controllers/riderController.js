@@ -195,21 +195,7 @@ export const reportLostItem = async (req, res, next) => {
   }
 };
 
-// --------------------- 6. Wallet ---------------------
-export const addMoney = async (req, res) => {
-  try {
-    const { user_id, amount, payment_method, bank_details } = req.body;
-    const result = await riderService.addMoney({
-      user_id: parseInt(user_id, 10),
-      amount,
-      payment_method,
-      bank_details,
-    });
-    res.status(200).json(result);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
+
 
 // --------------------- 7. Ratings (Rider → Driver) ---------------------
 export const rateDriver = async (req, res, next) => {

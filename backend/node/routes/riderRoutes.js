@@ -5,8 +5,10 @@
 
 import express from "express";
 import * as riderController from "../controllers/riderController.js";
+import { authMiddleware } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
+router.use(authMiddleware)
 
 // ---------------- 1. Ride history ----------------
 // Example: GET /api/rider/history/2
@@ -14,7 +16,7 @@ router.get("/history/:riderId", riderController.getRideHistory);
 
 // ---------------- 2. Profile management ----------------
 // Example: GET /api/rider/profile/2
-router.get("/profile/:riderId", riderController.getProfile);
+router.get("/profile/", riderController.getProfile);
 router.put("/profile/:riderId", riderController.updateProfile);
 
 // ---------------- 3. Saved locations ----------------
@@ -42,9 +44,6 @@ router.get("/lost-items/:rideId", riderController.getLostItems);
 // Example: POST /api/rider/lost-items/2/15
 router.post("/lost-items/:riderId/:rideId", riderController.reportLostItem);
 
-// ---------------- 6. Wallet management ----------------
-// Example: POST /api/rider/addMoney
-router.post("/addMoney", riderController.addMoney);
 
 // ---------------- 7. Ratings (Rider → Driver) ----------------
 // Rider gives rating to driver for a ride
