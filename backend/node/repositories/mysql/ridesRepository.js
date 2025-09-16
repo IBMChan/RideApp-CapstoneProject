@@ -155,7 +155,7 @@ class RideRepository {
       where: { rider_id },
       order: [["ride_date", "DESC"]],
     });
+  }
+}
 
-}
-}
 export default new RideRepository();

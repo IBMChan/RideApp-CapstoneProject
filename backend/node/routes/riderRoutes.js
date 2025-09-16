@@ -16,7 +16,7 @@ router.get("/history/:riderId", riderController.getRideHistory);
 
 // ---------------- 2. Profile management ----------------
 // Example: GET /api/rider/profile/2
-router.get("/profile/", riderController.getProfile);
+router.get("/profile/:riderid", riderController.getProfile);
 router.put("/profile/:riderId", riderController.updateProfile);
 
 // ---------------- 3. Saved locations ----------------
