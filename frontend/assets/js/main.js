@@ -1,10 +1,10 @@
 // Put at: frontend/assets/js/main.js
 (() => {
-  const baseApiUrl = window.baseApiUrl || ''; // update if backend is on different origin, e.g. 'http://localhost:3000'
+  const baseApiUrl = window.baseApiUrl || 'http://localhost:3000'; // update if backend is on different origin, e.g. 'http://localhost:3000'
   window.baseApiUrl = baseApiUrl;
 
   // simple header year
-  document.getElementById('year')?.textContent = new Date().getFullYear();
+  document.getElementById('year')?.textContent = (new Date()).getFullYear();
 
   // Contact form
   const contactForm = document.getElementById('contactForm');
@@ -85,7 +85,7 @@
   if (car) {
     let dir = 1;
     setInterval(() => {
-      car.style.transform = `translateX(${(Math.sin(Date.now()/700) * 6)}px)`;
+      car.style.transform = `translateX(${(Math.sin(Date.now() / 700) * 6)}px)`;
     }, 60);
   }
 
