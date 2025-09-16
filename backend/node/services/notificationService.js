@@ -1,3 +1,5 @@
+//laxmikanth: notification(email(smtp) - phone (firebase)) , authentication, updates of rides, invoice download
+//to send notifcation on payment completion
 import nodemailer from "nodemailer";
 // Add this function to notificationService.js
 import fs from 'fs';

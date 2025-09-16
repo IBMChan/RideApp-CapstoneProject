@@ -22,9 +22,16 @@ async create({ rider_id, pickup_loc, drop_loc, distance, fare, vehicle_id = null
     return await Ride.findByPk(ride_id);
   }
 
-  async updateStatus(ride_id, status) {
+  async updateStatus(ride_id, status, pin = null) {
     const ride = await this.findById(ride_id);
     if (!ride) return null;
+
+    if (status === "in_progress") {
+      if (!pin || pin !== ride.ride_pin) {
+        return null;
+      }
+    }
+
     return await ride.update({ status });
   }
 
@@ -43,6 +50,13 @@ async create({ rider_id, pickup_loc, drop_loc, distance, fare, vehicle_id = null
   async cancelRide(ride_id) {
     const ride = await this.findById(ride_id);
     if (!ride) return null;
+    const now = new Date();
+    const expiry = new Date(ride.expiry_time); // assuming your model has expiry_time
+
+    if (now < expiry) {
+      // before expiry → revert back to "requested"
+      return await ride.update({ status: "requested", driver_id: null, vehicle_id: null });
+    }
     return await ride.update({ status: "cancelled" });
   }
 
@@ -67,7 +81,17 @@ async create({ rider_id, pickup_loc, drop_loc, distance, fare, vehicle_id = null
   }
 
   async getPendingRides() {
-    return await Ride.findAll({ where: { status: "requested" } });
+    const rides = await Ride.findAll({
+      where: { status: "requested" },
+      attributes: { exclude: ["ride_pin"] },
+      raw: true, // returns plain objects instead of Sequelize instances
+    });
+
+    return rides.map((ride) => ({
+      ...ride,
+      pickup_loc: ride.pickup_loc ? JSON.parse(ride.pickup_loc) : null,
+      drop_loc: ride.drop_loc ? JSON.parse(ride.drop_loc) : null,
+    }));
   }
 
   async getOngoingRidesByDriver(driver_id) {
@@ -83,6 +107,10 @@ async create({ rider_id, pickup_loc, drop_loc, distance, fare, vehicle_id = null
       order: [["ride_date", "DESC"]],
     });
   }
+  
+  async getRideById(ride_id) {
+    return await Ride.findByPk(ride_id);
+  }
 
   async getRidesByRider(rider_id) {
     return await Ride.findAll({
@@ -90,6 +118,14 @@ async create({ rider_id, pickup_loc, drop_loc, distance, fare, vehicle_id = null
       order: [["ride_date", "DESC"]],
     });
   }
+  async updateRide(ride_id, updates) {
+    return await Ride.update(updates, { where: { ride_id } });
+  }
+
+  async deleteRide(ride_id) {
+    return await Ride.destroy({ where: { ride_id } });
+  }
+
 
   async getRidesByDriver(driver_id) {
     return await Ride.findAll({
@@ -108,6 +144,12 @@ async create({ rider_id, pickup_loc, drop_loc, distance, fare, vehicle_id = null
 
   async getAll() {
     return await Ride.findAll({ order: [["ride_date", "DESC"]] });
+  }
+
+  async clearSensitiveFields(ride_id) {
+    const ride = await this.findById(ride_id);
+    if (!ride) return null;
+    return await ride.update({ driver_id: null, vehicle_id: null, ride_pin: null });
   }
 }
 

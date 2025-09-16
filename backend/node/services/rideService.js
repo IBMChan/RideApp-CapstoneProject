@@ -4,7 +4,7 @@ import redisClient from "../config/redisConfig.js";
 import RideRepository from "../repositories/mysql/ridesRepository.js";
 import AppError from "../utils/appError.js";
 import userRepository from "../repositories/mysql/userRepository.js";
-// import WalletService from "./wallet_service.js";
+// import WalletService from "./walletService.js";
 // import paymentService from "./paymentService.js";
 import { callPython } from "./pythonService.js";
 import path from "path";
@@ -244,11 +244,16 @@ console.log("Ride created with PIN:", ride.ride_pin);
     console.log(riders, driverCount);
     console.log(costMatrix);
 
+    console.log(riders, driverCount);
+    console.log(costMatrix);
+
     return new Promise((resolve, reject) => {
       const matcherPath = path.resolve(
-        "./cpp/matcher" + (process.platform === "win32" ? ".exe" : "")
+        "./cpp/matcher.exe"
+        // "./cpp/matcher" + (process.platform === "win32" ? ".exe" : "")
       );
       const child = spawn(matcherPath);
+      console.log(matcherPath);
       console.log(matcherPath);
 
       let stdout = "";
@@ -258,6 +263,7 @@ console.log("Ride created with PIN:", ride.ride_pin);
       child.stderr.on("data", (data) => (stderr += data.toString()));
 
       child.on("close", (code) => {
+        console.log(code);
         if (code !== 0) {
           console.error("C++ matcher error:",code, stderr);
           return reject(new AppError("Driver matching failed", 500, "MATCHER_ERROR"));

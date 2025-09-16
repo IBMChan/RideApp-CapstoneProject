@@ -45,5 +45,3 @@ Example
     "status": "success",
     "mode": "upi"
 },
-
-

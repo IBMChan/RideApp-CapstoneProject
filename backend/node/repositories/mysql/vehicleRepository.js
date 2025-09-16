@@ -8,6 +8,11 @@ class VehicleRepository {
     return Vehicle.findAll({ where: { driver_id: driverId } });
   }
 
+  async findAll() {
+  return await Vehicle.findAll({ raw: true });
+}
+
+
   async findById(vehicleId) {
     return Vehicle.findByPk(vehicleId);
   }

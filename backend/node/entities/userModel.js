@@ -29,12 +29,13 @@ const User = sequelize.define("User", {
     type: DataTypes.ENUM("yes", "no"),
     defaultValue: "yes",
   },
-}, {
-  indexes: [
-    {
-      unique: true,
-      fields: ["phone"],
-    },
+  },
+  {
+    tableName: "users",       // ✅ explicitly set table name
+    timestamps: true,         // ✅ let Sequelize handle created/updated
+    createdAt: "created_at",  // ✅ map to DB column
+    updatedAt: "updated_at",  // ✅ map to DB column
+    indexes: [
     {
       unique: true,
       fields: ["email"],

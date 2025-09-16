@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../config/postgresCongif.js";
+import pgSequelize from "../config/postgreConfig.js";
 
-const WalletTransaction = sequelize.define("wallet_transaction", {
+const WalletTransaction = pgSequelize.define("wallet_transaction", {
   transc_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
