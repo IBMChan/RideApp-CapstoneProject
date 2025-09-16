@@ -35,13 +35,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // optionally redirect
     // Redirect based on role
+// Redirect based on role (frontend is on Apache localhost:80)
 if (data.user.role === "rider") {
-  window.location.href = "../views/rider_dashboard.html";
+  window.location.href = "/RideApp-CapstoneProject/frontend/views/rider_dashboard.html";
 } else if (data.user.role === "driver") {
-  window.location.href = "../views/driver_dashboard.html";
+  window.location.href = "/RideApp-CapstoneProject/frontend/views/driver_dashboard.html";
 } else {
-  window.location.href = "../index.html";
+  window.location.href = "/RideApp-CapstoneProject/frontend/index.html";
 }
+
 
       } catch (err) {
         console.error("Login error:", err);

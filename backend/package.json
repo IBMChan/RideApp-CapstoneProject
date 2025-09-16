@@ -7,7 +7,6 @@
     "start": "nodemon ./node/app.js",
     "dev": "nodemon ./node/app.js",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand"
-    // "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "author": "",
   "license": "ISC",
@@ -32,7 +31,7 @@
   "devDependencies": {
     "cross-env": "^10.0.0",
     "jest": "^30.1.3",
-      "supertest": "^7.1.3"
+    "supertest": "^7.1.3"
   }
 
 }
