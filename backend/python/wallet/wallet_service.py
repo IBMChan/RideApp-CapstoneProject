@@ -153,7 +153,7 @@ def cmd_withdraw(user_id, amount, dest_details=None):
         conn.close()
 
 def usage():
-    return {"success": False, "message": "usage: python wallet_service.py action [params]"}
+    return {"success": False, "message": "usage: python walletService.py action [params]"}
 
 if __name__ == "__main__":
     # CLI: action and args, output JSON to stdout

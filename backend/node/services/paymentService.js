@@ -85,7 +85,7 @@
 import PaymentRepo from "../repositories/mongodb/paymentRepository.js";
 import WalletRepository from "../repositories/postgres/walletRepository.js"
 import WalletTransactionRepository from "../repositories/postgres/walletTransactionRepository.js"
-import walletService from "./wallet_service.js"; // calls wallet_service.py python script
+import walletService from "./walletService.js"; // calls walletService.py python script
 import razorpay from "../config/razorpayConfig.js";
 import AppError from "../utils/appError.js";
 

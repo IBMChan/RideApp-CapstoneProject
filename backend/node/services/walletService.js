@@ -4,7 +4,7 @@ import { fileURLToPath } from "url";
 import WalletRepository from "../repositories/postgres/walletRepository.js";
 import WalletTransactionRepository from "../repositories/postgres/walletTransactionRepository.js";
 import AppError from "../utils/appError.js";
-import walletServicePython from "./wallet_service.js"; // Python interop
+import walletServicePython from "./walletService.js"; // Python interop
 
 class WalletService {
   constructor() {
@@ -16,7 +16,7 @@ class WalletService {
     if (envPath && path.isAbsolute(envPath) && envPath.endsWith(".py")) {
       this.walletScript = envPath;
     } else {
-      this.walletScript = path.resolve(__dirname, "../../python/wallet/wallet_service.py");
+      this.walletScript = path.resolve(__dirname, "../../python/wallet/walletService.py");
     }
 
     this.rideScript = path.resolve(__dirname, "../../python/rides/rideUtils.py");

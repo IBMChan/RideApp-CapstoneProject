@@ -4,7 +4,7 @@ import redisClient from "../config/redisConfig.js";
 import RideRepository from "../repositories/mysql/ridesRepository.js";
 import AppError from "../utils/appError.js";
 import userRepository from "../repositories/mysql/userRepository.js";
-// import WalletService from "./wallet_service.js";
+// import WalletService from "./walletService.js";
 // import paymentService from "./paymentService.js";
 import { callPython } from "./pythonService.js";
 import path from "path";
