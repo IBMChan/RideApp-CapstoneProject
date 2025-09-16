@@ -4,6 +4,7 @@ process.env.TZ = "Asia/Kolkata";
 import { config as configDotenv } from "dotenv";
 configDotenv();
 
+import cors from "cors";
 import express from "express";
 import cookieParser from "cookie-parser";
 import mysql from "mysql2/promise";
@@ -15,6 +16,7 @@ import { errorHandler } from "./middlewares/errorHandler.js"; // Raksha & Harshi
 import redisClient from "./config/redisConfig.js";
 
 // Routes
+import adminRoutes from "./routes/adminRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import rideRoutes from "./routes/rideRoutes.js";
 import riderRoutes from "./routes/riderRoutes.js";
@@ -25,10 +27,12 @@ import walletRoutes from "./routes/walletRoutes.js";
 
 
 
+
 const app = express();
 const PORT = process.env.PORT;
 
 // ---------- Middlewares ----------
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -45,6 +49,7 @@ app.get("/", (_req, res) => {
 });
 
 // ---------- Routes ----------
+app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/rides", rideRoutes);
 app.use("/api/rider", riderRoutes);
