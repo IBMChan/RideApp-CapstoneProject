@@ -1,5 +1,6 @@
 // app.js - Unified Entry Point
 
+process.env.TZ = "Asia/Kolkata";
 import { config as configDotenv } from "dotenv";
 configDotenv();
 
@@ -21,6 +22,8 @@ import driverRoutes from "./routes/driverRoutes.js";
 // Note: Add paymentRoutes and walletRoutes if they exist and are to be used
 import paymentRoutes from "./routes/paymentRoutes.js";
 import walletRoutes from "./routes/walletRoutes.js";
+
+
 
 const app = express();
 const PORT = process.env.PORT;
@@ -47,10 +50,16 @@ app.use("/api/rides", rideRoutes);
 app.use("/api/rider", riderRoutes);
 app.use("/api/driver", driverRoutes);
 app.use("/api/payment", paymentRoutes);      // Add payment routes
-app.use("/api/wallet", walletRoutes);        // Add wallet routes
+app.use("/api/wallet", walletRoutes);  // Add wallet routes
 
     // Error Raksha & Harshit
 app.use(errorHandler);
+
+const utcMillis = Date.now();
+const dateInIST = new Date(utcMillis).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+
+console.log("IST date time:", dateInIST);
+
 
 // ---------- Server & DB Connections ----------
 (async () => {
@@ -94,6 +103,11 @@ app.use(errorHandler);
     console.error("❌ Unable to connect to the database(s):", error);
     process.exit(1);
   }
+
+  app.use((err, req, res, next) => {
+  console.error("🔥 Error caught:", err); // logs full error
+  res.status(500).json({ error: err.message || "Internal Server Error" });
+});
 })();
 
 export default app;

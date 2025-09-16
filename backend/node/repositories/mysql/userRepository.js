@@ -10,7 +10,7 @@ import { QueryTypes } from "sequelize";
 export const findUserById = async (userId) => {
   const [user] = await mysqlSequelize.query(
     `SELECT user_id, full_name, phone, email, role, license, kyc_type,
-            kyc_document, gender, wallet_balance, total_earnings, status,
+            kyc_document, gender, status,
             is_live_currently, created_at
      FROM users
      WHERE user_id = ?`,
@@ -22,10 +22,7 @@ export const findUserById = async (userId) => {
   return user || null;
 };
 import Vehicle from "../../entities/vehicleModel.js";
-import Ride from "../../entities/rideModel.js";       // Sequelize
-import Payment from "../../entities/paymentModel.js"; // Mongoose
-import Rating from "../../entities/ratingModel.js";   // Mongoose
-
+import Ride from "../../entities/rideModel.js";     
 
 class UserRepository {
   async findById(id) {
@@ -104,43 +101,6 @@ async update(driverId, updates) {
       // order: [["created_at", "DESC"]],
     });
   }
-
-  // ===== Payment History (Mongo/Mongoose) =====
-  async findPaymentsByDriver(driverId) {
-    return Payment.find({ driver_id: driverId })
-      .sort({ created_at: -1 })
-      .lean();
-  }
-
-  // ===== Average Rating for driver (Mongo/Mongoose) =====
-  async findRatingsByDriver(driverId) {
-    return Rating.find({ driver_id: driverId })
-      .sort({ created_at: -1 })
-      .lean();
-  }
-  // Average Rating for a Driver
- async getAverageRatingByDriver(driverId) {
-  const result = await Rating.aggregate([
-    { $match: { driver_id: driverId } },
-    {
-      $group: {
-        _id: "$driver_id",
-        averageRating: { $avg: "$rating" },
-        totalRatings: { $sum: 1 }
-      }
-    }
-  ]);
-
-  if (result.length === 0) {
-    return { averageRating: null, totalRatings: 0 };
-  }
-
-  return {
-    averageRating: parseFloat(result[0].averageRating.toFixed(2)),
-    totalRatings: result[0].totalRatings,
-  };
-}
-
 }
 
 export default new UserRepository();

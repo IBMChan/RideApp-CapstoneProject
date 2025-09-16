@@ -3,6 +3,8 @@
 
 import userRepository from "../repositories/mysql/userRepository.js";
 import vehicleRepository from "../repositories/mysql/vehicleRepository.js";
+import RatingRepository from "../repositories/mongodb/ratingRepository.js";
+import PaymentRepository from "../repositories/mongodb/paymentRepository.js"
 import vehicleService from "./vehicleService.js";
 import walletRepository from "../repositories/postgres/walletRepository.js";
 import walletTransactionRepository from "../repositories/postgres/walletTransactionRepository.js";
@@ -45,15 +47,14 @@ class DriverService {
   }
   // ==== Average Rating =====
   async getAverageRating(driverId) {
-    return await userRepository.getAverageRatingByDriver(driverId);
+    return await RatingRepository.getAverageRatingByDriver(driverId);
   }
   // ===== Payment History =====
   async getPaymentHistory(driverId) {
-    return await userRepository.findPaymentsByDriver(driverId);
+    return await PaymentRepository.findPaymentsByDriver(driverId);
   }
   // Vehicle Management
   async addVehicle(driverId, vehicleData) {
-    console.log("Debug: vehicleData =", vehicleData);
     if (!vehicleData || typeof vehicleData !== "object") {
       throw new Error("Invalid vehicle data");
     }

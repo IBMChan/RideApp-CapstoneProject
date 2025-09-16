@@ -11,8 +11,7 @@ import * as complaintRepository from "../repositories/mongodb/complaintRepositor
 import * as lostItemRepository from "../repositories/mongodb/lostItemRepository.js";
 import * as ratingRepository from "../repositories/mongodb/ratingRepository.js";
 import * as walletRepository from "../repositories/postgres/walletRepository.js";
-import walletTransactionRepository from "../repositories/postgres/walletTransactionRepository.js";
-import { spawnPythonPayment } from "../config/razorpayConfig.js";
+
 
 import { NotFoundError, ValidationError } from "../utils/appError.js";
 

@@ -1,4 +1,4 @@
-// backend/node/config/postgres.js
+
 import pkg from "pg";
 const { Pool } = pkg;
 import dotenv from "dotenv";
