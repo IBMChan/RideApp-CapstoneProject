@@ -3,17 +3,20 @@ import { Op } from "sequelize";
 
 class RideRepository {
   // Create ride (expiry_time auto-set by model hook)
-  async create({ rider_id, pickup_loc, drop_loc, distance, fare, vehicle_id = null }) {
-    return await Ride.create({
-      rider_id,
-      pickup_loc,
-      drop_loc,
-      distance,
-      fare,
-      vehicle_id,
-      status: "requested",
-    });
-  }
+  // Update the create method in ridesRepository.js
+async create({ rider_id, pickup_loc, drop_loc, distance, fare, vehicle_id = null, ride_pin }) {
+  return await Ride.create({
+    rider_id,
+    pickup_loc,
+    drop_loc,
+    distance,
+    fare,
+    vehicle_id,
+    status: "requested",
+    ride_pin
+  });
+} 
+
 
   async findById(ride_id) {
     return await Ride.findByPk(ride_id);

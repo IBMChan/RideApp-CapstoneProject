@@ -19,6 +19,12 @@ class UserRepository {
     return await User.findOne({ where: { email } });
   }
 
+  async findByPhone(phone) {                                     
+  if (!phone) return null;
+  return await User.findOne({ where: { phone } });
+}
+
+
   async findByRole(role) {
     if (!role) return [];
     return await User.findAll({ where: { role } });

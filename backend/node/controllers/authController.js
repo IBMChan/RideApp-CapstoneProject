@@ -52,8 +52,18 @@ export const completeSignup = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const user = await userRepository.findByEmail(email);
+    const { email, phone, password } = req.body;
+    
+    let user = null;
+    // Try to find user by email first
+    if (email) {
+      user = await userRepository.findByEmail(email);
+    } 
+    // If no user found by email or no email provided, try phone
+    if (!user && phone) {
+      user = await userRepository.findByPhone(phone);
+    }
+    
     if (!user) return res.status(401).json({ message: "Invalid credentials" });
     if (!user.emailVerified || !user.phoneVerified)
       return res.status(403).json({ message: "Email or phone not verified" });
@@ -84,6 +94,8 @@ export const login = async (req, res) => {
     res.status(500).json({ message: "Login failed" });
   }
 };
+
+
 
 
 // Stateless JWT logout: client should discard token. For demo, just respond OK.
