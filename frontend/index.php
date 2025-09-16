@@ -1,1 +1,0 @@
-<!-- entry point to the frontend -->

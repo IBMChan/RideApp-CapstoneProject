@@ -14,6 +14,14 @@ class WalletRepository {
     return res.rows[0];
   }
 
+  async updateBalanceByUserId(user_id, newBalance) {
+    const { rows } = await pgSequelize.query(
+      "UPDATE wallet SET balance = $1 WHERE user_id = $2 RETURNING *",
+      [newBalance, user_id]
+    );
+    return rows[0];
+  }
+
   async createForUserWithPin(user_id, pin) {
     const { rows } = await pgSequelize.query(
       "INSERT INTO wallet (user_id, balance, pin) VALUES ($1, $2, $3) RETURNING *",
@@ -30,7 +38,7 @@ class WalletRepository {
     return rows[0];
   }
 
-  static async updatePin(user_id, newPin) {
+  async updatePin(user_id, newPin) {
     const res = await pgSequelize.query(
       "UPDATE wallet SET pin = $1 WHERE user_id = $2 RETURNING *",
       [newPin, user_id]
