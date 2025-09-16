@@ -8,7 +8,7 @@ import * as riderController from "../controllers/riderController.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
-router.use(authMiddleware)
+// router.use(authMiddleware)
 
 // ---------------- 1. Ride history ----------------
 // Example: GET /api/rider/history/2
