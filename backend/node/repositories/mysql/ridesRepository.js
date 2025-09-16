@@ -116,6 +116,7 @@ class RideRepository {
       order: [["ride_date", "DESC"]],
     });
   }
+
   async updateRide(ride_id, updates) {
     return await Ride.update(updates, { where: { ride_id } });
   }
@@ -123,7 +124,6 @@ class RideRepository {
   async deleteRide(ride_id) {
     return await Ride.destroy({ where: { ride_id } });
   }
-
 
   async getRidesByDriver(driver_id) {
     return await Ride.findAll({
@@ -143,11 +143,18 @@ class RideRepository {
   async getAll() {
     return await Ride.findAll({ order: [["ride_date", "DESC"]] });
   }
-
-  async clearSensitiveFields(ride_id) {
+    async clearSensitiveFields(ride_id) {
     const ride = await this.findById(ride_id);
     if (!ride) return null;
     return await ride.update({ driver_id: null, vehicle_id: null, ride_pin: null });
+  }
+
+  // ✅ NEW FUNCTION: get the most recent ride for a rider
+  async getLatestRideByRider(rider_id) {
+    return await Ride.findOne({
+      where: { rider_id },
+      order: [["ride_date", "DESC"]],
+    });
   }
 }
 

@@ -88,19 +88,42 @@ export const deleteSavedLocation = async (req, res, next) => {
 };
 
 // --------------------- 4. Share ride status ---------------------
-export const shareRideStatus = async (req, res, next) => {
+// --------------------- Share Ride Status via Email ---------------------
+export const shareRideStatusEmail = async (req, res, next) => {
   try {
-    const riderId = req.user?.id
-      ? parseInt(req.user.id, 10)
-      : parseInt(req.params.riderId, 10);
+    const riderId = parseInt(req.body.riderId, 10);
     const rideId = parseInt(req.params.rideId, 10);
-    const { phoneNumber } = req.body;
-    await riderService.shareRideStatus(riderId, rideId, phoneNumber);
-    res.json({ message: "Ride status shared successfully" });
+    const { recipientEmail } = req.body;
+
+    if (isNaN(riderId) || isNaN(rideId)) {
+      return res.status(400).json({ error: "Valid riderId and rideId are required." });
+    }
+
+    const result = await riderService.shareRideStatus(riderId, rideId, recipientEmail);
+
+    res.status(200).json(result);
   } catch (err) {
     next(err);
   }
 };
+
+// --------------------- SOS ---------------------
+export const sendSOS = async (req, res, next) => {
+  try {
+    const riderId = parseInt(req.params.riderId, 10);
+    const { recipientEmail, customMessage } = req.body;
+
+    if (!recipientEmail) {
+      return res.status(400).json({ error: "Recipient email is required." });
+    }
+
+    const result = await riderService.sendSOS(riderId, recipientEmail, customMessage);
+    res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
 
 // --------------------- 5. Complaints + Lost items ---------------------
 export const registerComplaint = async (req, res, next) => {
@@ -167,145 +190,6 @@ export const reportLostItem = async (req, res, next) => {
       message: "Lost item reported successfully",
       data: lostItem,
     });
-  } catch (err) {
-    next(err);
-  }
-};
-
-
-
-// --------------------- 7. Ratings (Rider → Driver) ---------------------
-export const rateDriver = async (req, res, next) => {
-  try {
-    const rideId = parseInt(req.params.rideId, 10);
-    const riderId = parseInt(req.body.riderId, 10);
-    const driverId = parseInt(req.body.driverId, 10);
-
-    if (isNaN(riderId) || isNaN(driverId) || isNaN(rideId)) {
-      throw new ValidationError("Valid riderId, driverId and rideId are required.");
-    }
-
-    const { rate, comment } = req.body;
-    const rating = await riderService.rateDriver(riderId, rideId, driverId, rate, comment);
-
-    res.status(201).json({
-      success: true,
-      message: "Rating submitted successfully",
-      data: rating,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const getDriverRating = async (req, res, next) => {
-  try {
-    const rideId = parseInt(req.params.rideId, 10);
-    const riderId = parseInt(req.query.riderId, 10);
-    console.log(`${rideId} ${riderId}`);
-    
-    if (isNaN(riderId) || isNaN(rideId)) {
-      throw new ValidationError("Valid riderId and rideId are required.");
-    }
-    const rating = await riderService.getDriverRating(rideId, riderId);
-    res.json({ success: true, data: rating });
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const updateDriverRating = async (req, res, next) => {
-  try {
-    const rideId = parseInt(req.params.rideId, 10);
-    const riderId = parseInt(req.body.riderId, 10);
-    if (isNaN(riderId) || isNaN(rideId)) {
-      throw new ValidationError("Valid riderId and rideId are required.");
-    }
-    const { rate, comment } = req.body;
-    const rating = await riderService.updateDriverRating(riderId, rideId, { rate, comment });
-    res.json({ success: true, message: "Rating updated successfully", data: rating });
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const deleteDriverRating = async (req, res, next) => {
-  try {
-    const rideId = parseInt(req.params.rideId, 10);
-    const riderId = parseInt(req.body.riderId, 10);
-    if (isNaN(riderId) || isNaN(rideId)) {
-      throw new ValidationError("Valid riderId and rideId are required.");
-    }
-    await riderService.deleteDriverRating(rideId, riderId);
-    res.json({ success: true, message: "Rating deleted successfully" });
-  } catch (err) {
-    next(err);
-  }
-};
-
-// --------------------- 8. Ratings (Driver → Rider) ---------------------
-export const rateRider = async (req, res, next) => {
-  try {
-    const rideId = parseInt(req.params.rideId, 10);
-    const driverId = parseInt(req.body.driverId, 10);
-    const riderId = parseInt(req.body.riderId, 10);
-
-    if (isNaN(driverId) || isNaN(riderId) || isNaN(rideId)) {
-      throw new ValidationError("Valid driverId, riderId and rideId are required.");
-    }
-
-    const { rate, comment } = req.body;
-    const rating = await riderService.rateRider(driverId, rideId, riderId, rate, comment);
-
-    res.status(201).json({
-      success: true,
-      message: "Rating submitted successfully",
-      data: rating,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const getRiderRating = async (req, res, next) => {
-  try {
-    const rideId = parseInt(req.params.rideId, 10);
-    const driverId = parseInt(req.query.driverId, 10);
-    console.log(`${rideId} ${driverId}`);
-    if (isNaN(driverId) || isNaN(rideId)) {
-      throw new ValidationError("Valid driverId and rideId are required.");
-    }
-    const rating = await riderService.getRiderRating(rideId, driverId);
-    res.json({ success: true, data: rating });
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const updateRiderRating = async (req, res, next) => {
-  try {
-    const rideId = parseInt(req.params.rideId, 10);
-    const driverId = parseInt(req.body.driverId, 10);
-    if (isNaN(driverId) || isNaN(rideId)) {
-      throw new ValidationError("Valid driverId and rideId are required.");
-    }
-    const { rate, comment } = req.body;
-    const rating = await riderService.updateRiderRating(driverId, rideId, { rate, comment });
-    res.json({ success: true, message: "Rating updated successfully", data: rating });
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const deleteRiderRating = async (req, res, next) => {
-  try {
-    const rideId = parseInt(req.params.rideId, 10);
-    const driverId = parseInt(req.body.driverId, 10);
-    if (isNaN(driverId) || isNaN(rideId)) {
-      throw new ValidationError("Valid driverId and rideId are required.");
-    }
-    await riderService.deleteRiderRating(rideId, driverId);
-    res.json({ success: true, message: "Rating deleted successfully" });
   } catch (err) {
     next(err);
   }

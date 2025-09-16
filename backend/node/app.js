@@ -129,6 +129,11 @@ app.use(errorHandler);
     console.error("❌ Unable to connect to the database(s):", error);
     process.exit(1);
   }
+
+  app.use((err, req, res, next) => {
+  console.error("🔥 Error caught:", err); // logs full error
+  res.status(500).json({ error: err.message || "Internal Server Error" });
+});
 })();
 
 export default app;
