@@ -1,8 +1,36 @@
 // backend/node/test/services/riderService.test.js
 import { jest } from "@jest/globals";
+// import nodemailer from "nodemailer"; 
 import { NotFoundError, ValidationError } from "../../utils/appError.js";
 
 // ------------------- Mock modules -------------------
+
+// ------------------- Nodemailer Mock -------------------
+const sendMailMock = jest.fn().mockResolvedValue(true);
+const createTransportMock = jest.fn(() => ({ sendMail: sendMailMock }));
+
+jest.unstable_mockModule("nodemailer", () => ({
+  __esModule: true,
+  default: {
+    createTransport: createTransportMock,
+  },
+}));
+
+// Dynamically import nodemailer *after* mock
+const nodemailerModule = await import("nodemailer");
+const nodemailer = nodemailerModule.default;
+jest.unstable_mockModule("../../repositories/mongodb/complaintRepository.js", () => ({
+  __esModule: true,
+  default: {
+    createComplaint: jest.fn(),
+    findComplaintsByRider: jest.fn(),
+  },
+}));
+
+// later, dynamically import it:
+const complaintRepositoryModule = await import("../../repositories/mongodb/complaintRepository.js");
+const complaintRepository = complaintRepositoryModule.default;
+
 jest.unstable_mockModule("../../repositories/mysql/ridesRepository.js", () => ({
   default: {
     getRidesByRider: jest.fn(),
@@ -29,8 +57,9 @@ jest.unstable_mockModule("../../repositories/postgres/saveLocRepository.js", () 
 }));
 
 jest.unstable_mockModule("../../repositories/mongodb/complaintRepository.js", () => ({
-  createComplaint: jest.fn(),
-  findComplaintsByRider: jest.fn(),
+  __esModule: true,
+  registerComplaint: jest.fn(),
+  getComplaints: jest.fn(),
 }));
 
 jest.unstable_mockModule("../../repositories/mongodb/lostItemRepository.js", () => ({
@@ -47,7 +76,6 @@ const userRepository = userRepositoryModule.default;
 const { findUserById } = userRepositoryModule;
 
 const savedLocRepository = await import("../../repositories/postgres/saveLocRepository.js");
-const complaintRepository = await import("../../repositories/mongodb/complaintRepository.js");
 const lostItemRepository = await import("../../repositories/mongodb/lostItemRepository.js");
 
 // Import service AFTER mocks
@@ -185,4 +213,122 @@ describe("RiderService", () => {
         .rejects.toThrow(NotFoundError);
     });
   });
+
+  // ---------------- 4. Share Ride Status ----------------
+describe("shareRideStatus (mocked)", () => {
+  it("should send email when ride exists", async () => {
+    rideRepository.findById.mockResolvedValue({
+      ride_id: 1,
+      driver_id: 123,
+      vehicle_id: null,
+    });
+
+    userRepository.findById.mockResolvedValue({ user_id: 123, name: "Driver A" });
+
+    const result = await riderService.shareRideStatus(
+      1, // riderId
+      1, // rideId
+      "skharshit@hotmail.com"
+    );
+
+    expect(result).toEqual({
+      success: true,
+      message: "Ride status shared via email.",
+    });
+    expect(nodemailer.createTransport).toHaveBeenCalled();
+    expect(nodemailer.createTransport().sendMail).toHaveBeenCalled();
+  });
+
+  it("should throw NotFoundError if ride not found", async () => {
+    rideRepository.findById.mockResolvedValue(null);
+
+    await expect(
+      riderService.shareRideStatus(1, 999, "friend@example.com")
+    ).rejects.toThrow(NotFoundError);
+  });
+});
+
+// ---------------- 5. SOS Alert ----------------
+describe("sendSOS (mocked)", () => {
+  it("should send SOS email when rider and ride exist", async () => {
+    userRepository.findById.mockResolvedValue({ 
+      user_id: 1, 
+      full_name: "Rider One" 
+    });
+
+    rideRepository.getLatestRideByRider.mockResolvedValue({
+      ride_id: 101,
+      pickup_loc: "Station Road",
+      drop_loc: "Airport",
+      driver_id: 123,
+    });
+
+    userRepository.findById.mockResolvedValueOnce({ // for rider
+      user_id: 1, full_name: "Rider One"
+    }).mockResolvedValueOnce({ // for driver
+      user_id: 123, full_name: "Driver A", phone: "9999999999", email: "driver@example.com"
+    });
+
+    const result = await riderService.sendSOS(
+      1, 
+      "emergency@example.com",
+      "Custom SOS message"
+    );
+
+    expect(result).toEqual({
+      success: true,
+      message: "SOS alert sent successfully",
+    });
+    expect(nodemailer.createTransport).toHaveBeenCalled();
+    expect(nodemailer.createTransport().sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: "emergency@example.com",
+        subject: expect.stringContaining("SOS"),
+      })
+    );
+  });
+
+  it("should throw NotFoundError if rider not found", async () => {
+    userRepository.findById.mockResolvedValue(null);
+
+    await expect(
+      riderService.sendSOS(999, "emergency@example.com")
+    ).rejects.toThrow(NotFoundError);
+  });
+
+  it("should still send SOS if no active ride found", async () => {
+    userRepository.findById.mockResolvedValue({
+      user_id: 1,
+      full_name: "Rider One",
+    });
+
+    rideRepository.getLatestRideByRider.mockResolvedValue(null);
+
+    const result = await riderService.sendSOS(
+      1,
+      "emergency@example.com"
+    );
+
+    expect(result).toEqual({
+      success: true,
+      message: "SOS alert sent successfully",
+    });
+    expect(nodemailer.createTransport).toHaveBeenCalled();
+    expect(nodemailer.createTransport().sendMail).toHaveBeenCalled();
+  });
+
+  it("should throw error if nodemailer fails", async () => {
+    userRepository.findById.mockResolvedValue({ user_id: 1, full_name: "Rider One" });
+    rideRepository.getLatestRideByRider.mockResolvedValue(null);
+
+    // Force sendMail to fail
+    nodemailer.createTransport().sendMail.mockRejectedValue(
+      new Error("SMTP failure")
+    );
+
+    await expect(
+      riderService.sendSOS(1, "emergency@example.com")
+    ).rejects.toThrow("Failed to send SOS email");
+  });
+});
 });
