@@ -211,7 +211,7 @@ class RideService {
     return await RideRepository.getPendingRides();
   }
 
-  async acceptRide(ride_id, driver_id) {
+  async acceptRide(ride_id,driver_id) {
     if (!ride_id) throw new AppError("Ride ID is required", 400, "MISSING_RIDE_ID");
     if (!driver_id) throw new AppError("Driver ID is required", 400, "MISSING_DRIVER_ID");
 
