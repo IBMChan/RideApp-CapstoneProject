@@ -21,7 +21,7 @@ export default {
         host: process.env.DB_HOST || "localhost",
         port: process.env.DB_PORT || "3306",
         user: process.env.DB_USER || "root",
-        password: process.env.DB_PASSWORD || "",
+        password: process.env.DB_PASSWORD || "pratik123",
         database: process.env.DB_NAME || "ibm_rideapp_capstone_db",
     },
     mongo: {
@@ -32,7 +32,7 @@ export default {
         host: process.env.PG_HOST || "localhost",
         port: process.env.PG_PORT || "5432",
         user: process.env.PG_USER || "postgres",
-        password: process.env.PG_PASSWORD || "Raksha@2003",
+        password: process.env.PG_PASSWORD || "pratik123",
         database: process.env.PG_DB || "ibm_rideapp_capstone_db",           
     },
     jwt: {

@@ -122,6 +122,23 @@ class RideController {
     }
   }
 
+  async getMatchedRides(req, res, next) {
+    try {
+      const { driverId } = req.params;
+      const rides = await RideService.getMatchedRidesForDriver(driverId);
+
+      return res.status(200).json({
+        success: true,
+        message: "Matched rides fetched successfully",
+        data: rides,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+
   async getOngoingRides(req, res) {
     try {
       const driver_id = req.user?.user_id;

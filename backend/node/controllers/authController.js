@@ -69,15 +69,17 @@ export const login = async (req, res) => {
 
     // ✅ Set token in HTTP-only cookie
     res.cookie("token", token, {
-      httpOnly: true,      // JS cannot access this cookie
-      secure: process.env.NODE_ENV === "production", // only https in prod
-      sameSite: "strict",  // prevents CSRF
-      maxAge: 24 * 60 * 60 * 1000 // 1 day
+      httpOnly: true,
+      secure: false,   // HTTP dev
+      sameSite: "lax", // works with localhost redirects
+      maxAge: 24 * 60 * 60 * 1000,
     });
+
+
 
     return res.json({
       message: "Login successful",
-      user: { user_id: userId, full_name: user.full_name, role: user.role }
+      user: { user_id: userId, full_name: user.full_name, role: user.role, token: token }
     });
   } catch (err) {
     console.error(err);
