@@ -62,15 +62,37 @@ export const addSavedLocation = async (req, res, next) => {
     const riderId = req.user?.id
       ? parseInt(req.user.id, 10)
       : parseInt(req.params.riderId, 10);
+
     if (isNaN(riderId)) {
       throw new ValidationError("Valid riderId is required.");
     }
-    const location = await riderService.addSavedLocation(riderId, req.body);
+
+    const { label, address, latitude, longitude } = req.body;
+
+    if (!label || !address || !latitude || !longitude) {
+      throw new ValidationError("All fields (label, address, latitude, longitude) are required.");
+    }
+
+    const lat = parseFloat(latitude);
+    const lng = parseFloat(longitude);
+
+    if (isNaN(lat) || isNaN(lng)) {
+      throw new ValidationError("Latitude and Longitude must be valid numbers.");
+    }
+
+    const location = await riderService.addSavedLocation(riderId, {
+      label,
+      address,
+      latitude: lat,
+      longitude: lng,
+    });
+
     res.status(201).json(location);
   } catch (err) {
     next(err);
   }
 };
+
 
 export const deleteSavedLocation = async (req, res, next) => {
   try {

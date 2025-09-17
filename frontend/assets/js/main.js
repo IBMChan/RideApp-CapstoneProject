@@ -1,7 +1,8 @@
 const BASE_URL = "http://localhost:3000/api"; // backend port
 
-// ===== LOGIN =====
 document.addEventListener("DOMContentLoaded", () => {
+
+  // ===== LOGIN =====
   const loginForm = document.getElementById("loginForm");
   if (loginForm) {
     loginForm.addEventListener("submit", async (e) => {
@@ -15,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const res = await fetch(`${BASE_URL}/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          credentials: "include", // so cookies from backend are stored
+          credentials: "include",
           body: JSON.stringify({ email, password }),
         });
 
@@ -30,20 +31,17 @@ document.addEventListener("DOMContentLoaded", () => {
         msgBox.textContent = `✅ Welcome, ${data.user.full_name}!`;
         msgBox.style.color = "lightgreen";
 
-        // save user info in localStorage
+        // Save user info
         localStorage.setItem("user", JSON.stringify(data.user));
 
-        // optionally redirect
-        setTimeout(() => {
-          if (data.user.role === "rider") {
-            window.location.href = "../views/rider_dashboard.html";
-          } else if (data.user.role === "driver") {
-            window.location.href = "../views/driver_dashboard.html";
-          } else {
-            window.location.href = "../index.html";
-          }
-        }, 300); // 300ms delay
-
+        // Redirect based on role
+        if (data.user.role === "rider") {
+          window.location.href = "/RideApp-CapstoneProject/frontend/views/rider_dashboard.html";
+        } else if (data.user.role === "driver") {
+          window.location.href = "/RideApp-CapstoneProject/frontend/views/driver_dashboard.html";
+        } else {
+          window.location.href = "/RideApp-CapstoneProject/frontend/index.html";
+        }
 
       } catch (err) {
         console.error("Login error:", err);
@@ -53,13 +51,35 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // small floating car animation / bounce effect on hero
-  const car = document.querySelector('.vehicle-card svg');
-  if (car) {
-    let dir = 1;
-    setInterval(() => {
-      car.style.transform = `translateX(${(Math.sin(Date.now() / 700) * 6)}px)`;
-    }, 60);
-  }
+   // ===== LOGOUT (for rider, driver, admin dashboards) =====
+  const logoutBtn = document.getElementById("logoutBtn");
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${BASE_URL}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        // Clear localStorage and cookies
+        localStorage.removeItem("user");
+        document.cookie.split(";").forEach(function(c) {
+          document.cookie = c
+            .replace(/^ +/, "")
+            .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
+
+        // Redirect to main index page
+        window.location.href = "/RideApp-CapstoneProject/frontend/index.html";
+      } else {
+        console.error("Logout failed");
+      }
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  });
+}
 
 });

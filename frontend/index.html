@@ -1,143 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RideApp — Go anywhere</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <style>
-        :root {
-            --blue-1: #6A89A7;
-            --blue-2: #BDDDFC;
-            --blue-3: #88BDF2;
-            --dark: #384959;
-        }
-
-        /* Full height layout with flex */
-        html, body {
-            height: 100%;
-            margin: 0;
-            background-color: var(--dark);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            font-size: 14px; /* default smaller font size */
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.8rem 1.5rem;
-            background-color: var(--blue-1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            font-size: 0.9rem; /* smaller header font */
-        }
-
-        header nav a {
-            margin-left: 0.8rem;
-            font-size: 0.85rem;
-        }
-
-        main {
-            flex: 1;
-        }
-
-        .hero {
-            padding: 4rem 1rem 2rem;
-            text-align: center;
-        }
-
-        .hero h1 {
-            font-size: 1.8rem;
-            margin-bottom: 0.8rem;
-        }
-
-        .hero p {
-            font-size: 1rem;
-            margin-bottom: 1.5rem;
-            color: var(--blue-2);
-        }
-
-        .btn {
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-weight: 600;
-            text-decoration: none;
-            color: var(--dark);
-            background-color: var(--blue-3);
-            transition: 0.3s;
-            font-size: 0.85rem;
-        }
-
-        .btn:hover {
-            opacity: 0.85;
-        }
-
-        .btn.outline {
-            background: transparent;
-            border: 2px solid var(--blue-3);
-            color: var(--blue-3);
-        }
-
-        footer {
-            background-color: var(--blue-1);
-            padding: 0.8rem 1.5rem;
-            text-align: center;
-            font-size: 0.8rem;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                gap: 0.5rem;
-                font-size: 0.8rem;
-            }
-            .hero h1 {
-                font-size: 1.5rem;
-            }
-            .hero p {
-                font-size: 0.9rem;
-            }
-            .btn {
-                font-size: 0.8rem;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RideApp — Go anywhere</title>
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 
-    <!-- Header -->
-    <header>
-        <div class="brand">
-            <h1>RideApp</h1>
-        </div>
-        <nav>
-            <a class="btn" href="public/login.html">Login</a>
-            <a class="btn outline" href="public/signup.html">Signup</a>
-            <a class="btn" href="public/admin.php">Admin</a>
-        </nav>
-    </header>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">🚗 RideApp</div>
+    <nav class="header-nav">
+      <a class="btn" href="public/login.html">Login</a>
+      <a class="btn " href="public/signup.html">Signup</a>
+      <a class="btn" href="public/admin_login.php">Admin</a>
+    </nav>
+  </header>
 
-    <!-- Main Content -->
-    <main>
-        <!-- Hero Section -->
-        <section class="hero">
-            <h1>Welcome to RideApp</h1>
-            <p>Book rides faster, safer, and smarter. Connect with verified drivers and enjoy transparent fares.</p>
-        </section>
-    </main>
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Hero Section -->
+    <section class="hero">
+      <h1>Welcome to RideApp</h1>
+      <p>Book rides faster, safer, and smarter. Connect with verified drivers and enjoy transparent fares.</p>
+    </section>
+  </main>
 
-    <!-- Footer -->
-    <footer>
-        &copy; <span id="year"></span> RideApp — All rights reserved
-    </footer>
+  <!-- Footer -->
+  <footer class="footer">
+    &copy; <span id="year"></span> RideApp — All rights reserved
+  </footer>
 
-    <script>
-        document.getElementById("year").textContent = new Date().getFullYear();
-    </script>
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>

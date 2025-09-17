@@ -63,41 +63,87 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Driver Dashboard — RideApp</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Driver Dashboard - Vaahan</title>
   <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="../assets/js/main.js" defer></script>
 </head>
 <body>
-  <header>
-    <h1>RideApp — Driver Dashboard</h1>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">Vaahan</div>
+    <nav class="header-nav">
+      <a href="#home" class="nav-link">Home</a>
+      <a id="logoutBtn" class="nav-link">Logout</a>
+      <a href="#profile" class="nav-link">
+        <div class="profile-pic">D</div>
+      </a>
+    </nav>
   </header>
 
-  <main class="dashboard">
-    <div class="card">
-      <h2>Welcome, Driver 🚕</h2>
-      <p>Ready to accept new ride requests.</p>
-      <button class="btn">Go Online</button>
-      <br>
-      <button class="btn-secondary" id="logoutBtn">Logout</button>
-    </div>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <button class="toggle-btn" id="toggleBtn"><i class="fas fa-bars"></i></button>
+    <ul class="sidebar-menu">
+      <li class="sidebar-item">
+        <a href="#" class="sidebar-link">
+          <i class="fas fa-car"></i>
+          <span style="margin-left:10px;">Check Rides</span>
+          <span style="color:red; font-size:1.2rem; margin-left:5px;">•</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="#" class="sidebar-link">
+          <i class="fas fa-wallet"></i>
+          <span style="margin-left:10px;">My Earnings</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="#" class="sidebar-link">
+          <i class="fas fa-credit-card"></i>
+          <span style="margin-left:10px;">Payment & Wallet</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="#" class="sidebar-link">
+          <i class="fas fa-history"></i>
+          <span style="margin-left:10px;">History</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="#" class="sidebar-link">
+          <i class="fas fa-cog"></i>
+          <span style="margin-left:10px;">Settings</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
 
-    <div class="card">
-      <h2>Earnings</h2>
-      <p>You haven’t completed any rides yet.</p>
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="hero">
+      <h1>No Active Rider</h1>
+      <p>Currently, you don’t have any active rides assigned.</p>
     </div>
   </main>
 
-  <footer>
-    &copy; <span id="year"></span> RideApp
+  <!-- Footer -->
+  <footer class="footer">
+    <div>&copy; 2025 Vaahan. All Rights Reserved.</div>
+    <div class="footer-links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Support</a>
+    </div>
   </footer>
 
+  <!-- Sidebar Toggle Script -->
   <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
-
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      document.cookie.split(";").forEach(c => {
-        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-      });
-      window.location.href = "../index.html";
+    const toggleBtn = document.getElementById("toggleBtn");
+    const sidebar = document.getElementById("sidebar");
+    toggleBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("collapsed");
     });
   </script>
 </body>

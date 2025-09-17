@@ -1,180 +1,116 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>RideApp — Rider Dashboard</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vaahan - Rider Dashboard</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <script src="../assets/js/main.js" defer></script>
+<script src="../assets/js/rider.js" defer></script>
 
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-  <!-- Local CSS -->
-  <link rel="stylesheet" href="../assets/css/rider.css" />
-
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Topbar -->
-  <header class="topbar">
-    <div class="container">
-      <div class="brand">
-        <div class="logo">🟦</div>
-        <div>
-          <h1>RideApp</h1>
-          <small>Fast. Reliable. Local.</small>
-        </div>
-      </div>
 
-      <nav class="tabs">
-        <button class="tab-btn active" data-tab="book">Book Ride</button>
-        <button class="tab-btn" data-tab="requests">Requests</button>
-        <button class="tab-btn" data-tab="features">Features</button>
-        <button class="tab-btn" data-tab="profile">Profile</button>
-      </nav>
-
-      <div class="user-actions">
-        <div id="userName">Guest</div>
-        <button id="btnLogout" class="ghost">Logout</button>
-      </div>
-    </div>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">🚗 Vaahan</div>
+    <nav class="header-nav">
+      <a href="#home" class="nav-link">Home</a>
+      <a id="logoutBtn" class="nav-link">Logout</a>
+      <a href="#profile" class="nav-link">
+        <div class="profile-pic">P</div>
+      </a>
+      <button class="sos-btn">SOS</button>
+    </nav>
   </header>
 
-  <!-- Main Grid -->
-  <main class="container grid">
-    <!-- Left column: Map + Book -->
-    <section class="left-col card" id="book">
-      <h2>Create a Ride</h2>
+<aside class="sidebar">
+  <ul class="sidebar-menu">
+    <li class="sidebar-item"><a href="#home" class="sidebar-link">🚖 Book Ride</a></li>
+<li class="sidebar-item">
+  <a href="save_location.html" class="sidebar-link">📍 Save Location</a>
+</li>
 
-      <div class="form-row">
-        <label>Pickup location</label>
-        <input id="pickupInput" placeholder="Start typing address or click on map" autocomplete="off" />
-        <div class="coords small muted" id="pickupCoords"></div>
-      </div>
+    <li class="sidebar-item"><a href="#wallet" class="sidebar-link">💳 Payments & Wallet</a></li>
+    <li class="sidebar-item"><a href="#rides" class="sidebar-link">📝 My Rides</a></li>
+    <li class="sidebar-item"><a href="#ticket" class="sidebar-link">🎫 Raise Ticket</a></li>
+  </ul>
+</aside>
 
-      <div class="form-row">
-        <label>Drop location</label>
-        <input id="dropInput" placeholder="Start typing address or click on map" autocomplete="off" />
-        <div class="coords small muted" id="dropCoords"></div>
-      </div>
-
-      <div class="row">
-        <button id="btnSwap" class="ghost small">Swap</button>
-        <div class="spacer"></div>
-        <button id="btnCreateRide" class="primary">Request Ride</button>
-      </div>
-
-      <hr />
-      <div id="matchResult" class="muted small"></div>
-      <div id="fareDistanceSummary" style="margin-top:8px;"></div>
-      <div id="map" class="map"></div>
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Hero Section (Home) -->
+    <section id="home" class="hero">
+      <h1>Book Your Ride Instantly 🚖</h1>
+      <form class="ride-form">
+        <div class="form-group">
+          <label for="pickup">Pickup Location</label>
+          <input type="text" id="pickup" placeholder="Enter Pickup Location">
+        </div>
+        <div class="form-group">
+          <label for="drop">Drop Location</label>
+          <input type="text" id="drop" placeholder="Enter Drop Location">
+        </div>
+        <button type="submit" class="request-btn">Request Ride</button>
+      </form>
     </section>
 
-    <!-- Right column: Requests / Features / Profile -->
-    <section class="right-col">
-      <!-- Requests -->
-      <div class="card tab" id="requests" style="display:none;">
-        <h3>Ride Requests</h3>
-        <div id="requestsArea" class="list"></div>
-      </div>
-
-      <!-- Features (replaces History) -->
-      <div class="card tab" id="features" style="display:none;">
-        <h3>Rider Features</h3>
-
-        <!-- Saved Locations -->
-        <div class="features-section">
-          <h4>Saved Locations</h4>
-          <form id="formSaveLocation" class="form-grid">
-            <input id="locLabel" placeholder="Label (e.g., Home)" required />
-            <input id="locAddress" placeholder="Address" required />
-            <input id="locLat" placeholder="Latitude" type="number" step="0.000001" required />
-            <input id="locLng" placeholder="Longitude" type="number" step="0.000001" required />
-            <div class="form-actions">
-              <button type="submit" class="primary small">Save Location</button>
-              <button id="btnClearLoc" type="button" class="ghost small">Clear</button>
-            </div>
-          </form>
-          <div id="savedLocations" class="list" style="margin-top:12px"></div>
+    <!-- About Section -->
+    <!-- <section id="about" class="about">
+      <h2>About Us</h2>
+      <div class="services-carousel">
+        <div class="service-card">
+          <h3>Safe & Secure Rides</h3>
+          <p>Trusted drivers with background checks.</p>
         </div>
-
-        <hr />
-
-        <!-- Lost Items -->
-        <div class="features-section">
-          <h4>Report Lost Item</h4>
-          <form id="formLostItem" class="form-grid">
-            <input id="lostRideId" placeholder="Ride ID (required)" type="number" required />
-            <input id="lostDescription" placeholder="Describe lost item" required />
-            <div class="form-actions">
-              <button type="submit" class="primary small">Report Lost Item</button>
-            </div>
-          </form>
-          <div id="lostItemsList" class="list" style="margin-top:12px"></div>
+        <div class="service-card">
+          <h3>Affordable Pricing</h3>
+          <p>Best rides at pocket-friendly prices.</p>
         </div>
-
-        <hr />
-
-        <!-- Share Ride -->
-        <div class="features-section">
-          <h4>Share Ride Status (Email)</h4>
-          <form id="formShareRide" class="form-grid">
-            <input id="shareRideId" placeholder="Ride ID (optional)" type="number" />
-            <input id="shareEmail" placeholder="Recipient Email" type="email" required />
-            <div class="form-actions">
-              <button type="submit" class="primary small">Share Ride</button>
-            </div>
-          </form>
-          <div id="shareResult" class="small muted" style="margin-top:8px"></div>
+        <div class="service-card">
+          <h3>24/7 Availability</h3>
+          <p>Ride anytime, anywhere.</p>
         </div>
-
-        <hr />
-
-        <!-- SOS -->
-        <div class="features-section">
-          <h4>Emergency SOS</h4>
-          <form id="formSOS" class="form-grid">
-            <input id="sosEmail" placeholder="Emergency contact email" type="email" required />
-            <div class="form-actions">
-              <button type="submit" class="primary small danger">Send SOS</button>
-            </div>
-          </form>
-          <div id="sosResult" class="small muted" style="margin-top:8px"></div>
+        <div class="service-card">
+          <h3>Wallet & Rewards</h3>
+          <p>Cashless payments with rewards.</p>
+        </div>
+        <div class="service-card">
+          <h3>Customer Support</h3>
+          <p>24/7 dedicated help for you.</p>
         </div>
       </div>
+    </section> -->
 
-      <!-- Profile -->
-      <div id="profile" class="tab" style="display:none; padding: 20px;">
-        <div id="profileCard" style="max-width:420px;"></div>
-
-        <form id="profileForm" style="display:none; max-width:420px; margin-top:20px;">
-          <label>Name:</label><br>
-          <input type="text" id="profileName" required><br><br>
-          <label>Email:</label><br>
-          <input type="email" id="profileEmail"><br><br>
-          <label>Phone:</label><br>
-          <input type="text" id="profilePhone"><br><br>
-          <div class="row">
-            <div class="spacer"></div>
-            <button type="submit" id="btnSaveProfile" class="primary small">Save</button>
-            <button type="button" id="btnCancelEdit" class="ghost small">Cancel</button>
-          </div>
-        </form>
-
-        <button id="btnEditProfile" style="margin-top:10px;" class="small ghost">Edit Profile</button>
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+      <h2>Contact Us</h2>
+      <div class="contact-content">
+        <div class="contact-item">
+          <h3>Email</h3>
+          <p>support@vaahan.com</p>
+        </div>
+        <div class="contact-item">
+          <h3>Phone</h3>
+          <p>+91 98765 43210</p>
+        </div>
+        <div class="contact-item">
+          <h3>Address</h3>
+          <p>Bengaluru, India</p>
+        </div>
       </div>
     </section>
   </main>
 
+  <!-- Footer -->
   <footer class="footer">
-    <div class="container">© RideApp • Built for demo</div>
+    <p>© 2025 Vaahan. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </div>
   </footer>
 
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <!-- Local JS: ride helper + UI -->
-  <script src="../assets/js/ride.js"></script>
-  <script src="../assets/js/rider.js"></script>
 </body>
 </html>
