@@ -7,6 +7,8 @@ const router = Router();
 // Wallet creation
 router.post("/create", authMiddleware, walletController.createWallet);
 
+router.get("/me", authMiddleware, walletController.getMyWallet);
+
 // Add money
 router.post("/add-money", authMiddleware, walletController.addMoney);
 router.post("/verify-add-money", authMiddleware, walletController.verifyAddMoney);

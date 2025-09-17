@@ -33,8 +33,8 @@ const User = sequelize.define("User", {
   {
     tableName: "users",       // ✅ explicitly set table name
     timestamps: true,         // ✅ let Sequelize handle created/updated
-    created_at: "created_at",  // ✅ map to DB column
-    updated_at: "updated_at",  // ✅ map to DB column
+    createdAt: "created_at",  // ✅ map to DB column
+    updatedAt: "updated_at",  // ✅ map to DB column
     indexes: [
     {
       unique: true,

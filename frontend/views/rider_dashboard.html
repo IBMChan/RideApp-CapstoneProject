@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -6,116 +6,50 @@
   <title>Vaahan - Rider Dashboard</title>
   <link rel="stylesheet" href="../assets/css/style.css">
   <script src="../assets/js/main.js" defer></script>
-<script src="../assets/js/rider.js" defer></script>
-
+  <script src="../assets/js/rider.js" defer></script>
 </head>
 <body>
 
-  <!-- Header -->
-  <header class="header">
-    <div class="logo">🚗 Vaahan</div>
-    <nav class="header-nav">
-      <a href="#home" class="nav-link">Home</a>
-      <a id="logoutBtn" class="nav-link">Logout</a>
-      <a href="#profile" class="nav-link">
-        <div class="profile-pic">P</div>
-      </a>
-      <button class="sos-btn">SOS</button>
-    </nav>
-  </header>
+<header class="header">
+  <div class="logo">🚗 Vaahan</div>
+  <nav class="header-nav">
+    <a href="#home" class="nav-link">Home</a>
+    <a id="logoutBtn" class="nav-link">Logout</a>
+    <a href="#profile" class="nav-link"><div class="profile-pic">P</div></a>
+    <button class="sos-btn">SOS</button>
+  </nav>
+</header>
 
-<!-- Sidebar -->
 <aside class="sidebar">
   <ul class="sidebar-menu">
-    <li class="sidebar-item"><a href="#home" class="sidebar-link">🏠 Home</a></li>
-    <li class="sidebar-item"><a href="./book_ride.html" class="sidebar-link">🚖 Book Ride</a></li>
-    <li class="sidebar-item"><a href="#save-location" class="sidebar-link">📍 Save Location</a></li>
-    <li class="sidebar-item"><a href="#wallet" class="sidebar-link">💳 Manage Wallet</a></li>
-    <li class="sidebar-item"><a href="#rides" class="sidebar-link">📝 My Rides</a></li>
-    <li class="sidebar-item"><a href="#ticket" class="sidebar-link">🎫 Raise Ticket</a></li>
+    <li><a href="#home" class="sidebar-link">🏠 Home</a></li>
+    <li><a href="book_ride.html" class="sidebar-link">🚖 Book Ride</a></li>
+    <li><a href="save_location.html" class="sidebar-link">📍 Save Location</a></li>
+    <li><a href="rider_wallet.html" class="sidebar-link">💳 Manage Wallet</a></li>
+    <li><a href="#rides" class="sidebar-link">📝 My Rides</a></li>
+    <li><a href="#ticket" class="sidebar-link">🎫 Raise Ticket</a></li>
   </ul>
 </aside>
 
-<!-- Main -->
-<main class="main-content" id="mainContent">
+<main class="main-content">
   <h1>Welcome Rider 👋</h1>
+
+  <section id="home" class="hero">
+    <h2>Book Your Ride Instantly 🚖</h2>
+    <form id="rideForm" class="ride-form">
+      <label for="pickup">Pickup Location</label>
+      <input type="text" id="pickup">
+      <label for="drop">Drop Location</label>
+      <input type="text" id="drop">
+      <button type="submit" class="request-btn">Request Ride</button>
+    </form>
+  </section>
+
 </main>
 
-
-  <!-- Main Content -->
-  <main class="main-content">
-    <!-- Hero Section (Home) -->
-    <section id="home" class="hero">
-      <h1>Book Your Ride Instantly 🚖</h1>
-      <form class="ride-form">
-        <div class="form-group">
-          <label for="pickup">Pickup Location</label>
-          <input type="text" id="pickup" placeholder="Enter Pickup Location">
-        </div>
-        <div class="form-group">
-          <label for="drop">Drop Location</label>
-          <input type="text" id="drop" placeholder="Enter Drop Location">
-        </div>
-        <button type="submit" class="request-btn">Request Ride</button>
-      </form>
-    </section>
-
-    <!-- About Section -->
-    <!-- <section id="about" class="about">
-      <h2>About Us</h2>
-      <div class="services-carousel">
-        <div class="service-card">
-          <h3>Safe & Secure Rides</h3>
-          <p>Trusted drivers with background checks.</p>
-        </div>
-        <div class="service-card">
-          <h3>Affordable Pricing</h3>
-          <p>Best rides at pocket-friendly prices.</p>
-        </div>
-        <div class="service-card">
-          <h3>24/7 Availability</h3>
-          <p>Ride anytime, anywhere.</p>
-        </div>
-        <div class="service-card">
-          <h3>Wallet & Rewards</h3>
-          <p>Cashless payments with rewards.</p>
-        </div>
-        <div class="service-card">
-          <h3>Customer Support</h3>
-          <p>24/7 dedicated help for you.</p>
-        </div>
-      </div>
-    </section> -->
-
-    <!-- Contact Section -->
-    <section id="contact" class="contact">
-      <h2>Contact Us</h2>
-      <div class="contact-content">
-        <div class="contact-item">
-          <h3>Email</h3>
-          <p>support@vaahan.com</p>
-        </div>
-        <div class="contact-item">
-          <h3>Phone</h3>
-          <p>+91 98765 43210</p>
-        </div>
-        <div class="contact-item">
-          <h3>Address</h3>
-          <p>Bengaluru, India</p>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <p>© 2025 Vaahan. All rights reserved.</p>
-    <div class="footer-links">
-      <a href="#home">Home</a>
-      <a href="#about">About</a>
-      <a href="#contact">Contact</a>
-    </div>
-  </footer>
+<footer class="footer">
+  <p>© 2025 Vaahan. All rights reserved.</p>
+</footer>
 
 </body>
 </html>

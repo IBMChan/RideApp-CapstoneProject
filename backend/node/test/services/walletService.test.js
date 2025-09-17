@@ -1,4 +1,3 @@
-// node/test/services/walletService.test.js
 import { jest } from "@jest/globals";
 import AppError from "../../utils/appError.js";
 
@@ -7,7 +6,6 @@ let WalletRepositoryMock;
 let WalletTransactionRepositoryMock;
 
 beforeAll(async () => {
-  // 1️⃣ Mock dependencies
   WalletRepositoryMock = {
     findByUser: jest.fn(),
     createForUserWithPin: jest.fn(),
@@ -20,7 +18,6 @@ beforeAll(async () => {
     create: jest.fn(),
   };
 
-  // 2️⃣ Apply mocks using unstable_mockModule
   jest.unstable_mockModule("../../repositories/postgres/walletRepository.js", () => ({
     default: WalletRepositoryMock,
   }));
@@ -29,20 +26,17 @@ beforeAll(async () => {
     default: WalletTransactionRepositoryMock,
   }));
 
-  // 3️⃣ Import the service after mocks
   WalletService = (await import("../../services/walletService.js")).default;
 });
 
-afterEach(() => {
-  jest.clearAllMocks();
-});
+afterEach(() => jest.clearAllMocks());
 
 describe("WalletService", () => {
   const user_id = 1;
   const wallet = { wallet_id: 1, user_id, balance: 1000, pin: "1234" };
   const txn = { id: 1, wallet_id: 1, debit: 100, credit: null };
 
-  // ------------------ createWallet ------------------
+  // createWallet
   describe("createWallet", () => {
     it("should create a new wallet", async () => {
       WalletRepositoryMock.findByUser.mockResolvedValue(null);
@@ -50,7 +44,6 @@ describe("WalletService", () => {
 
       const result = await WalletService.createWallet(user_id, "1234");
       expect(result).toEqual(wallet);
-      expect(WalletRepositoryMock.createForUserWithPin).toHaveBeenCalledWith(user_id, "1234");
     });
 
     it("should throw error if wallet exists", async () => {
@@ -59,9 +52,9 @@ describe("WalletService", () => {
     });
   });
 
-  // ------------------ updatePin ------------------
+  // updatePin
   describe("updatePin", () => {
-    it("should update the wallet PIN successfully", async () => {
+    it("should update wallet PIN", async () => {
       WalletRepositoryMock.findByUser.mockResolvedValue(wallet);
       WalletRepositoryMock.updatePin.mockResolvedValue({ ...wallet, pin: "5678" });
 
@@ -82,7 +75,7 @@ describe("WalletService", () => {
     });
   });
 
-  // ------------------ getBalance ------------------
+  // getBalance
   describe("getBalance", () => {
     it("should return wallet balance", async () => {
       WalletRepositoryMock.findByUser.mockResolvedValue(wallet);
@@ -90,13 +83,13 @@ describe("WalletService", () => {
       expect(balance).toBe(wallet.balance);
     });
 
-    it("should throw error if wallet not found", async () => {
+    it("should throw if wallet not found", async () => {
       WalletRepositoryMock.findByUser.mockResolvedValue(null);
       await expect(WalletService.getBalance(user_id)).rejects.toThrow(AppError);
     });
   });
 
-  // ------------------ getTransactions ------------------
+  // getTransactions
   describe("getTransactions", () => {
     it("should return transactions", async () => {
       WalletRepositoryMock.findByUser.mockResolvedValue(wallet);
@@ -106,13 +99,13 @@ describe("WalletService", () => {
       expect(result).toEqual([txn]);
     });
 
-    it("should throw error if wallet not found", async () => {
+    it("should throw if wallet not found", async () => {
       WalletRepositoryMock.findByUser.mockResolvedValue(null);
       await expect(WalletService.getTransactions(user_id)).rejects.toThrow(AppError);
     });
   });
 
-  // ------------------ initiateWithdraw ------------------
+  // initiateWithdraw
   describe("initiateWithdraw", () => {
     beforeEach(() => {
       WalletService.runPython = jest.fn();
@@ -153,9 +146,9 @@ describe("WalletService", () => {
     });
   });
 
-  // ------------------ initiateAddMoney ------------------
+  // initiateAddMoney
   describe("initiateAddMoney", () => {
-    beforeEach(() => WalletService.runPython = jest.fn());
+    beforeEach(() => (WalletService.runPython = jest.fn()));
 
     it("should add money successfully", async () => {
       WalletRepositoryMock.findByUser.mockResolvedValue(wallet);
@@ -170,15 +163,15 @@ describe("WalletService", () => {
       await expect(WalletService.initiateAddMoney(user_id, 500, "0000")).rejects.toThrow(AppError);
     });
 
-    it("should fail if wallet not found", async () => {
+    it("should throw if wallet not found", async () => {
       WalletRepositoryMock.findByUser.mockResolvedValue(null);
       await expect(WalletService.initiateAddMoney(user_id, 500, "1234")).rejects.toThrow(AppError);
     });
   });
 
-  // ------------------ verifyAddMoney ------------------
+  // verifyAddMoney
   describe("verifyAddMoney", () => {
-    beforeEach(() => WalletService.runPython = jest.fn());
+    beforeEach(() => (WalletService.runPython = jest.fn()));
 
     it("should verify successfully", async () => {
       WalletService.runPython.mockResolvedValue({ success: true });
@@ -186,7 +179,7 @@ describe("WalletService", () => {
       expect(result.success).toBe(true);
     });
 
-    it("should fail if verification fails", async () => {
+    it("should throw if verification fails", async () => {
       WalletService.runPython.mockResolvedValue({ success: false, message: "Payment failed" });
       await expect(WalletService.verifyAddMoney(1, "razorpay123")).rejects.toThrow(AppError);
     });

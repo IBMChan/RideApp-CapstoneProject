@@ -1,5 +1,6 @@
-//laxmikanth: notification(email(smtp) - phone (firebase)) , authentication, updates of rides, invoice download
-//to send notifcation on payment completion
+// laxmikanth: notification(email(smtp) - phone (firebase)) , authentication, updates of rides, invoice download
+// to send notifcation on payment completion
+
 import nodemailer from "nodemailer";
 
 const otpStore = new Map();
@@ -13,7 +14,11 @@ const generateOTP = () => {
 const storeOTP = (identifier, otp) => {
   const expiresAt = Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000; // UTC timestamp in ms
   otpStore.set(identifier, { otp, expiresAt });
-  console.log(`[OTP STORE] OTP for '${identifier}' generated: ${otp}, expires at (UTC): ${new Date(expiresAt).toISOString()}`);
+  console.log(
+    `[OTP STORE] OTP for '${identifier}' generated: ${otp}, expires at (UTC): ${new Date(
+      expiresAt
+    ).toISOString()}`
+  );
   return otp;
 };
 
@@ -23,7 +28,11 @@ setInterval(() => {
   for (const [key, { expiresAt }] of otpStore.entries()) {
     if (now > expiresAt) {
       otpStore.delete(key);
-      console.log(`[OTP CLEANUP] Expired OTP for '${key}' removed at ${new Date(now).toISOString()}`);
+      console.log(
+        `[OTP CLEANUP] Expired OTP for '${key}' removed at ${new Date(
+          now
+        ).toISOString()}`
+      );
     }
   }
 }, 60 * 1000);
@@ -36,7 +45,13 @@ export const verifyOTP = (identifier, otp) => {
   }
 
   const now = Date.now();
-  console.log(`[OTP VERIFY] Verifying OTP for '${identifier}': input = ${otp}, expected = ${storedData.otp}, now = ${new Date(now).toISOString()}, expiresAt = ${new Date(storedData.expiresAt).toISOString()}`);
+  console.log(
+    `[OTP VERIFY] Verifying OTP for '${identifier}': input = ${otp}, expected = ${storedData.otp}, now = ${new Date(
+      now
+    ).toISOString()}, expiresAt = ${new Date(
+      storedData.expiresAt
+    ).toISOString()}`
+  );
 
   if (now > storedData.expiresAt) {
     otpStore.delete(identifier);
@@ -53,7 +68,6 @@ export const verifyOTP = (identifier, otp) => {
   console.log(`[OTP VERIFY] OTP verified successfully for '${identifier}'`);
   return { valid: true, message: "OTP verified successfully" };
 };
-
 
 const formatExpiryIST = (expiresAt) => {
   // Using toLocaleString with Asia/Kolkata timezone explicitly to format display string
@@ -121,3 +135,32 @@ export const sendSmsOTP = async (phone, email) => {
     return { success: false, message: "Failed to send phone OTP via email" };
   }
 };
+
+/**
+ * Send Transaction ID to user via email for payment verification
+ */
+export const sendTxnEmail = async (email, txnId) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST || "smtp.gmail.com",
+      port: process.env.SMTP_PORT || 587,
+      secure: false,
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    });
+
+    await transporter.sendMail({
+      from: `"RideApp" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: "Your RideApp Transaction ID",
+      text: `Your transaction has been initiated. Transaction ID: ${txnId}`,
+      html: `<p>Your transaction has been initiated.</p><p><strong>Transaction ID:</strong> ${txnId}</p>`,
+    });
+
+    console.log(`📧 Transaction ID mail sent to ${email}: ${txnId}`);
+    return { success: true };
+  } catch (err) {
+    console.error("❌ Email send error:", err);
+    return { success: false, message: "Failed to send transaction email" };
+  }
+};
+

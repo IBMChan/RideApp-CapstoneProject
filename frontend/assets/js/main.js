@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:3000/api"; // backend port
+const BASE_URL = "http://localhost:3000/api";
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -16,8 +16,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const res = await fetch(`${BASE_URL}/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          credentials: "include",
           body: JSON.stringify({ email, password }),
+          credentials: "include", // ✅ Important to send cookie
         });
 
         const data = await res.json();
@@ -30,9 +30,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         msgBox.textContent = `✅ Welcome, ${data.user.full_name}!`;
         msgBox.style.color = "lightgreen";
-
-        // Save user info
-        localStorage.setItem("user", JSON.stringify(data.user));
 
         // Redirect based on role
         if (data.user.role === "rider") {
@@ -51,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ===== LOGOUT (for rider, driver, admin dashboards) =====
+  // ===== LOGOUT =====
   const logoutBtn = document.getElementById("logoutBtn");
   if (logoutBtn) {
     logoutBtn.addEventListener("click", async (e) => {
@@ -59,19 +56,10 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const res = await fetch(`${BASE_URL}/auth/logout`, {
           method: "POST",
-          credentials: "include",
+          credentials: "include", // send cookie
         });
 
         if (res.ok) {
-          // Clear localStorage and cookies
-          localStorage.removeItem("user");
-          document.cookie.split(";").forEach(function (c) {
-            document.cookie = c
-              .replace(/^ +/, "")
-              .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-          });
-
-          // Redirect to main index page
           window.location.href = "/RideApp-CapstoneProject/frontend/index.html";
         } else {
           console.error("Logout failed");
@@ -81,5 +69,4 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-
 });
