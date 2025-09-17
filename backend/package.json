@@ -27,6 +27,7 @@
     "razorpay": "^2.9.6",
     "redis": "^5.8.2",
     "sequelize": "^6.37.7",
+    "socket": "^1.1.15",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1"
   },

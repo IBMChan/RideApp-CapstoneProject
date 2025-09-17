@@ -10,7 +10,7 @@ class DriverController {
   // ========== Profile ==========
   async getProfile(req, res, next) {
     try {
-      const driverId = req.user?.user_id;
+      const driverId = req.user?.id;
       const profile = await DriverService.getProfile(driverId);
       return res.json({ success: true, data: profile });
     } catch (err) {
@@ -20,7 +20,7 @@ class DriverController {
 
   async updateProfile(req, res, next) {
     try {
-      const driverId = req.user?.user_id;
+      const driverId = req.user?.id;
       const fieldsToUpdate = req.body;
       const updatedProfile = await DriverService.updateProfile(driverId, fieldsToUpdate);
       return res.json({ success: true, data: updatedProfile });
@@ -32,7 +32,7 @@ class DriverController {
   // ========== Ride History ==========
   async getRideHistory(req, res, next) {
     try {
-      const driverId = req.user?.user_id;
+      const driverId = req.user?.id;
       const rides = await DriverService.getRideHistory(driverId);
       return res.json({ success: true, data: rides });
     } catch (err) {
@@ -43,7 +43,7 @@ class DriverController {
   // ========== Payment History ==========
   async getPaymentHistory(req, res, next) {
     try {
-      const driverId = req.user?.user_id;
+      const driverId = req.user?.id;
       const payments = await DriverService.getPaymentHistory(driverId);
       return res.json({ success: true, data: payments });
     } catch (err) {
@@ -54,7 +54,7 @@ class DriverController {
   // ========== Vehicle Management ==========
   async addVehicle(req, res, next) {
     try {
-      const driverId = req.user?.user_id;
+      const driverId = req.user?.id;
       const vehicle = await DriverService.addVehicle(driverId, req.body);
       return res.status(201).json({ success: true, data: vehicle });
     } catch (err) {
@@ -65,7 +65,7 @@ class DriverController {
   async updateVehicle(req, res, next) {
     try {
       const { vehicleId } = req.params;
-      const driverId = req.user?.user_id;
+      const driverId = req.user?.id;
       const vehicle = await DriverService.updateVehicle(driverId, vehicleId, req.body);
       return res.json({ success: true, data: vehicle });
     } catch (err) {
@@ -76,7 +76,7 @@ class DriverController {
   async deleteVehicle(req, res, next) {
     try {
       const { vehicleId } = req.params;
-      const driverId = req.user?.user_id;
+      const driverId = req.user?.id;
       await DriverService.deleteVehicle(driverId, vehicleId);
       return res.json({ success: true, message: "Vehicle deleted successfully" });
     } catch (err) {
@@ -87,7 +87,7 @@ class DriverController {
   // NEW: List vehicles for driver
   async listVehicles(req, res, next) {
     try {
-      const driverId = req.user?.user_id;
+      const driverId = req.user?.id;
       const vehicles = await DriverService.listVehicles(driverId);
       return res.json({ success: true, data: vehicles });
     } catch (err) {
@@ -98,7 +98,7 @@ class DriverController {
   // NEW: Set vehicle status (active/inactive)
   async setVehicleStatus(req, res, next) {
     try {
-      const driverId = req.user?.user_id;
+      const driverId = req.user?.id;
       const { vehicleId } = req.params;
       const { vehicle_status } = req.body;
       const updated = await DriverService.setVehicleStatus(driverId, vehicleId, vehicle_status);
@@ -111,7 +111,7 @@ class DriverController {
   // ========== Status ==========
   async updateStatus(req, res, next) {
     try {
-      const driverId = req.user?.user_id;
+      const driverId = req.user?.id;
       const { is_live_currently } = req.body; // "yes" or "no"
       const updatedDriver = await DriverService.updateStatus(driverId, is_live_currently);
       return res.json({ success: true, data: updatedDriver });
@@ -123,7 +123,7 @@ class DriverController {
   // ========== Driver Average Rating ==========
   async getAverageRating(req, res, next) {
     try {
-      const driverId = req.user?.user_id;
+      const driverId = req.user?.id;
       const ratingStats = await DriverService.getAverageRating(driverId);
       return res.json({ success: true, data: ratingStats });
     } catch (err) {
@@ -135,7 +135,7 @@ class DriverController {
   async confirmPayment(req, res, next) {
     try {
       const { payment_id } = req.params;
-      const driverId = req.user?.user_id;
+      const driverId = req.user?.id;
       const confirmation = await DriverService.confirmPayment(driverId, payment_id);
       return res.json({ success: true, data: confirmation });
     } catch (err) {

@@ -19,6 +19,11 @@ const router = Router();
 // ======================= Public Routes =======================
 
 // Signup (2-step process)
+// Add this to your route file
+router.get("/me", authMiddleware, (req, res) => {
+  res.json({ success: true, user: req.user });
+});
+
 router.post("/signup/initiate", validateSignup, initiateSignup);
 router.post("/signup/complete", completeSignup);
 
