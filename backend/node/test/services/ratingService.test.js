@@ -17,11 +17,11 @@ jest.unstable_mockModule("../../repositories/mongodb/ratingRepository.js", () =>
 
 // ------------------- Dynamic imports -------------------
 const ratingRepository = await import("../../repositories/mongodb/ratingRepository.js");
-const riderServiceModule = await import("../../services/riderService.js");
-const riderService = riderServiceModule.default;
+const ratingServiceModule = await import("../../services/ratingService.js");
+const ratingService = ratingServiceModule.default;
 
 // ------------------- Tests -------------------
-describe("RatingService (via riderService)", () => {
+describe("RatingService (via ratingService)", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -32,7 +32,7 @@ describe("RatingService (via riderService)", () => {
       const mockRating = { r_to_d: { rate: 5, comment: "Great driver" } };
       ratingRepository.addRiderToDriverRating.mockResolvedValue(mockRating);
 
-      const result = await riderService.rateDriver(1, 10, 2, 5, "Great driver");
+      const result = await ratingService.rateDriver(1, 10, 2, 5, "Great driver");
 
       expect(result).toEqual(mockRating);
       expect(ratingRepository.addRiderToDriverRating)
@@ -40,7 +40,7 @@ describe("RatingService (via riderService)", () => {
     });
 
     it("should throw ValidationError if invalid rate", async () => {
-      await expect(riderService.rateDriver(1, 10, 2, 0, "bad"))
+      await expect(ratingService.rateDriver(1, 10, 2, 0, "bad"))
         .rejects.toThrow(ValidationError);
     });
   });
@@ -50,7 +50,7 @@ describe("RatingService (via riderService)", () => {
       const mockRating = { r_to_d: { rate: 4 } };
       ratingRepository.getRiderToDriverRating.mockResolvedValue(mockRating);
 
-      const result = await riderService.getDriverRating(10, 1);
+      const result = await ratingService.getDriverRating(10, 1);
 
       expect(result).toEqual(mockRating);
       expect(ratingRepository.getRiderToDriverRating)
@@ -63,7 +63,7 @@ describe("RatingService (via riderService)", () => {
       const mockRating = { r_to_d: { rate: 5, comment: "Updated" } };
       ratingRepository.updateRiderToDriverRating.mockResolvedValue(mockRating);
 
-      const result = await riderService.updateDriverRating(1, 10, { rate: 5, comment: "Updated" });
+      const result = await ratingService.updateDriverRating(1, 10, { rate: 5, comment: "Updated" });
 
       expect(result).toEqual(mockRating);
       expect(ratingRepository.updateRiderToDriverRating)
@@ -72,7 +72,7 @@ describe("RatingService (via riderService)", () => {
 
     it("should throw ValidationError if rate invalid", async () => {
       await expect(
-        riderService.updateDriverRating(1, 10, { rate: 10, comment: "bad" })
+        ratingService.updateDriverRating(1, 10, { rate: 10, comment: "bad" })
       ).rejects.toThrow(ValidationError);
     });
   });
@@ -81,7 +81,7 @@ describe("RatingService (via riderService)", () => {
     it("should delete rating", async () => {
       ratingRepository.deleteRiderToDriverRating.mockResolvedValue(true);
 
-      const result = await riderService.deleteDriverRating(10, 1);
+      const result = await ratingService.deleteDriverRating(10, 1);
 
       expect(result).toBe(true);
       expect(ratingRepository.deleteRiderToDriverRating)
@@ -95,7 +95,7 @@ describe("RatingService (via riderService)", () => {
       const mockRating = { d_to_r: { rate: 4, comment: "Good rider" } };
       ratingRepository.addDriverToRiderRating.mockResolvedValue(mockRating);
 
-      const result = await riderService.rateRider(2, 10, 1, 4, "Good rider");
+      const result = await ratingService.rateRider(2, 10, 1, 4, "Good rider");
 
       expect(result).toEqual(mockRating);
       expect(ratingRepository.addDriverToRiderRating)
@@ -103,7 +103,7 @@ describe("RatingService (via riderService)", () => {
     });
 
     it("should throw ValidationError if invalid rate", async () => {
-      await expect(riderService.rateRider(2, 10, 1, 6, "oops"))
+      await expect(ratingService.rateRider(2, 10, 1, 6, "oops"))
         .rejects.toThrow(ValidationError);
     });
   });
@@ -113,7 +113,7 @@ describe("RatingService (via riderService)", () => {
       const mockRating = { d_to_r: { rate: 3 } };
       ratingRepository.getDriverToRiderRating.mockResolvedValue(mockRating);
 
-      const result = await riderService.getRiderRating(10, 2);
+      const result = await ratingService.getRiderRating(10, 2);
 
       expect(result).toEqual(mockRating);
       expect(ratingRepository.getDriverToRiderRating)
@@ -126,7 +126,7 @@ describe("RatingService (via riderService)", () => {
       const mockRating = { d_to_r: { rate: 5, comment: "Updated rider" } };
       ratingRepository.updateDriverToRiderRating.mockResolvedValue(mockRating);
 
-      const result = await riderService.updateRiderRating(2, 10, { rate: 5, comment: "Updated rider" });
+      const result = await ratingService.updateRiderRating(2, 10, { rate: 5, comment: "Updated rider" });
 
       expect(result).toEqual(mockRating);
       expect(ratingRepository.updateDriverToRiderRating)
@@ -135,7 +135,7 @@ describe("RatingService (via riderService)", () => {
 
     it("should throw ValidationError if rate invalid", async () => {
       await expect(
-        riderService.updateRiderRating(2, 10, { rate: 0, comment: "bad" })
+        ratingService.updateRiderRating(2, 10, { rate: 0, comment: "bad" })
       ).rejects.toThrow(ValidationError);
     });
   });
@@ -144,7 +144,7 @@ describe("RatingService (via riderService)", () => {
     it("should delete rating", async () => {
       ratingRepository.deleteDriverToRiderRating.mockResolvedValue(true);
 
-      const result = await riderService.deleteRiderRating(10, 2);
+      const result = await ratingService.deleteRiderRating(10, 2);
 
       expect(result).toBe(true);
       expect(ratingRepository.deleteDriverToRiderRating)

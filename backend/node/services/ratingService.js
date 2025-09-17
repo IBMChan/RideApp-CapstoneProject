@@ -55,5 +55,5 @@ class RatingService {
   async deleteRiderRating(rideId, driverId) {
     return await ratingRepository.deleteDriverToRiderRating(rideId, driverId);
   }
-
 }
+export default new RatingService();

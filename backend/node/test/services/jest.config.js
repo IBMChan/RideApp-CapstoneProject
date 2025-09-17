@@ -1,3 +1,4 @@
+// Raksha & Harshit
 // backend/node/test/jest.config.js
 export default {
   testEnvironment: "node",

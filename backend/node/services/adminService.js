@@ -3,7 +3,7 @@ import paymentRepository from '../repositories/mongodb/paymentRepository.js';
 import walletRepository from '../repositories/postgres/walletRepository.js';
 import walletTransactionRepository from '../repositories/postgres/walletTransactionRepository.js';
 import vehicleRepository from '../repositories/mysql/vehicleRepository.js';
-import ridesRepository from "../repositories/mysql/ridesRepository.js";
+import ridesRepository from '../repositories/mysql/ridesRepository.js';
 
 class AdminService {
   async adminLogin(email, password) {
@@ -51,6 +51,11 @@ class AdminService {
 
   async fetchUsers() {
     return userRepository.findAll();
+  }
+  
+  // Raksha & Harshit
+  async fetchRides() {
+    return ridesRepository.getAllRides();
   }
 
   async fetchPayments() {
