@@ -32,6 +32,8 @@ import riderRoutes from "./routes/riderRoutes.js";
 import driverRoutes from "./routes/driverRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import walletRoutes from "./routes/walletRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
+
 
 
 const app = express();
@@ -73,6 +75,12 @@ app.use("/api/auth", authRoutes);
 
 // Apply AuthGuard for all routes below
 // app.use(authMiddleware);
+
+// Public (no auth needed)
+app.use("/api/auth", authRoutes);
+
+// Admin routes (login + protected admin endpoints)
+app.use("/api/admin", adminRoutes);
 
 // Protected Routes
 app.use("/api/rides", rideRoutes);
