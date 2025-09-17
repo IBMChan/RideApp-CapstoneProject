@@ -1,0 +1,78 @@
+/* ===== History Page Styling ===== */
+.content {
+  margin-left: 260px; /* space for sidebar */
+  padding: 30px;
+  min-height: calc(100vh - 120px);
+  background-color: #f5f7fa;
+}
+
+.content h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  font-weight: bold;
+  color: #1a3d4f;
+}
+
+/* Filters */
+.filters {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+#statusFilter,
+#dateFilter {
+  width: 180px;              /* ✅ same width for both */
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+#statusFilter:focus,
+#dateFilter:focus {
+  border-color: #1a3d4f;
+  outline: none;
+}
+
+/* Table */
+#ridesTable {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+#ridesTable th,
+#ridesTable td {
+  padding: 12px 16px;
+  border: 1px solid #e5e7eb;
+  text-align: left;
+  font-size: 14px;
+}
+
+#ridesTable th {
+  background-color: #1a3d4f;
+  color: #fff;
+  font-weight: 600;
+}
+
+#ridesTable tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+/* Status colors */
+.status-completed {
+  color: green;
+  font-weight: bold;
+}
+
+.status-cancelled {
+  color: red;
+  font-weight: bold;
+}

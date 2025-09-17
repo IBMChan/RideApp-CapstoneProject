@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Driver Dashboard | Vaahan</title>
-  <link rel="stylesheet" href="../assets/css/driver-dashboard.css" />
+  <title>Ride History</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/history.css">
 </head>
 <body>
   <!-- ===== Header ===== -->
@@ -26,7 +27,7 @@
       <li class="sidebar-item">
         <a href="./startRide.html" class="sidebar-link">Start a ride</a>
       </li>
-      <li class="sidebar-item">
+       <li class="sidebar-item">
         <a href="./addVehicle.html" class="sidebar-link ">Add Vehicle</a>
       </li>
       <li class="sidebar-item">
@@ -36,7 +37,7 @@
         <a href="#" class="sidebar-link">Payment & Wallet</a>
       </li>
       <li class="sidebar-item">
-        <a href="./history.html" class="sidebar-link">History</a>
+        <a href="./history.html" class="sidebar-link active">History</a>
       </li>
       <li class="sidebar-item">
         <a href="./setting.html" class="sidebar-link">Settings</a>
@@ -45,12 +46,33 @@
   </aside>
 
   <!-- ===== Main Content ===== -->
-  <main class="main-content">
-    <section class="hero">
-      <h1>No Active Rider</h1>
-      <p>Currently, you don’t have any active rides assigned.</p>
-    </section>
-  </main>
+  <div class="content">
+    <h2>Ride History</h2>
+
+    <div class="filters">
+      <label for="statusFilter">Filter by Status:</label>
+      <select id="statusFilter">
+        <option value="">All</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+
+      <label for="dateFilter">Filter by Date:</label>
+      <input type="date" id="dateFilter" />
+    </div>
+
+    <table id="ridesTable">
+      <thead>
+        <tr>
+          <th>Ride ID</th>
+          <th>Rider</th>
+          <th>Status</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="historyBody"></tbody>
+    </table>
+  </div>
 
   <!-- ===== Footer ===== -->
   <footer class="footer">
@@ -61,6 +83,7 @@
       <a href="#">Support</a>
     </div>
   </footer>
+
+  <script src="../assets/js/history.js"></script>
 </body>
 </html>
-

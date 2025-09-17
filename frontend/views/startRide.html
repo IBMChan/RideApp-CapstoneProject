@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Start Ride</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/startRide.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">Vaahan</div>
+    <nav class="header-nav">
+      <a href="#" class="nav-link">Home</a>
+      <a href="logout.php" class="nav-link">Logout</a>
+      <div class="profile-pic">D</div>
+    </nav>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <ul class="sidebar-menu">
+      <li class="sidebar-item"><a href="./checkRides.html" class="sidebar-link">Check Rides</a></li>
+      <li class="sidebar-item"><a href="./startRide.html" class="sidebar-link active">Start Ride</a></li>
+      <li class="sidebar-item"><a href="./addVehicle.html" class="sidebar-link">Add Vehicle</a></li>
+      <li class="sidebar-item"><a href="#" class="sidebar-link">My Earnings</a></li>
+      <li class="sidebar-item"><a href="#" class="sidebar-link">Payment & Wallet</a></li>
+      <li class="sidebar-item"><a href="./history.html" class="sidebar-link">History</a></li>
+      <li class="sidebar-item"><a href="./setting.html" class="sidebar-link">Settings</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="content">
+    <h1>Start Ride</h1>
+    <form id="startRideForm" class="start-ride-form">
+      <label for="rideId">Ride ID</label>
+      <input type="text" id="rideId" name="rideId" required />
+
+      <label for="ridePin">Ride PIN</label>
+      <input type="password" id="ridePin" name="ridePin" required />
+
+      <button type="submit">Start Ride</button>
+      <p id="responseMessage"></p>
+
+      <!-- 🔘 Complete Ride button (initially hidden) -->
+      <button id="completeRideBtn" style="display: none; margin-top: 10px;">Complete Ride</button>
+    </form>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div>© 2025 Vaahan. All Rights Reserved.</div>
+    <div class="footer-links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Support</a>
+    </div>
+  </footer>
+
+  <script src="../assets/js/startRide.js"></script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+/* ===== Reset ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+
+body {
+  background: #f8f9fb;
+  color: #245F73;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== Header ===== */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: #245F73;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 1000;
+}
+
+.logo {
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-nav .nav-link {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.header-nav .nav-link:hover {
+  color: #D9D9D9;
+}
+
+.profile-pic {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #517891;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+/* ===== Sidebar ===== */
+.sidebar {
+  position: fixed;
+  top: 60px; /* below header */
+  bottom: 40px; /* above footer */
+  left: 0;
+  width: 220px;
+  background: #ffffff;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+  transition: width 0.3s ease;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding-left: 0;
+}
+
+.sidebar-item {
+  margin-bottom: 8px;
+}
+
+.sidebar-link {
+  display: block;
+  padding: 12px 20px;
+  color: #245F73;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background 0.3s, color 0.3s;
+}
+
+.sidebar-link:hover,
+.sidebar-link.active {
+  background: #245F73;
+  color: #fff;
+}
+
+/* ===== Main Content ===== */
+.main-content {
+  margin-top: 60px;   /* push below header */
+  margin-left: 220px; /* push beside sidebar */
+  padding: 20px;
+  min-height: calc(100vh - 100px); /* adjust for header + footer */
+  transition: margin-left 0.3s;
+}
+
+.hero {
+  padding: 40px;
+  background: #f1f4f8;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+  color: #245F73;
+}
+
+.hero p {
+  color: #555;
+  font-size: 1rem;
+}
+
+/* ===== Footer ===== */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: #245F73;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.footer-links a {
+  color: #fff;
+  margin-left: 15px;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}

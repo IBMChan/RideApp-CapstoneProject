@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Driver Dashboard | Vaahan</title>
-  <link rel="stylesheet" href="../assets/css/driver-dashboard.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Check Rides</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/checkRides.css">
 </head>
 <body>
-  <!-- ===== Header ===== -->
+  <!-- Header -->
   <header class="header">
     <div class="logo">Vaahan</div>
     <nav class="header-nav">
@@ -21,7 +22,7 @@
   <aside class="sidebar">
     <ul class="sidebar-menu">
       <li class="sidebar-item">
-        <a href="./checkRides.html" class="sidebar-link">Check Rides</a>
+        <a href="./checkRides.html" class="sidebar-link active">Check Rides</a>
       </li>
       <li class="sidebar-item">
         <a href="./startRide.html" class="sidebar-link">Start a ride</a>
@@ -44,15 +45,27 @@
     </ul>
   </aside>
 
-  <!-- ===== Main Content ===== -->
-  <main class="main-content">
-    <section class="hero">
-      <h1>No Active Rider</h1>
-      <p>Currently, you don’t have any active rides assigned.</p>
-    </section>
-  </main>
+  <!-- Main Content -->
+  <div class="content">
+    <h1>Matched Rides</h1>
+    <table id="ridesTable">
+      <thead>
+        <tr>
+          <th>Ride ID</th>
+          <th>Rider Name</th>
+          <th>Pickup</th>
+          <th>Drop</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="ridesBody">
+        <!-- Dynamic rows will be added by checkRides.js -->
+      </tbody>
+    </table>
+  </div>
 
-  <!-- ===== Footer ===== -->
+  <!-- Footer -->
   <footer class="footer">
     <div>© 2025 Vaahan. All Rights Reserved.</div>
     <div class="footer-links">
@@ -61,6 +74,8 @@
       <a href="#">Support</a>
     </div>
   </footer>
+
+  <!-- JS -->
+  <script src="../assets/js/checkRides.js"></script>
 </body>
 </html>
-

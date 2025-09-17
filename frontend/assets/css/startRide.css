@@ -1,0 +1,48 @@
+/* Style for Start Ride Page */
+
+.start-ride-form {
+  max-width: 400px;
+  margin: 40px auto;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+
+.start-ride-form label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #333;
+}
+
+.start-ride-form input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+.start-ride-form button {
+  background-color: #007bff;
+  color: white;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+  transition: background-color 0.2s ease;
+}
+
+.start-ride-form button:hover {
+  background-color: #0056b3;
+}
+
+#responseMessage {
+  text-align: center;
+  margin-top: 15px;
+  font-weight: bold;
+}

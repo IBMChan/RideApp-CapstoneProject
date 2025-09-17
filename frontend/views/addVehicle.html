@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Vehicle</title>
+  <link rel="stylesheet", href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/addVehicle.css">
+</head>
+<body>
+
+  <!-- ===== Header ===== -->
+  <header class="header">
+    <div class="logo">Vaahan</div>
+    <nav class="header-nav">
+      <a href="#" class="nav-link">Home</a>
+      <a href="logout.php" class="nav-link">Logout</a>
+      <div class="profile-pic">D</div>
+    </nav>
+  </header>
+
+  <!-- ===== Sidebar ===== -->
+  <aside class="sidebar">
+    <ul class="sidebar-menu">
+      <li class="sidebar-item">
+        <a href="./checkRides.html" class="sidebar-link">Check Rides</a>
+      </li>
+      <li class="sidebar-item">
+        <a href="./startRide.html" class="sidebar-link">Start a ride</a>
+      </li>
+      <li class="sidebar-item">
+        <a href="./addVehicle.html" class="sidebar-link active">Add Vehicle</a>
+      </li>
+      <li class="sidebar-item">
+        <a href="#" class="sidebar-link">My Earnings</a>
+      </li>
+      <li class="sidebar-item">
+        <a href="#" class="sidebar-link">Payment & Wallet</a>
+      </li>
+      <li class="sidebar-item">
+        <a href="./history.html" class="sidebar-link">History</a>
+      </li>
+      <li class="sidebar-item">
+        <a href="./setting.html" class="sidebar-link">Settings</a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- ===== Main Content ===== -->
+  <main class="main-content">
+    <div class="container">
+      <h2>Add Vehicle</h2>
+      <form id="vehicleForm">
+        <div class="form-group">
+          <label for="model">Model</label>
+          <input type="text" id="model" name="model" placeholder="e.g., Toyota Corolla" required>
+        </div>
+
+        <div class="form-group">
+          <label for="make">Make</label>
+          <input type="text" id="make" name="make" placeholder="e.g., Toyota" required>
+        </div>
+
+        <div class="form-group">
+          <label for="year">Year</label>
+          <input type="number" id="year" name="year" placeholder="e.g., 2023" required>
+        </div>
+
+        <div class="form-group">
+          <label for="plate_no">Plate Number</label>
+          <input type="text" id="plate_no" name="plate_no" placeholder="e.g., ABC-1234" required>
+        </div>
+
+        <div class="form-group">
+          <label for="color">Color</label>
+          <input type="text" id="color" name="color" placeholder="e.g., White">
+        </div>
+
+        <div class="form-group">
+          <label for="seating">Seating Capacity</label>
+          <select id="seating" name="seating" required>
+            <option value="">Select seating</option>
+            <option value="4">4</option>
+            <option value="7">7</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="category">Category</label>
+          <select id="category" name="category" required>
+            <option value="">Select category</option>
+            <option value="non_ac">Non AC</option>
+            <option value="ac">AC</option>
+            <option value="sedan">Sedan</option>
+            <option value="suv">SUV</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn">Add Vehicle</button>
+      </form>
+
+      <p id="message"></p>
+    </div>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="footer">
+    <div>© 2025 Vaahan. All Rights Reserved.</div>
+    <div class="footer-links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Support</a>
+    </div>
+  </footer>
+
+  <script src="../assets/js/addVehicle.js"></script>
+</body>
+</html>
