@@ -165,4 +165,79 @@ if (saveLocationForm) {
 
 // load on page ready
 loadSavedLocations();
+
+/* ===============================
+   SHARE RIDE STATUS
+================================= */
+const shareRideForm = document.getElementById("shareRideForm");
+const shareRideMsg = document.getElementById("shareRideMsg");
+
+if (shareRideForm) {
+  shareRideForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    const riderId = user?.user_id;
+    if (!riderId) {
+      alert("Rider not logged in. Please login again.");
+      return;
+    }
+
+    const recipientEmail = document.getElementById("shareEmail").value.trim();
+    if (!recipientEmail) {
+      alert("Please enter a valid email");
+      return;
+    }
+
+    try {
+      // 1️⃣ Fetch the latest rides for this rider
+      const rideRes = await fetch(`http://localhost:3000/api/rides/list`, {
+        method: "GET",
+        credentials: "include"
+      });
+
+      if (!rideRes.ok) {
+        shareRideMsg.textContent = "❌ Could not fetch rides.";
+        shareRideMsg.style.color = "red";
+        return;
+      }
+
+      const ride = await rideRes.json();
+      if (!ride?.data?.rides?.length) {
+        shareRideMsg.textContent = "❌ No active ride to share.";
+        shareRideMsg.style.color = "red";
+        return;
+      }
+
+      const rideId = ride.data.rides[0].ride_id; // use first ride (latest/active)
+      console.log("[SHARE] Found ride:", rideId);
+
+      // 2️⃣ Call backend to send email
+      const res = await fetch(
+        `http://localhost:3000/api/rider/share-ride-email/${rideId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ riderId, recipientEmail })
+        }
+      );
+
+      const data = await res.json();
+      if (res.ok) {
+        shareRideMsg.textContent = "✅ Ride status shared successfully!";
+        shareRideMsg.style.color = "green";
+        shareRideForm.reset();
+      } else {
+        shareRideMsg.textContent = `❌ ${data.message || "Failed to share ride"}`;
+        shareRideMsg.style.color = "red";
+      }
+    } catch (err) {
+      console.error("[SHARE] Error:", err);
+      shareRideMsg.textContent = "❌ Something went wrong.";
+      shareRideMsg.style.color = "red";
+    }
+  });
+}
+
 });
