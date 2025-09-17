@@ -80,6 +80,19 @@ app.get("/api/auth/check", (req, res) => {
   });
 });
 
+app.get("/api/geocode", async (req, res) => {
+  try {
+    const q = req.query.q;
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=5&addressdetails=1`, {
+      headers: { "User-Agent": "RideApp/1.0" } // required by Nominatim
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "geocode failed" });
+  }
+});
+
 // Global Error Handler
 app.use(errorHandler);
 
