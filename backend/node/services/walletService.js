@@ -47,26 +47,24 @@ class WalletService {
     return { success: true, message: "Add money initiated", txn };
   }
 
-  async verifyAddMoneyByTxnId(razorpay_payment_id) {
-    if (!razorpay_payment_id) throw new AppError("razorpay_payment_id is required", 400);
+async verifyAddMoneyByTxnId(razorpay_payment_id) {
+  const txn = await WalletTransactionRepository.findByRazorpayId(razorpay_payment_id);
 
-    // Fetch txn by razorpay_payment_id
-    const txn = await WalletTransactionRepository.findByRazorpayId(razorpay_payment_id);
-    if (!txn) return { success: false, message: "Transaction not found" };
-    if (txn.status === "completed") return { success: true, message: "Already verified" };
+  if (!txn) return { success: false, message: "Transaction not found" };
+  if (txn.status === "completed") return { success: true, message: "Already verified" };
 
-    // Update wallet balance
-    const wallet = await WalletRepository.findById(txn.wallet_id);
-    if (!wallet) throw new AppError("Wallet not found", 404);
+  // Update wallet balance
+  const wallet = await WalletRepository.findById(txn.wallet_id);
+  if (!wallet) return { success: false, message: "Wallet not found" };
 
-    const newBalance = parseFloat(wallet.balance) + parseFloat(txn.credit || 0);
-    await WalletRepository.updateBalance(wallet.wallet_id, newBalance);
+  const newBalance = parseFloat(wallet.balance) + parseFloat(txn.credit || 0);
+  await WalletRepository.updateBalance(wallet.wallet_id, newBalance);
 
-    // Update transaction status
-    await WalletTransactionRepository.updateStatus(txn.transc_id, "completed");
+  // Update txn status
+  await WalletTransactionRepository.updateStatus(txn.transc_id, "completed");
 
-    return { success: true, message: "Wallet credited", balance: newBalance };
-  }
+  return { success: true, balance: newBalance };
+}
 
   async initiateWithdraw(user_id, amount, pin) {
     const wallet = await WalletRepository.findByUser(user_id);
