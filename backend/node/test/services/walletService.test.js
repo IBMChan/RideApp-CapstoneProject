@@ -8,14 +8,15 @@ let WalletTransactionRepositoryMock;
 beforeAll(async () => {
   WalletRepositoryMock = {
     findByUser: jest.fn(),
-    createForUserWithPin: jest.fn(),
-    updatePin: jest.fn(),
-    updateBalanceByUserId: jest.fn(),
+    findById: jest.fn(),
+    updateBalance: jest.fn(),
   };
 
   WalletTransactionRepositoryMock = {
     findByWallet: jest.fn(),
     create: jest.fn(),
+    findByRazorpayId: jest.fn(),
+    updateStatus: jest.fn(),
   };
 
   jest.unstable_mockModule("../../repositories/postgres/walletRepository.js", () => ({
@@ -34,44 +35,145 @@ afterEach(() => jest.clearAllMocks());
 describe("WalletService", () => {
   const user_id = 1;
   const wallet = { wallet_id: 1, user_id, balance: 1000, pin: "1234" };
-  const txn = { id: 1, wallet_id: 1, debit: 100, credit: null };
+  const txn = {
+    transc_id: 1,
+    wallet_id: 1,
+    debit: 100,
+    credit: null,
+    status: "pending",
+    razorpay_payment_id: "razorpay123",
+    txn_date: new Date()
+  };
 
-  // createWallet
-  describe("createWallet", () => {
-    it("should create a new wallet", async () => {
-      WalletRepositoryMock.findByUser.mockResolvedValue(null);
-      WalletRepositoryMock.createForUserWithPin.mockResolvedValue(wallet);
+  // getWalletByUserId
+  describe("getWalletByUserId", () => {
+    it("should return wallet if found", async () => {
+      WalletRepositoryMock.findByUser.mockResolvedValue(wallet);
 
-      const result = await WalletService.createWallet(user_id, "1234");
+      const result = await WalletService.getWalletByUserId(user_id);
       expect(result).toEqual(wallet);
     });
 
-    it("should throw error if wallet exists", async () => {
-      WalletRepositoryMock.findByUser.mockResolvedValue(wallet);
-      await expect(WalletService.createWallet(user_id, "1234")).rejects.toThrow(AppError);
+    it("should return null if wallet not found", async () => {
+      WalletRepositoryMock.findByUser.mockResolvedValue(null);
+
+      const result = await WalletService.getWalletByUserId(user_id);
+      expect(result).toBeNull();
     });
   });
 
-  // updatePin
-  describe("updatePin", () => {
-    it("should update wallet PIN", async () => {
+  // initiateAddMoney
+  describe("initiateAddMoney", () => {
+    beforeEach(() => {
+      WalletService.runPython = jest.fn();
+    });
+
+    it("should initiate add money successfully", async () => {
       WalletRepositoryMock.findByUser.mockResolvedValue(wallet);
-      WalletRepositoryMock.updatePin.mockResolvedValue({ ...wallet, pin: "5678" });
+      const pythonResponse = {
+        success: true,
+        txn: { transc_id: 1, amount: 500, status: "pending" },
+      };
+      WalletService.runPython.mockResolvedValue(pythonResponse);
 
-      const result = await WalletService.updatePin(user_id, "5678");
+      const result = await WalletService.initiateAddMoney(user_id, 500, "1234");
       expect(result.success).toBe(true);
-      expect(result.wallet.pin).toBe("5678");
+      expect(result.txn).toEqual(pythonResponse.txn);
     });
 
-    it("should fail if PIN too short", async () => {
-      const result = await WalletService.updatePin(user_id, "12");
-      expect(result.success).toBe(false);
-      expect(result.message).toBe("PIN must be at least 4 digits");
+    it("should throw error for invalid PIN", async () => {
+      WalletRepositoryMock.findByUser.mockResolvedValue(wallet);
+      await expect(WalletService.initiateAddMoney(user_id, 500, "0000")).rejects.toThrow(AppError);
     });
 
-    it("should throw error if wallet not found", async () => {
+    it("should throw error when wallet not found", async () => {
       WalletRepositoryMock.findByUser.mockResolvedValue(null);
-      await expect(WalletService.updatePin(user_id, "5678")).rejects.toThrow(AppError);
+      await expect(WalletService.initiateAddMoney(user_id, 500, "1234")).rejects.toThrow(AppError);
+    });
+
+    it("should throw error if python call fails", async () => {
+      WalletRepositoryMock.findByUser.mockResolvedValue(wallet);
+      WalletService.runPython.mockResolvedValue({ success: false, message: "Failed" });
+
+      await expect(WalletService.initiateAddMoney(user_id, 500, "1234")).rejects.toThrow(AppError);
+    });
+  });
+
+  // verifyAddMoneyByTxnId
+  describe("verifyAddMoneyByTxnId", () => {
+    it("should return failure if transaction not found", async () => {
+      WalletTransactionRepositoryMock.findByRazorpayId.mockResolvedValue(null);
+      const result = await WalletService.verifyAddMoneyByTxnId("razorpay123");
+      expect(result.success).toBe(false);
+      expect(result.message).toBe("Transaction not found");
+    });
+
+    it("should return success if transaction already verified", async () => {
+      const transaction = { ...txn, status: "completed" };
+      WalletTransactionRepositoryMock.findByRazorpayId.mockResolvedValue(transaction);
+      const result = await WalletService.verifyAddMoneyByTxnId("razorpay123");
+      expect(result.success).toBe(true);
+      expect(result.message).toBe("Already verified");
+    });
+
+    it("should update balance and transaction status on verification", async () => {
+      const transaction = { ...txn, status: "pending", credit: 500 };
+      WalletTransactionRepositoryMock.findByRazorpayId.mockResolvedValue(transaction);
+      WalletRepositoryMock.findById.mockResolvedValue(wallet);
+      WalletRepositoryMock.updateBalance.mockResolvedValue({ ...wallet, balance: 1500 });
+      WalletTransactionRepositoryMock.updateStatus.mockResolvedValue(true);
+
+      const result = await WalletService.verifyAddMoneyByTxnId("razorpay123");
+
+      expect(result.success).toBe(true);
+      expect(result.balance).toBe(1500);
+      expect(WalletRepositoryMock.updateBalance).toHaveBeenCalledWith(wallet.wallet_id, 1500);
+      expect(WalletTransactionRepositoryMock.updateStatus).toHaveBeenCalledWith(transaction.transc_id, "completed");
+    });
+
+    it("should return failure if wallet not found during verification", async () => {
+      const transaction = { ...txn, status: "pending", credit: 500 };
+      WalletTransactionRepositoryMock.findByRazorpayId.mockResolvedValue(transaction);
+      WalletRepositoryMock.findById.mockResolvedValue(null);
+
+      const result = await WalletService.verifyAddMoneyByTxnId("razorpay123");
+      expect(result.success).toBe(false);
+      expect(result.message).toBe("Wallet not found");
+    });
+  });
+
+  // initiateWithdraw
+  describe("initiateWithdraw", () => {
+    beforeEach(() => {
+      WalletService.runPython = jest.fn();
+      WalletTransactionRepositoryMock.create.mockResolvedValue({ transc_id: 2 });
+      WalletRepositoryMock.updateBalance.mockResolvedValue({ ...wallet, balance: 800 });
+    });
+
+    it("should withdraw successfully", async () => {
+      WalletRepositoryMock.findByUser.mockResolvedValue(wallet);
+      WalletService.runPython.mockResolvedValue({ success: true });
+
+      const result = await WalletService.initiateWithdraw(user_id, 200, "1234");
+      expect(result.success).toBe(true);
+      expect(result.balance).toBe(800);
+    });
+
+    it("should throw error for invalid PIN", async () => {
+      WalletRepositoryMock.findByUser.mockResolvedValue(wallet);
+      await expect(WalletService.initiateWithdraw(user_id, 200, "0000")).rejects.toThrow(AppError);
+    });
+
+    it("should throw error for insufficient balance", async () => {
+      WalletRepositoryMock.findByUser.mockResolvedValue(wallet);
+      await expect(WalletService.initiateWithdraw(user_id, 2000, "1234")).rejects.toThrow(AppError);
+    });
+
+    it("should throw if python withdraw fails", async () => {
+      WalletRepositoryMock.findByUser.mockResolvedValue(wallet);
+      WalletService.runPython.mockResolvedValue({ success: false, message: "Error" });
+
+      await expect(WalletService.initiateWithdraw(user_id, 200, "1234")).rejects.toThrow(AppError);
     });
   });
 
@@ -96,92 +198,21 @@ describe("WalletService", () => {
       WalletTransactionRepositoryMock.findByWallet.mockResolvedValue([txn]);
 
       const result = await WalletService.getTransactions(user_id);
-      expect(result).toEqual([txn]);
+      expect(result).toEqual([
+        {
+          transc_id: txn.transc_id,
+          txn_date: txn.txn_date,
+          credit: txn.credit,
+          debit: txn.debit,
+          status: txn.status,
+          razorpay_payment_id: txn.razorpay_payment_id,
+        },
+      ]);
     });
 
     it("should throw if wallet not found", async () => {
       WalletRepositoryMock.findByUser.mockResolvedValue(null);
       await expect(WalletService.getTransactions(user_id)).rejects.toThrow(AppError);
-    });
-  });
-
-  // initiateWithdraw
-  describe("initiateWithdraw", () => {
-    beforeEach(() => {
-      WalletService.runPython = jest.fn();
-      WalletRepositoryMock.updateBalanceByUserId.mockResolvedValue({ ...wallet, balance: 800 });
-      WalletTransactionRepositoryMock.create.mockResolvedValue({ id: 1 });
-    });
-
-    it("should withdraw successfully", async () => {
-      WalletRepositoryMock.findByUser.mockResolvedValue(wallet);
-      WalletService.runPython.mockResolvedValue({ success: true });
-
-      const result = await WalletService.initiateWithdraw(user_id, 200, "1234");
-      expect(result.success).toBe(true);
-      expect(result.balance).toBe(800);
-    });
-
-    it("should fail for invalid PIN", async () => {
-      WalletRepositoryMock.findByUser.mockResolvedValue(wallet);
-      const result = await WalletService.initiateWithdraw(user_id, 200, "0000");
-      expect(result.success).toBe(false);
-      expect(result.message).toBe("Invalid wallet PIN");
-    });
-
-    it("should fail for insufficient balance", async () => {
-      WalletRepositoryMock.findByUser.mockResolvedValue(wallet);
-      const result = await WalletService.initiateWithdraw(user_id, 2000, "1234");
-      expect(result.success).toBe(false);
-      expect(result.message).toBe("Insufficient balance");
-    });
-
-    it("should fail if Python withdraw fails", async () => {
-      WalletRepositoryMock.findByUser.mockResolvedValue(wallet);
-      WalletService.runPython.mockResolvedValue({ success: false, message: "Python error" });
-
-      const result = await WalletService.initiateWithdraw(user_id, 200, "1234");
-      expect(result.success).toBe(false);
-      expect(result.message).toBe("Python error");
-    });
-  });
-
-  // initiateAddMoney
-  describe("initiateAddMoney", () => {
-    beforeEach(() => (WalletService.runPython = jest.fn()));
-
-    it("should add money successfully", async () => {
-      WalletRepositoryMock.findByUser.mockResolvedValue(wallet);
-      WalletService.runPython.mockResolvedValue({ success: true, txn_id: 1 });
-
-      const result = await WalletService.initiateAddMoney(user_id, 500, "1234");
-      expect(result.success).toBe(true);
-    });
-
-    it("should fail for invalid PIN", async () => {
-      WalletRepositoryMock.findByUser.mockResolvedValue(wallet);
-      await expect(WalletService.initiateAddMoney(user_id, 500, "0000")).rejects.toThrow(AppError);
-    });
-
-    it("should throw if wallet not found", async () => {
-      WalletRepositoryMock.findByUser.mockResolvedValue(null);
-      await expect(WalletService.initiateAddMoney(user_id, 500, "1234")).rejects.toThrow(AppError);
-    });
-  });
-
-  // verifyAddMoney
-  describe("verifyAddMoney", () => {
-    beforeEach(() => (WalletService.runPython = jest.fn()));
-
-    it("should verify successfully", async () => {
-      WalletService.runPython.mockResolvedValue({ success: true });
-      const result = await WalletService.verifyAddMoney(1, "razorpay123");
-      expect(result.success).toBe(true);
-    });
-
-    it("should throw if verification fails", async () => {
-      WalletService.runPython.mockResolvedValue({ success: false, message: "Payment failed" });
-      await expect(WalletService.verifyAddMoney(1, "razorpay123")).rejects.toThrow(AppError);
     });
   });
 });
