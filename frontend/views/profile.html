@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Driver Profile — RideApp</title>
+
+  <!-- Google font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../assets/css/profile.css" />
+</head>
+<body>
+  <!-- HEADER (consistent with other app pages) -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 24 24" width="28" height="28" aria-hidden><path fill="currentColor" d="M12 2L2 7v7c0 5 4 9 10 9s10-4 10-9V7L12 2z"/></svg>
+        <span class="brand-title">RideApp</span>
+      </div>
+
+      <nav class="nav-links" role="navigation" aria-label="Main navigation">
+        <a class="nav-link" href="/RideApp-CapstoneProject/frontend/index.html">Home</a>
+        <a class="nav-link" href="/RideApp-CapstoneProject/frontend/views/book_ride.html">Book Ride</a>
+        <a class="nav-link" href="/RideApp-CapstoneProject/frontend/views/rider_dashboard.html">Rides</a>
+        <a class="nav-link active" href="#">Profile</a>
+      </nav>
+
+      <div class="header-actions">
+        <button id="btnRefresh" class="icon-btn" title="Refresh profile">⟳</button>
+        <button id="logoutBtn" class="btn-ghost">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN PAGE -->
+  <main class="profile-page">
+    <section class="container">
+      <!-- LEFT PROFILE CARD -->
+      <aside class="profile-card" aria-label="Profile summary">
+        <div class="avatar-row">
+          <div id="avatar" class="avatar">DR</div>
+          <div class="name-role">
+            <h1 id="displayName">Driver Name</h1>
+            <div id="displayRole" class="muted">driver</div>
+          </div>
+        </div>
+
+        <div class="meta-grid">
+          <div class="meta-item">
+            <div class="meta-title">Member Since</div>
+            <div id="memberSince" class="meta-value">—</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-title">Status</div>
+            <div id="acctStatus" class="meta-value">—</div>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button id="editBtn" class="btn btn-primary">Edit Profile</button>
+          <!-- <button id="downloadBtn" class="btn btn-outline">Export</button> -->
+        </div>
+      </aside>
+
+      <!-- RIGHT DETAILS -->
+      <section class="details-card" aria-label="Profile details">
+        <div class="details-header">
+          <div>
+            <h2>Profile Details</h2>
+            <p class="subtitle">Only Full name, Email and Phone are editable.</p>
+          </div>
+        </div>
+
+        <form id="profileForm" class="profile-form" autocomplete="off" novalidate>
+          <div class="form-grid">
+            <div class="field">
+              <label for="full_name">Full name</label>
+              <input id="full_name" name="full_name" type="text" disabled />
+            </div>
+
+            <div class="field">
+              <label for="phone">Phone</label>
+              <input id="phone" name="phone" type="tel" inputmode="numeric" disabled />
+            </div>
+
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" disabled />
+            </div>
+
+            <!-- optional visible read-only fields -->
+            <div class="field">
+              <label for="role">Role</label>
+              <input id="role" name="role" type="text" disabled />
+            </div>
+
+            <div class="field">
+              <label for="license">License</label>
+              <input id="license" name="license" type="text" disabled />
+            </div>
+
+            <div class="field">
+              <label for="gender">Gender</label>
+              <input id="gender" name="gender" type="text" disabled />
+            </div>
+
+            <div class="field" style="grid-column: 1 / -1;">
+              <label for="kyc_type">KYC type</label>
+              <input id="kyc_type" name="kyc_type" type="text" disabled />
+            </div>
+
+            <div class="field" style="grid-column: 1 / -1;">
+              <label for="kyc_document">KYC document (preview)</label>
+              <textarea id="kyc_document" name="kyc_document" rows="2" disabled></textarea>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button id="saveBtn" type="submit" class="btn btn-success" disabled>Save Changes</button>
+            <button id="cancelBtn" type="button" class="btn btn-secondary" disabled>Cancel</button>
+          </div>
+
+          <div id="formStatus" class="form-status" aria-live="polite"></div>
+        </form>
+
+        <hr class="divider" />
+
+        <div class="all-fields">
+          <h3>All fields</h3>
+          <!-- <p class="small-muted">Showing all non-sensitive fields returned by the API.</p> -->
+          <div id="fieldsList" class="fields-list" aria-live="polite"></div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="../assets/js/profile.js"></script>
+</body>
+</html>

@@ -8,7 +8,7 @@ async function checkAuth() {
 
     if (!res.ok) {
       // Not logged in -> redirect to login page
-      window.location.href = "/public/login.html";
+      window.location.href = "/RideApp-CapstoneProject/frontend/index.html";
       return;
     }
 
@@ -16,7 +16,7 @@ async function checkAuth() {
     console.log("User verified:", data.user);
   } catch (err) {
     console.error("Auth check failed:", err);
-    window.location.href = "/public/login.html";
+    window.location.href = "/RideApp-CapstoneProject/frontend/index.html";
   }
 }
 

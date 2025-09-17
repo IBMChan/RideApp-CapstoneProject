@@ -29,11 +29,11 @@ export const authMiddleware = (req, res, next) => {
 
     // Handle both "id" and "user_id" just in case
     req.user = {
-      id: decoded.id || decoded.user_id,
+      user_id: decoded.id || decoded.user_id,
       role: decoded.role,
     };
 
-    if (!req.user.id) {
+    if (!req.user.user_id) {
       return res.status(400).json({ success: false, message: "User ID missing in token" });
     }
 

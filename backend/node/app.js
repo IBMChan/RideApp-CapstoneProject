@@ -21,7 +21,7 @@ import WalletTransaction from "./entities/walletTransactionModel.js";
 
 // Middlewares
 import { errorHandler } from "./middlewares/errorHandler.js";
-// import { authMiddleware } from "./middlewares/authMiddleware.js";
+import { authMiddleware } from "./middlewares/authMiddleware.js";
 
 import { initSocket } from "./utils/socket.js";
 
