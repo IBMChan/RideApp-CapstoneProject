@@ -6,13 +6,11 @@ const rowsPerPage = 10;
 
 document.addEventListener("DOMContentLoaded", async () => {
   await getUser();
-  await fetchLocations();
-  setupFormToggle();
-  setupAddLocationForm();
+  setupSidebarNavigation();
   setupLogout();
 });
 
-// Get logged-in rider from cookie
+// ✅ Get logged-in rider from cookie
 async function getUser() {
   try {
     const res = await fetch("http://localhost:3000/api/auth/check", {
@@ -28,6 +26,39 @@ async function getUser() {
   }
 }
 
+/* =============================
+   SPA SIDEBAR NAVIGATION
+============================= */
+function setupSidebarNavigation() {
+  const mainContent = document.getElementById("mainContent");
+
+  document.querySelectorAll(".sidebar-link").forEach(link => {
+    link.addEventListener("click", async (e) => {
+      e.preventDefault();
+      const page = e.target.getAttribute("href").replace("#", "");
+
+      try {
+        const res = await fetch(`pages/${page}.html`);
+        const html = await res.text();
+        mainContent.innerHTML = html;
+
+        // Reinitialize scripts depending on page
+        if (page === "save_location") {
+          await fetchLocations();
+          setupFormToggle();
+          setupAddLocationForm();
+        }
+      } catch (err) {
+        console.error(err);
+        mainContent.innerHTML = "<p>⚠️ Page not found</p>";
+      }
+    });
+  });
+}
+
+/* =============================
+   SAVE LOCATION FUNCTIONS
+============================= */
 // Fetch saved locations
 async function fetchLocations() {
   try {
@@ -119,6 +150,8 @@ function setupFormToggle() {
   const form = document.getElementById("addLocationForm");
   const cancelBtn = document.getElementById("cancelAdd");
 
+  if (!addBtn || !form) return;
+
   addBtn.addEventListener("click", () => form.style.display = "block");
   cancelBtn.addEventListener("click", () => form.style.display = "none");
 }
@@ -127,6 +160,8 @@ function setupFormToggle() {
 function setupAddLocationForm() {
   const form = document.getElementById("addLocationForm");
   const saveBtn = document.getElementById("saveLocationBtn");
+
+  if (!form) return;
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -166,7 +201,9 @@ function setupAddLocationForm() {
   });
 }
 
-// Logout
+/* =============================
+   LOGOUT
+============================= */
 function setupLogout() {
   document.getElementById("logoutBtn").addEventListener("click", () => {
     fetch("http://localhost:3000/api/auth/logout", {
