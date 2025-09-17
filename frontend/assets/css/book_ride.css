@@ -1,0 +1,119 @@
+/* --- Layout --- */
+.layout {
+  display: flex;
+  height: calc(100vh - 60px);
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  padding: 20px;
+  gap: 20px;
+  /* overflow: hidden; */
+}
+
+/* --- Ride Form --- */
+#book {
+  flex: 1;
+  max-width: 400px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+#book h2 {
+  margin-bottom: 10px;
+  color: #333;
+}
+
+#book input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#book .row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#book .primary {
+  background: #2d89ef;
+  border: none;
+  color: #fff;
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+#book .primary:hover {
+  background: #1b5fbb;
+}
+
+#book .ghost {
+  background: transparent;
+  border: 1px solid #bbb;
+  color: #444;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#book .ghost:hover {
+  border-color: #333;
+}
+
+/* ride info */
+.ride-info-area {
+  margin-top: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  background: #fafafa;
+  border: 1px solid #f1f1f1;
+}
+
+/* saved locations list */
+.saved-locations {
+  margin-top: 10px;
+  max-height: 220px; /* scrollable */
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 6px;
+}
+
+/* small item card */
+.saved-locations .item {
+  padding: 8px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #eee;
+}
+
+/* --- Map --- */
+#map {
+  flex: 2;
+  height: 100%;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* --- Responsive --- */
+@media (max-width: 900px) {
+  .main-content {
+    flex-direction: column;
+  }
+
+  #map {
+    height: 300px;
+  }
+}

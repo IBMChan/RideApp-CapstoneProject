@@ -51,35 +51,35 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-   // ===== LOGOUT (for rider, driver, admin dashboards) =====
+  // ===== LOGOUT (for rider, driver, admin dashboards) =====
   const logoutBtn = document.getElementById("logoutBtn");
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", async (e) => {
-    e.preventDefault();
-    try {
-      const res = await fetch(`${BASE_URL}/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
-
-      if (res.ok) {
-        // Clear localStorage and cookies
-        localStorage.removeItem("user");
-        document.cookie.split(";").forEach(function(c) {
-          document.cookie = c
-            .replace(/^ +/, "")
-            .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      try {
+        const res = await fetch(`${BASE_URL}/auth/logout`, {
+          method: "POST",
+          credentials: "include",
         });
 
-        // Redirect to main index page
-        window.location.href = "/RideApp-CapstoneProject/frontend/index.html";
-      } else {
-        console.error("Logout failed");
+        if (res.ok) {
+          // Clear localStorage and cookies
+          localStorage.removeItem("user");
+          document.cookie.split(";").forEach(function (c) {
+            document.cookie = c
+              .replace(/^ +/, "")
+              .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+          });
+
+          // Redirect to main index page
+          window.location.href = "/RideApp-CapstoneProject/frontend/index.html";
+        } else {
+          console.error("Logout failed");
+        }
+      } catch (err) {
+        console.error("Logout error:", err);
       }
-    } catch (err) {
-      console.error("Logout error:", err);
-    }
-  });
-}
+    });
+  }
 
 });

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RideApp — Go anywhere</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <div class="logo-blob"></div>
+      <h1>RideApp</h1>
+    </div>
+    <nav class="nav">
+      <a href="#hero">Home</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+      <a class="btn" href="./login.html">Login</a>
+      <a class="btn outline" href="./signup.html">Sign up</a>
+      <!-- tiny admin link -->
+      <a class="admin-link" href="./admin.html">Admin</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="hero" class="hero">
+      <div class="hero-left">
+        <h2>Get where you need to be — faster, safer, happier.</h2>
+        <p class="lead">On-demand rides, transparent fares, friendly drivers — all in one app.</p>
+        <div class="cta-row">
+          <a class="cta" href="./signup.html">Create Account</a>
+          <a class="cta ghost" href="./login.html">Login</a>
+        </div>
+        <ul class="features">
+          <li><strong>Instant booking</strong> — find nearby drivers in seconds</li>
+          <li><strong>Secure payments</strong> — wallet, UPI or cash</li>
+          <li><strong>Driver verification</strong> — KYC & license checks</li>
+        </ul>
+      </div>
+
+      <div class="hero-right">
+        <div class="vehicle-card">
+          <div class="car-track"></div>
+          <svg class="car" viewBox="0 0 100 50" preserveAspectRatio="xMidYMid meet">
+            <!-- simple car shape -->
+            <rect x="5" y="18" width="90" height="20" rx="4" ry="4" />
+            <circle cx="25" cy="40" r="6" />
+            <circle cx="75" cy="40" r="6" />
+          </svg>
+          <div class="ride-stats">
+            <div><strong>Nearby:</strong> 12 drivers</div>
+            <div><strong>ETA:</strong> 3–6 mins</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="info-section">
+      <h3>About Us</h3>
+      <p>RideApp is a community-first ride-hailing service built for reliability and safety. We focus on verified
+        drivers, fair fare, and an intuitive UX for everyone.</p>
+      <div class="cards">
+        <article class="card">
+          <h4>Safety</h4>
+          <p>Driver KYC, ride tracking, and in-app emergency support.</p>
+        </article>
+        <article class="card">
+          <h4>Transparent fares</h4>
+          <p>Estimated fare shown before booking. Wallet top-up and history.</p>
+        </article>
+        <article class="card">
+          <h4>Local drivers</h4>
+          <p>Supporting local drivers with fair earnings and support.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="contact" class="info-section contact-section">
+      <h3>Contact</h3>
+      <form id="contactForm" class="contact-form">
+        <input name="name" placeholder="Your name" required />
+        <input name="email" placeholder="Email" type="email" required />
+        <textarea name="message" placeholder="How can we help?" rows="4" required></textarea>
+        <button type="submit">Send message</button>
+      </form>
+      <div class="contact-meta">
+        <p><strong>Email:</strong> support@rideapp.example</p>
+        <p><strong>Phone:</strong> +91 98765 43210</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>© <span id="year"></span> RideApp — All rights reserved</div>
+    <div class="socials">
+      <a href="#">Twitter</a> · <a href="#">LinkedIn</a>
+    </div>
+  </footer>
+
+  <script src="../assets/js/main.js"></script>
+</body>
+
+</html>

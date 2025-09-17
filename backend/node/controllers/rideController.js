@@ -1,6 +1,7 @@
 import RideService from "../services/rideService.js";
 import paymentService from "../services/paymentService.js";
 import redisClient from "../config/redisConfig.js";
+import appEvents from "../utils/events.js";
 import { successResponse, errorResponse } from "../utils/apiResponse.js";
 
 class RideController {
@@ -78,6 +79,7 @@ class RideController {
       //   "expiry_time": ride.expiry_time,
       // };
 
+      appEvents.emit(`rideAccepted:${ride.rider_id}`, ride);
       return successResponse(res, "Ride accepted successfully", { ride });
     } catch (err) {
       return errorResponse(res, err, err.statusCode || 400);

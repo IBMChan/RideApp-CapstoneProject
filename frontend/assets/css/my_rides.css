@@ -1,0 +1,100 @@
+/* my_rides.css */
+.rides-section {
+    max-width: 900px;
+    margin: auto;
+}
+
+.rides-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.ride-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s;
+}
+
+.ride-card:hover {
+    transform: translateY(-2px);
+}
+
+.ride-card.latest {
+    border: 2px solid #007bff;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.ride-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ride-id {
+    font-weight: 700;
+}
+
+.ride-pin {
+    font-weight: 600;
+    color: #d9534f;
+    margin-top: 4px;
+}
+
+.ride-details {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.ride-footer {
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.status {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    padding: 2px 8px;
+    border-radius: 8px;
+}
+
+.status.requested {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status.ongoing {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.status.completed {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status.cancelled {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.btn-cancel {
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.btn-cancel:hover {
+    background: #c82333;
+}

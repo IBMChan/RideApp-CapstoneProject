@@ -26,7 +26,9 @@
     "pg-hstore": "^2.3.4",
     "razorpay": "^2.9.6",
     "redis": "^5.8.2",
-    "sequelize": "^6.37.7"
+    "sequelize": "^6.37.7",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "cross-env": "^10.0.0",

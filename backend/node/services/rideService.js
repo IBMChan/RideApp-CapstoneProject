@@ -13,6 +13,7 @@ import vehicleRepository from "../repositories/mysql/vehicleRepository.js";
 import RideDriverAssignmentRepository from "../repositories/mysql/rideDriverAssignmentRepository.js";
 import crypto from "crypto";
 import Ride from "../entities/rideModel.js";
+import appEvents from "../utils/events.js";
 // import notificationService from "./notificationService"; // Optional notifications
 
 class RideService {
@@ -242,6 +243,13 @@ class RideService {
 
     const res = await RideRepository.assignDriver(ride_id, driver_id, activeVehicle.vehicle_id);
     console.log("email sent");
+    appEvents.emit(`rideStatusUpdate:${ride.rider_id}`, {
+      ride_id: ride.user_id,
+      status: ride.status,
+      driver_id: ride.driver_id || null,
+      vehicle_id: ride.vehicle_id || null,
+      timestamp: Date.now()
+    });
     return res;
   }
 
@@ -266,10 +274,24 @@ class RideService {
     }
 
     if (status === "in_progress" && role === "driver") {
+      appEvents.emit(`rideStatusUpdate:${ride.rider_id}`, {
+        ride_id: ride.user_id,
+        status: ride.status,
+        driver_id: ride.driver_id || null,
+        vehicle_id: ride.vehicle_id || null,
+        timestamp: Date.now()
+      });
       const updated = await RideRepository.updateStatus(ride_id, "in_progress", pin);
       if (!updated) throw new AppError("Invalid PIN. Cannot start ride.", 400, "INVALID_PIN");
       return updated;
     }
+    appEvents.emit(`rideStatusUpdate:${ride.rider_id}`, {
+      ride_id: ride.user_id,
+      status: ride.status,
+      driver_id: ride.driver_id || null,
+      vehicle_id: ride.vehicle_id || null,
+      timestamp: Date.now()
+    });
 
     return await RideRepository.updateStatus(ride_id, status);
   }
@@ -301,6 +323,13 @@ class RideService {
     //     });
     //   }
     // }
+    appEvents.emit(`rideStatusUpdate:${ride.rider_id}`, {
+      ride_id: ride.user_id,
+      status: ride.status,
+      driver_id: ride.driver_id || null,
+      vehicle_id: ride.vehicle_id || null,
+      timestamp: Date.now()
+    });
 
     return ride;
   }
@@ -339,6 +368,13 @@ class RideService {
     await RideRepository.clearSensitiveFields(ride_id);
     const cancelled = await RideRepository.cancelRide(ride_id);
     if (!cancelled) throw new AppError("Unable to cancel ride", 500, "CANCEL_FAILED");
+    appEvents.emit(`rideStatusUpdate:${ride.rider_id}`, {
+      ride_id: ride.user_id,
+      status: ride.status,
+      driver_id: ride.driver_id || null,
+      vehicle_id: ride.vehicle_id || null,
+      timestamp: Date.now()
+    });
     return cancelled;
     // }
   }

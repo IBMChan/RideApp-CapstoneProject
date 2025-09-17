@@ -7,6 +7,7 @@ configDotenv();
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import http from "http";
 import mysql from "mysql2/promise";
 import sequelize from "./config/sqlConfig.js";
 import { connectDB } from "./config/mongoConfig.js";
@@ -22,6 +23,8 @@ import WalletTransaction from "./entities/walletTransactionModel.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import { authMiddleware } from "./middlewares/authMiddleware.js";
 
+import { initSocket } from "./utils/socket.js";
+
 // Routes
 import authRoutes from "./routes/authRoutes.js";
 import rideRoutes from "./routes/rideRoutes.js";
@@ -30,8 +33,14 @@ import driverRoutes from "./routes/driverRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import walletRoutes from "./routes/walletRoutes.js";
 
+
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+const server = http.createServer(app);
+
+// init sockets
+initSocket(server);
 
 // ---------- Global Middlewares ----------
 // Enable CORS (restrict to frontend origin, allow cookies)
@@ -63,7 +72,7 @@ app.get("/", (_req, res) => {
 app.use("/api/auth", authRoutes);
 
 // Apply AuthGuard for all routes below
-app.use(authMiddleware);
+// app.use(authMiddleware);
 
 // Protected Routes
 app.use("/api/rides", rideRoutes);
@@ -78,6 +87,19 @@ app.get("/api/auth/check", (req, res) => {
     message: "Authenticated",
     user: req.user,
   });
+});
+
+app.get("/api/geocode", async (req, res) => {
+  try {
+    const q = req.query.q;
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=5&addressdetails=1`, {
+      headers: { "User-Agent": "RideApp/1.0" } // required by Nominatim
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "geocode failed" });
+  }
 });
 
 // Global Error Handler
@@ -122,7 +144,7 @@ app.use(errorHandler);
     console.log("✅ Redis connected");
 
     // 6️⃣ Start Server
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`🚀 Server running at http://localhost:${PORT}`);
     });
   } catch (error) {

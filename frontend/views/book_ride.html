@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Vaahan - Rider Dashboard</title>
-  <link rel="stylesheet" href="../assets/css/style.css">
-  <script src="../assets/js/main.js" defer></script>
-<script src="../assets/js/rider.js" defer></script>
 
+  <!-- Styles -->
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/book_ride.css" />
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
-<body>
 
+<body>
   <!-- Header -->
   <header class="header">
     <div class="logo">🚗 Vaahan</div>
@@ -24,36 +28,80 @@
     </nav>
   </header>
 
-<aside class="sidebar">
-  <ul class="sidebar-menu">
-    <li class="sidebar-item"><a href="#home" class="sidebar-link">🚖Home Page</a></li>
-    <li class="sidebar-item"><a href="book_ride.html" class="sidebar-link">🚖 Book Ride</a></li>
-<li class="sidebar-item">
-  <a href="save_location.html" class="sidebar-link">📍 Save Location</a>
-</li>
+  <!-- Layout wrapper -->
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <ul class="sidebar-menu">
+        <li class="sidebar-item"><a href="#home" class="sidebar-link">🏠 Home</a></li>
+        <li class="sidebar-item"><a href="./book_ride.html" class="sidebar-link">🚖 Book Ride</a></li>
+        <li class="sidebar-item"><a href="#save-location" class="sidebar-link">📍 Save Location</a></li>
+        <li class="sidebar-item"><a href="#wallet" class="sidebar-link">💳 Manage Wallet</a></li>
+        <li class="sidebar-item"><a href="./my_rides.html" class="sidebar-link">📝 My Rides</a></li>
+        <li class="sidebar-item"><a href="#ticket" class="sidebar-link">🎫 Raise Ticket</a></li>
+      </ul>
+    </aside>
 
-    <li class="sidebar-item"><a href="#wallet" class="sidebar-link">💳 Payments & Wallet</a></li>
-    <li class="sidebar-item"><a href="#rides" class="sidebar-link">📝 My Rides</a></li>
-    <li class="sidebar-item"><a href="#ticket" class="sidebar-link">🎫 Raise Ticket</a></li>
-  </ul>
-</aside>
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Book Ride Form -->
+      <section class="card" id="book">
+        <h2>Create a Ride</h2>
 
-  <!-- Main Content -->
-  <!-- <main class="main-content">
-    <section id="home" class="hero">
-      <h1>Book Your Ride Instantly 🚖</h1>
-      <form class="ride-form">
-        <div class="form-group">
-          <label for="pickup">Pickup Location</label>
-          <input type="text" id="pickup" placeholder="Enter Pickup Location">
+        <div class="form-row">
+          <label>Pickup location</label>
+          <input id="pickupInput" placeholder="Start typing address or click on map" autocomplete="off" />
+          <div class="coords small muted" id="pickupCoords"></div>
         </div>
-        <div class="form-group">
-          <label for="drop">Drop Location</label>
-          <input type="text" id="drop" placeholder="Enter Drop Location">
+
+        <div class="form-row">
+          <label>Drop location</label>
+          <input id="dropInput" placeholder="Start typing address or click on map" autocomplete="off" />
+          <div class="coords small muted" id="dropCoords"></div>
         </div>
-        <button type="submit" class="request-btn">Request Ride</button>
-      </form>
-    </section>
-  </main> -->
+
+        <div class="row">
+          <button id="btnSwap" class="ghost small">Swap</button>
+          <div class="spacer"></div>
+          <button id="btnCreateRide" class="primary">Request Ride</button>
+        </div>
+
+        <hr />
+        <!-- area to show the last created ride / cancel button -->
+        <div id="rideInfoArea" class="ride-info-area"></div>
+
+        <h3 style="margin-top:15px;">Saved Locations</h3>
+        <div id="savedLocationsWrapper">
+          <!-- <form id="formSaveLocation" class="save-form">
+            <input id="locLabel" placeholder="Label (e.g. Home, Office)" required />
+            <input id="locAddress" placeholder="Address" required />
+            <input id="locLat" placeholder="Lat" required />
+            <input id="locLng" placeholder="Lng" required />
+            <button type="submit" class="primary small">Save</button>
+          </form> -->
+          <div id="savedLocations" class="saved-locations"></div>
+        </div>
+      </section>
+
+      <!-- Map -->
+      <div id="map" class="map"></div>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">© Vaahan • Built for demo</div>
+  </footer>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- helpers first, app code second -->
+  <script src="../assets/js/book_ride_helper.js"></script>
+  <script src="../assets/js/book_ride.js"></script>
+
+  <!-- keep main.js if you need it (optional) -->
+  <script src="../assets/js/main.js"></script>
 </body>
+
 </html>

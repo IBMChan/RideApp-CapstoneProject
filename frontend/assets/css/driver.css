@@ -1,0 +1,158 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Page */
+body {
+    background: #f4f6f9;
+    color: #333;
+    padding: 20px;
+}
+
+/* Heading */
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 25px;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    background: #fff;
+    border: 1px solid #dcdcdc;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.tab-btn:hover {
+    background: #3498db;
+    color: #fff;
+}
+
+.tab-btn.active {
+    background: #2980b9;
+    color: #fff;
+    border-color: #2980b9;
+}
+
+/* Tabs Content */
+.tab {
+    display: none;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.tab.active {
+    display: block;
+}
+
+/* Cards */
+.ride-card {
+    background: #fdfdfd;
+    border: 1px solid #e1e1e1;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ride-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.ride-card p {
+    margin: 5px 0;
+}
+
+/* Buttons inside cards */
+.ride-card button {
+    background: #3498db;
+    border: none;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 6px;
+    margin-right: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.ride-card button:hover {
+    background: #2980b9;
+}
+
+.ride-card .dismissBtn {
+    background: #e74c3c;
+}
+
+.ride-card .dismissBtn:hover {
+    background: #c0392b;
+}
+
+.ride-card .cancelBtn {
+    background: #e67e22;
+}
+
+.ride-card .cancelBtn:hover {
+    background: #d35400;
+}
+
+.ride-card .completeBtn {
+    background: #27ae60;
+}
+
+.ride-card .completeBtn:hover {
+    background: #1e8449;
+}
+
+/* Profile, Vehicles, Payments */
+#profileInfo,
+#vehicleList,
+#paymentHistory,
+#rideHistoryList {
+    padding: 10px;
+}
+
+#profileInfo p,
+#vehicleList p,
+#paymentHistory p,
+#rideHistoryList p {
+    margin: 8px 0;
+}
+
+/* Logout button */
+#btnLogout {
+    display: block;
+    margin: 30px auto 0 auto;
+    background: #c0392b;
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    font-size: 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+#btnLogout:hover {
+    background: #a93226;
+}
