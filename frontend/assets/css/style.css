@@ -430,3 +430,31 @@ input {
 .footer-links a:hover {
   text-decoration: underline;
 }
+/* === Header Buttons === */
+.header-nav .btn {
+  background: #245F73;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: background 0.3s, transform 0.2s;
+  display: inline-block;
+}
+
+.header-nav .btn:hover {
+  background: #1a4655;
+  transform: translateY(-2px);
+}
+
+.header-nav .btn.outline {
+  background: transparent;
+  border: 2px solid #245F73;
+  color: #245F73;
+}
+
+.header-nav .btn.outline:hover {
+  background: #245F73;
+  color: #fff;
+}

@@ -1,92 +1,179 @@
-// Put at: frontend/assets/js/main.js
-(() => {
-  const baseApiUrl = window.baseApiUrl || ''; // update if backend is on different origin, e.g. 'http://localhost:3000'
-  window.baseApiUrl = baseApiUrl;
+const BASE_URL = "http://localhost:3000/api/rider";
+let riderId;
+let locations = [];
+let currentPage = 1;
+const rowsPerPage = 10;
 
-  // simple header year
-  document.getElementById('year')?.textContent = new Date().getFullYear();
+document.addEventListener("DOMContentLoaded", async () => {
+  await getUser();
+  await fetchLocations();
+  setupFormToggle();
+  setupAddLocationForm();
+  setupLogout();
+});
 
-  // Contact form
-  const contactForm = document.getElementById('contactForm');
-  if (contactForm) {
-    contactForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const fd = new FormData(contactForm);
-      // demo: show a friendly message
-      alert('Thanks, we received your message. (Demo frontend)');
-      contactForm.reset();
+// Get logged-in rider from cookie
+async function getUser() {
+  try {
+    const res = await fetch("http://localhost:3000/api/auth/check", {
+      method: "GET",
+      credentials: "include",
     });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Unauthorized");
+    riderId = data.user.id;
+  } catch (err) {
+    alert("Not logged in. Redirecting...");
+    window.location.href = "/frontend/index.html";
+  }
+}
+
+// Fetch saved locations
+async function fetchLocations() {
+  try {
+    const res = await fetch(`${BASE_URL}/${riderId}/locations`, {
+      method: "GET",
+      credentials: "include",
+    });
+    locations = await res.json();
+    renderTable();
+  } catch (err) {
+    console.error(err);
+    alert("Failed to fetch locations.");
+  }
+}
+
+// Render table with pagination
+function renderTable() {
+  const tbody = document.querySelector("#locationsTable tbody");
+  tbody.innerHTML = "";
+
+  if (!locations.length) {
+    tbody.innerHTML = `<tr><td colspan="6">No saved locations found</td></tr>`;
+    document.getElementById("pagination").innerHTML = "";
+    return;
   }
 
-  // Signup form (initiate)
-  const signupForm = document.getElementById('signupForm');
-  if (signupForm) {
-    signupForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(signupForm).entries());
+  const start = (currentPage - 1) * rowsPerPage;
+  const end = start + rowsPerPage;
+  const pageItems = locations.slice(start, end);
+
+  pageItems.forEach((loc, index) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${start + index + 1}</td>
+      <td>${loc.label}</td>
+      <td>${loc.address}</td>
+      <td>${loc.longitude}</td>
+      <td>${loc.latitude}</td>
+      <td><button class="delete-btn" data-id="${loc.saved_loc_id}">Delete</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  setupDeleteButtons();
+  renderPagination();
+}
+
+// Pagination buttons
+function renderPagination() {
+  const pageCount = Math.ceil(locations.length / rowsPerPage);
+  const paginationDiv = document.getElementById("pagination");
+  paginationDiv.innerHTML = "";
+
+  for (let i = 1; i <= pageCount; i++) {
+    const btn = document.createElement("button");
+    btn.textContent = i;
+    btn.disabled = i === currentPage;
+    btn.addEventListener("click", () => {
+      currentPage = i;
+      renderTable();
+    });
+    paginationDiv.appendChild(btn);
+  }
+}
+
+// Delete location
+function setupDeleteButtons() {
+  document.querySelectorAll(".delete-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.id;
       try {
-        const res = await fetch(`${baseApiUrl}/api/auth/signup/initiate`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
+        await fetch(`${BASE_URL}/${riderId}/locations/${id}`, {
+          method: "DELETE",
+          credentials: "include",
         });
-        const json = await res.json();
-        const out = document.getElementById('signupResult');
-        if (!res.ok) {
-          out.textContent = json.message || 'Signup failed';
-          out.style.color = 'crimson';
-          return;
-        }
-        out.style.color = 'green';
-        out.textContent = `OTP sent to email & phone (demo). PendingId: ${json.pendingId}\nEmailOTP: ${json.emailOtp} PhoneOTP: ${json.phoneOtp}\nNow call /api/auth/signup/complete from backend or implement UI to complete OTP verification (demo).`;
+        locations = locations.filter((loc) => loc.saved_loc_id != id);
+        renderTable();
       } catch (err) {
         console.error(err);
-        document.getElementById('signupResult').textContent = 'Network error';
+        alert("Failed to delete location");
       }
     });
-  }
+  });
+}
 
-  // Login form
-  const loginForm = document.getElementById('loginForm');
-  if (loginForm) {
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(loginForm).entries());
-      try {
-        const res = await fetch(`${baseApiUrl}/api/auth/login`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-        const json = await res.json();
-        if (!res.ok) {
-          alert(json.message || 'Login failed');
-          return;
-        }
-        // user object returned (user_id, role)
-        const role = json.user?.role;
-        if (role === 'driver' || role === 'rider') {
-          // redirect to their dashboard (you can replace with your view)
-          window.location.href = '/views/rider.html';
-        } else {
-          // if admin redirect to admin console
-          window.location.href = '/admin.html';
-        }
-      } catch (err) {
-        console.error(err);
-        alert('Network error during login');
-      }
+// Add Location Form Toggle
+function setupFormToggle() {
+  const addBtn = document.getElementById("addLocationBtn");
+  const form = document.getElementById("addLocationForm");
+  const cancelBtn = document.getElementById("cancelAdd");
+
+  addBtn.addEventListener("click", () => form.style.display = "block");
+  cancelBtn.addEventListener("click", () => form.style.display = "none");
+}
+
+// Add Location Form Submit
+function setupAddLocationForm() {
+  const form = document.getElementById("addLocationForm");
+  const saveBtn = document.getElementById("saveLocationBtn");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    saveBtn.disabled = true;
+    const originalText = saveBtn.textContent;
+    saveBtn.textContent = "Saving...";
+
+    const payload = {
+      label: document.getElementById("label").value,
+      address: document.getElementById("address").value,
+      latitude: document.getElementById("latitude").value,
+      longitude: document.getElementById("longitude").value,
+    };
+
+    try {
+      const res = await fetch(`${BASE_URL}/${riderId}/locations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error("Failed to save location");
+      const newLocation = await res.json();
+      locations.push(newLocation);
+      renderTable();
+      form.reset();
+      form.style.display = "none";
+    } catch (err) {
+      console.error(err);
+      alert("Error saving location");
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = originalText;
+    }
+  });
+}
+
+// Logout
+function setupLogout() {
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    fetch("http://localhost:3000/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    }).then(() => {
+      window.location.href = "/frontend/index.html";
     });
-  }
-
-  // small floating car animation / bounce effect on hero
-  const car = document.querySelector('.vehicle-card svg');
-  if (car) {
-    let dir = 1;
-    setInterval(() => {
-      car.style.transform = `translateX(${(Math.sin(Date.now()/700) * 6)}px)`;
-    }, 60);
-  }
-
-})();
+  });
+}
