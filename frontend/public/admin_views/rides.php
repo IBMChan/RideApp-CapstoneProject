@@ -5,15 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vaahan - Rides</title>
   <link rel="stylesheet" href="../../assets/css/style.css">
-  <script src="../../assets/js/main.js" ></script>
-  <script src="../../assets/js/admin.js" ></script>
+  <script src="../../assets/js/admin.js" defer></script>
 </head>
 <body>
+
 <header class="header">
   <div class="logo">🚗 Vaahan Admin</div>
   <nav class="header-nav">
     <a href="admin_dashboard.html" class="nav-link">Dashboard</a>
     <a id="logoutBtn" class="nav-link">Logout</a>
+    <a href="#profile" class="nav-link"><div class="profile-pic">A</div></a>
   </nav>
 </header>
 
@@ -33,26 +34,28 @@
   <table id="ridesTable">
     <thead>
       <tr>
-        <th>ID</th>
+        <th>Ride ID</th>
         <th>Rider ID</th>
         <th>Driver ID</th>
         <th>Status</th>
-        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
       <!-- Rides loaded via admin.js -->
     </tbody>
   </table>
-  <input type="text" id="rideIdInput" placeholder="Ride ID">
-  <button id="searchRide">Search Ride</button>
-  <button id="loadRides">Load All Rides</button>
-  <button id="loadStats">Load Stats</button>
-  <div id="rideStats"></div>
 </main>
 
 <footer class="footer">
   <p>© 2025 Vaahan Admin Panel</p>
 </footer>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    if (document.querySelector("#ridesTable")) {
+      loadRides();
+    }
+  });
+</script>
 </body>
 </html>

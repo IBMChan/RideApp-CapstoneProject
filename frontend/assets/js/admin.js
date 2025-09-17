@@ -1,13 +1,25 @@
-const BASE_URL = "http://localhost:3000/api";
-
 document.addEventListener("DOMContentLoaded", () => {
+  const BASE_URL = "http://localhost:3000/api";
 
-  // ===== ADMIN LOGIN =====
+  const fetchJSON = async (url, options = {}) => {
+    const res = await fetch(url, {
+      ...options,
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {})
+      }
+    });
+    return res.json();
+  };
+
+  /* -------------------------
+     ADMIN LOGIN
+  ------------------------- */
   const loginForm = document.getElementById("adminLoginForm");
   if (loginForm) {
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-
       const email = document.getElementById("adminEmail").value;
       const password = document.getElementById("adminPassword").value;
       const msgBox = document.getElementById("loginError");
@@ -19,12 +31,11 @@ document.addEventListener("DOMContentLoaded", () => {
           body: JSON.stringify({ email, password }),
           credentials: "include",
         });
-
         const data = await res.json();
 
         if (!res.ok) {
           if (msgBox) {
-            msgBox.innerText = data.message;
+            msgBox.textContent = data.message || "Login failed";
             msgBox.style.color = "red";
             msgBox.style.display = "block";
           }
@@ -37,9 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
           msgBox.style.display = "block";
         }
 
-        // Redirect to admin dashboard
         window.location.href = "/RideApp-CapstoneProject/frontend/public/admin_views/admin_dashboard.html";
-
       } catch (err) {
         console.error("Login failed:", err);
         if (msgBox) {
@@ -51,177 +60,146 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ===== LOGOUT =====
+  /* -------------------------
+     LOGOUT
+  ------------------------- */
   const logoutBtn = document.getElementById("logoutBtn");
   if (logoutBtn) {
     logoutBtn.addEventListener("click", async () => {
-      try {
-        const res = await fetch(`${BASE_URL}/auth/logout`, {
-          method: "POST",
-          credentials: "include",
-        });
-        if (res.ok) window.location.href = "/RideApp-CapstoneProject/frontend/public/login.html";
-      } catch (err) {
-        console.error("Logout error:", err);
-      }
+      await fetchJSON(`${BASE_URL}/auth/logout`, { method: "POST" });
+      window.location.href = "/RideApp-CapstoneProject/frontend/public/admin_login.html";
     });
   }
 
-  // ===== FETCH USERS =====
-  const loadUsers = document.getElementById("loadUsers");
-  if (loadUsers) {
-    loadUsers.addEventListener("click", async () => {
-      try {
-        const res = await fetch(`${BASE_URL}/admin/users`, { credentials: "include" });
-        const result = await res.json();
-        if (res.ok && result.success) {
-          const tbody = document.querySelector("#usersTable tbody");
-          tbody.innerHTML = "";
-          result.data.forEach(u => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-              <td>${u._id || u.user_id}</td>
-              <td>${u.full_name || "-"}</td>
-              <td>${u.email || "-"}</td>
-              <td>${u.role || "-"}</td>
-            `;
-            tbody.appendChild(tr);
-          });
-        } else console.error(result.message);
-      } catch (err) {
-        console.error("Fetch users error:", err);
-      }
-    });
+  /* -------------------------
+     USERS
+  ------------------------- */
+  async function loadUsers() {
+    const usersTable = document.querySelector("#usersTable tbody");
+    if (!usersTable) return;
+    const res = await fetchJSON(`${BASE_URL}/admin/users`);
+    usersTable.innerHTML = "";
+    if (res.success && res.data.length) {
+      res.data.forEach(u => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${u.user_id || u._id}</td>
+          <td>${u.full_name || "-"}</td>
+          <td>${u.email || "-"}</td>
+          <td>${u.role || "-"}</td>
+        `;
+        usersTable.appendChild(tr);
+      });
+    } else {
+      usersTable.innerHTML = "<tr><td colspan='4'>No users found.</td></tr>";
+    }
   }
 
-  // ===== FETCH PAYMENTS =====
-  const loadPayments = document.getElementById("loadPayments");
-  if (loadPayments) {
-    loadPayments.addEventListener("click", async () => {
-      try {
-        const res = await fetch(`${BASE_URL}/admin/payments`, { credentials: "include" });
-        const result = await res.json();
-        if (res.ok && result.success) {
-          const tbody = document.querySelector("#paymentsTable tbody");
-          tbody.innerHTML = "";
-          result.data.forEach(p => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-              <td>${p._id}</td>
-              <td>${p.ride_id}</td>
-              <td>${p.fare}</td>
-              <td>${p.mode}</td>
-              <td>${new Date(p.Payed_At).toLocaleString()}</td>
-            `;
-            tbody.appendChild(tr);
-          });
-        } else console.error(result.message);
-      } catch (err) {
-        console.error("Fetch payments error:", err);
-      }
-    });
+  /* -------------------------
+     PAYMENTS
+  ------------------------- */
+  async function loadPayments() {
+    const paymentsTable = document.querySelector("#paymentsTable tbody");
+    if (!paymentsTable) return;
+    const res = await fetchJSON(`${BASE_URL}/admin/payments`);
+    paymentsTable.innerHTML = "";
+    if (res.success && res.data.length) {
+      res.data.forEach(p => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${p._id}</td>
+          <td>${p.ride_id}</td>
+          <td>${p.fare}</td>
+          <td>${p.mode}</td>
+          <td>${new Date(p.Payed_At).toLocaleString()}</td>
+        `;
+        paymentsTable.appendChild(tr);
+      });
+    } else {
+      paymentsTable.innerHTML = "<tr><td colspan='5'>No payments found.</td></tr>";
+    }
   }
 
-  // ===== FETCH WALLET ACCOUNTS =====
-  const loadWalletAccounts = document.getElementById("loadWalletAccounts");
-  if (loadWalletAccounts) {
-    loadWalletAccounts.addEventListener("click", async () => {
-      try {
-        const res = await fetch(`${BASE_URL}/admin/wallet/accounts`, { credentials: "include" });
-        const result = await res.json();
-        if (res.ok && result.success) {
-          const tbody = document.querySelector("#walletTable tbody");
-          tbody.innerHTML = "";
-          result.data.forEach(w => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-              <td>${w.wallet_id}</td>
-              <td>${w.user_id}</td>
-              <td>${w.pin}</td>
-              <td>${w.balance}</td>
-              <td>${new Date(w.last_updated).toLocaleString()}</td>
-            `;
-            tbody.appendChild(tr);
-          });
-        } else console.error(result.message);
-      } catch (err) {
-        console.error("Fetch wallet accounts error:", err);
-      }
-    });
+  /* -------------------------
+     WALLET ACCOUNTS
+  ------------------------- */
+  async function loadWalletAccounts() {
+    const walletTable = document.querySelector("#walletTable tbody");
+    if (!walletTable) return;
+    const res = await fetchJSON(`${BASE_URL}/admin/wallet/accounts`);
+    walletTable.innerHTML = "";
+    if (res.success && res.data.length) {
+      res.data.forEach(w => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${w.wallet_id}</td>
+          <td>${w.user_id}</td>
+          <td>${w.pin}</td>
+          <td>${w.balance}</td>
+          <td>${new Date(w.last_updated).toLocaleString()}</td>
+        `;
+        walletTable.appendChild(tr);
+      });
+    } else {
+      walletTable.innerHTML = "<tr><td colspan='5'>No wallet accounts found.</td></tr>";
+    }
   }
 
-  // ===== FETCH VEHICLES =====
-  const loadVehicles = document.getElementById("loadVehicles");
-  if (loadVehicles) {
-    loadVehicles.addEventListener("click", async () => {
-      try {
-        const res = await fetch(`${BASE_URL}/admin/vehicles`, { credentials: "include" });
-        const result = await res.json();
-        if (res.ok && result.success) {
-          const tbody = document.querySelector("#vehiclesTable tbody");
-          tbody.innerHTML = "";
-          result.data.forEach(v => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-              <td>${v.vehicle_id}</td>
-              <td>${v.model}</td>
-              <td>${v.plate_no}</td>
-              <td>${v.driver_id}</td>
-              <td>${v.vehicle_status}</td>
-            `;
-            tbody.appendChild(tr);
-          });
-        } else console.error(result.message);
-      } catch (err) {
-        console.error("Fetch vehicles error:", err);
-      }
-    });
+  /* -------------------------
+     VEHICLES
+  ------------------------- */
+  async function loadVehicles() {
+    const vehiclesTable = document.querySelector("#vehiclesTable tbody");
+    if (!vehiclesTable) return;
+    const res = await fetchJSON(`${BASE_URL}/admin/vehicles`);
+    vehiclesTable.innerHTML = "";
+    if (res.success && res.data.length) {
+      res.data.forEach(v => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${v.vehicle_id}</td>
+          <td>${v.model}</td>
+          <td>${v.plate_no}</td>
+          <td>${v.driver_id}</td>
+          <td>${v.vehicle_status}</td>
+        `;
+        vehiclesTable.appendChild(tr);
+      });
+    } else {
+      vehiclesTable.innerHTML = "<tr><td colspan='5'>No vehicles found.</td></tr>";
+    }
   }
 
-  // ===== FETCH RIDES =====
-  const loadRides = document.getElementById("loadRides");
-  if (loadRides) {
-    loadRides.addEventListener("click", async () => {
-      try {
-        const res = await fetch(`${BASE_URL}/admin/rides`, { credentials: "include" });
-        const result = await res.json();
-        if (res.ok && result.success) {
-          const tbody = document.querySelector("#ridesTable tbody");
-          tbody.innerHTML = "";
-          result.data.forEach(r => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-              <td>${r.ride_id}</td>
-              <td>${r.rider_id}</td>
-              <td>${r.driver_id || "-"}</td>
-              <td>${r.status}</td>
-              <td><button data-id="${r.ride_id}" class="viewRideBtn">View</button></td>
-            `;
-            tbody.appendChild(tr);
-          });
-        } else console.error(result.message);
-      } catch (err) {
-        console.error("Fetch rides error:", err);
-      }
-    });
+  /* -------------------------
+     RIDES
+  ------------------------- */
+  async function loadRides() {
+    const ridesTable = document.querySelector("#ridesTable tbody");
+    if (!ridesTable) return;
+    const res = await fetchJSON(`${BASE_URL}/admin/rides`);
+    ridesTable.innerHTML = "";
+    if (res.success && res.data.length) {
+      res.data.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${r.ride_id}</td>
+          <td>${r.rider_id}</td>
+          <td>${r.driver_id || "-"}</td>
+          <td>${r.status}</td>
+        `;
+        ridesTable.appendChild(tr);
+      });
+    } else {
+      ridesTable.innerHTML = "<tr><td colspan='4'>No rides found.</td></tr>";
+    }
   }
 
-  // ===== SEARCH RIDE BY ID =====
-  const searchRideBtn = document.getElementById("searchRide");
-  if (searchRideBtn) {
-    searchRideBtn.addEventListener("click", async () => {
-      const rideId = document.getElementById("rideIdInput").value;
-      if (!rideId) return alert("Enter Ride ID");
-      try {
-        const res = await fetch(`${BASE_URL}/admin/rides/${rideId}`, { credentials: "include" });
-        const result = await res.json();
-        if (res.ok && result.success) {
-          alert(JSON.stringify(result.data, null, 2));
-        } else alert(result.message);
-      } catch (err) {
-        console.error("Fetch ride by ID error:", err);
-      }
-    });
-  }
-
+  /* -------------------------
+     AUTO-LOAD DASHBOARD DATA
+  ------------------------- */
+  loadUsers();
+  loadPayments();
+  loadWalletAccounts();
+  loadVehicles();
+  loadRides();
 });

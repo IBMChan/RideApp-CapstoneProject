@@ -3,17 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vaahan - Wallet</title>
+  <title>Vaahan - Wallet Accounts</title>
   <link rel="stylesheet" href="../../assets/css/style.css">
-  <script src="../../assets/js/main.js" defer></script>
   <script src="../../assets/js/admin.js" defer></script>
 </head>
 <body>
+
 <header class="header">
   <div class="logo">🚗 Vaahan Admin</div>
   <nav class="header-nav">
     <a href="admin_dashboard.html" class="nav-link">Dashboard</a>
     <a id="logoutBtn" class="nav-link">Logout</a>
+    <a href="#profile" class="nav-link"><div class="profile-pic">A</div></a>
   </nav>
 </header>
 
@@ -29,17 +30,33 @@
 </aside>
 
 <main class="main-content">
-  <h1>Wallet 💳</h1>
+  <h1>Wallet Accounts 💳</h1>
   <table id="walletTable">
-    <thead id="walletTableHead"></thead>
-    <tbody></tbody>
+    <thead>
+      <tr>
+        <th>Wallet ID</th>
+        <th>User ID</th>
+        <th>PIN</th>
+        <th>Balance</th>
+        <th>Last Updated</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Wallet accounts loaded via admin.js -->
+    </tbody>
   </table>
-  <button id="loadWalletAccounts">Load Wallet Accounts</button>
-  <button id="loadWalletTransactions">Load Wallet Transactions</button>
 </main>
 
 <footer class="footer">
   <p>© 2025 Vaahan Admin Panel</p>
 </footer>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    if (document.querySelector("#walletTable")) {
+      loadWalletAccounts();
+    }
+  });
+</script>
 </body>
 </html>

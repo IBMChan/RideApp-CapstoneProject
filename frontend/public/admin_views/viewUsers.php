@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vaahan - Manage Users</title>
   <link rel="stylesheet" href="../../assets/css/style.css">
-  <script src="../../assets/js/main.js" defer></script>
   <script src="../../assets/js/admin.js" defer></script>
 </head>
 <body>
@@ -46,12 +45,18 @@
       <!-- Users loaded via admin.js -->
     </tbody>
   </table>
-  <button id="loadUsers">Load Users</button>
 </main>
 
 <footer class="footer">
   <p>© 2025 Vaahan Admin Panel</p>
 </footer>
 
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    if (document.querySelector("#usersTable")) {
+      loadUsers();
+    }
+  });
+</script>
 </body>
 </html>

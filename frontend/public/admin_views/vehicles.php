@@ -5,15 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vaahan - Vehicles</title>
   <link rel="stylesheet" href="../../assets/css/style.css">
-  <script src="../../assets/js/main.js" defer></script>
   <script src="../../assets/js/admin.js" defer></script>
 </head>
 <body>
+
 <header class="header">
   <div class="logo">🚗 Vaahan Admin</div>
   <nav class="header-nav">
     <a href="admin_dashboard.html" class="nav-link">Dashboard</a>
     <a id="logoutBtn" class="nav-link">Logout</a>
+    <a href="#profile" class="nav-link"><div class="profile-pic">A</div></a>
   </nav>
 </header>
 
@@ -33,9 +34,9 @@
   <table id="vehiclesTable">
     <thead>
       <tr>
-        <th>ID</th>
+        <th>Vehicle ID</th>
         <th>Model</th>
-        <th>Number</th>
+        <th>Plate No</th>
         <th>Driver ID</th>
         <th>Status</th>
       </tr>
@@ -44,11 +45,18 @@
       <!-- Vehicles loaded via admin.js -->
     </tbody>
   </table>
-  <button id="loadVehicles">Load Vehicles</button>
 </main>
 
 <footer class="footer">
   <p>© 2025 Vaahan Admin Panel</p>
 </footer>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    if (document.querySelector("#vehiclesTable")) {
+      loadVehicles();
+    }
+  });
+</script>
 </body>
 </html>
