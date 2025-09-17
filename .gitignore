@@ -9,4 +9,4 @@ package.json
 node_modules
 *.venv
 backend/.env copy
-backend\cpp\matcher.exe
+backend/cpp/matcher.exe
