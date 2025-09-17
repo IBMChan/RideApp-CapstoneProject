@@ -115,6 +115,8 @@ export const deleteSavedLocation = async (req, res, next) => {
 // --------------------- Share Ride Status via Email ---------------------
 export const shareRideStatusEmail = async (req, res, next) => {
   try {
+    console.log("[DEBUG] req.params.rideId:", req.params.rideId);
+    console.log("[DEBUG] req.body:", req.body);
     const riderId = parseInt(req.body.riderId, 10);
     const rideId = parseInt(req.params.rideId, 10);
     const { recipientEmail } = req.body;

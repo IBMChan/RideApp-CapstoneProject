@@ -1,3 +1,4 @@
+<!-- raksha and harshit -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vaahan - Rider Dashboard</title>
   <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/rider_dashboard.css">
+  <script src="../assets/js/rider_dashboard.js"></script>
   <script src="../assets/js/main.js" defer></script>
   <script src="../assets/js/rider.js" defer></script>
 </head>
@@ -27,6 +30,7 @@
     <li><a href="save_location.html" class="sidebar-link">📍 Save Location</a></li>
     <li><a href="rider_wallet.html" class="sidebar-link">💳 Manage Wallet</a></li>
     <li><a href="#rides" class="sidebar-link">📝 My Rides</a></li>
+      <li class="sidebar-item"><a href="#share" class="sidebar-link">📤 Share Ride Status</a></li>
     <li><a href="#ticket" class="sidebar-link">🎫 Raise Ticket</a></li>
   </ul>
 </aside>
@@ -45,7 +49,77 @@
     </form>
   </section>
 
-</main>
+     <!-- Saved Locations Section -->
+    <section id="save" class="dashboard-section">
+      <h2>📍 Saved Locations</h2>
+      <form id="saveLocationForm" class="form-inline">
+        <input type="text" id="locationLabel" placeholder="Label (e.g. Home)" required>
+        <input type="text" id="locationAddress" placeholder="Address" required>
+        <input type="text" id="latitude" placeholder="Latitude" required>
+        <input type="text" id="longitude" placeholder="Longitude" required>
+        <button type="submit" class="request-btn">Add Location</button>
+      </form>
+      <div id="savedLocationsList" class="list-container"></div>
+
+    </section>
+
+    <!-- Share Ride Status Section -->
+<section id="share" class="dashboard-section">
+  <h2>📤 Share Ride Status</h2>
+  <form id="shareRideForm" class="form-inline">
+    <input type="email" id="shareEmail" placeholder="Emergency Contact Email" required>
+    <button type="submit" class="request-btn">Share Ride</button>
+  </form>
+  <div id="shareRideMsg" class="message"></div>
+  
+</section>
+    <!-- About Section -->
+    <section id="about" class="about">
+      <h2>About Us</h2>
+      <div class="services-carousel">
+        <div class="service-card">
+          <h3>Safe & Secure Rides</h3>
+          <p>Trusted drivers with background checks.</p>
+        </div>
+        <div class="service-card">
+          <h3>Affordable Pricing</h3>
+          <p>Best rides at pocket-friendly prices.</p>
+        </div>
+        <div class="service-card">
+          <h3>24/7 Availability</h3>
+          <p>Ride anytime, anywhere.</p>
+        </div>
+        <div class="service-card">
+          <h3>Wallet & Rewards</h3>
+          <p>Cashless payments with rewards.</p>
+        </div>
+        <div class="service-card">
+          <h3>Customer Support</h3>
+          <p>24/7 dedicated help for you.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+      <h2>Contact Us</h2>
+      <div class="contact-content">
+        <div class="contact-item">
+          <h3>Email</h3>
+          <p>support@vaahan.com</p>
+        </div>
+        <div class="contact-item">
+          <h3>Phone</h3>
+          <p>+91 98765 43210</p>
+        </div>
+        <div class="contact-item">
+          <h3>Address</h3>
+          <p>Bengaluru, India</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
 
 <footer class="footer">
   <p>© 2025 Vaahan. All rights reserved.</p>

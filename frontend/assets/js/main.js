@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:3000/api"; // backend port
+const BASE_URL = "http://localhost:3000/api";
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
           headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify({ email, password }),
+          credentials: "include", // ✅ Important to send cookie
         });
 
         const data = await res.json();

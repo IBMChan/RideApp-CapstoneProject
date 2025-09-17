@@ -151,6 +151,8 @@ class RideService {
         "./cpp/matcher.exe"
         // "./cpp/matcher" + (process.platform === "win32" ? ".exe" : "")
       );
+      console.log(matcherPath); // Raksha & Harshit
+      
       const child = spawn(matcherPath);
       console.log(matcherPath);
 
