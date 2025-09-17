@@ -8,8 +8,8 @@ import riderService from "../services/riderService.js";
 // --------------------- 1. Ride history ---------------------
 export const getRideHistory = async (req, res, next) => {
   try {
-    const riderId = req.user?.id
-      ? parseInt(req.user.id, 10)
+    const riderId = req.user?.user_id
+      ? parseInt(req.user.user_id, 10)
       : parseInt(req.params.riderId, 10);
     console.log("Rider History called with riderId:", riderId);
     const rides = await riderService.getRideHistory(riderId);
@@ -22,8 +22,8 @@ export const getRideHistory = async (req, res, next) => {
 // --------------------- 2. Profile management ---------------------
 export const getProfile = async (req, res, next) => {
   try {
-    const riderId = req.user?.id
-      ? parseInt(req.user.id, 10)
+    const riderId = req.user?.user_id
+      ? parseInt(req.user.user_id, 10)
       : parseInt(req.params.riderId, 10);
     const profile = await riderService.getProfile(riderId);
     res.json(profile);
@@ -34,8 +34,8 @@ export const getProfile = async (req, res, next) => {
 
 export const updateProfile = async (req, res, next) => {
   try {
-    const riderId = req.user?.id
-      ? parseInt(req.user.id, 10)
+    const riderId = req.user?.user_id
+      ? parseInt(req.user.user_id, 10)
       : parseInt(req.params.riderId, 10);
     const updated = await riderService.updateProfile(riderId, req.body);
     res.json(updated);
@@ -47,8 +47,8 @@ export const updateProfile = async (req, res, next) => {
 // --------------------- 3. Saved locations ---------------------
 export const getSavedLocations = async (req, res, next) => {
   try {
-    const riderId = req.user?.id
-      ? parseInt(req.user.id, 10)
+    const riderId = req.user?.user_id
+      ? parseInt(req.user.user_id, 10)
       : parseInt(req.params.riderId, 10);
     const locations = await riderService.getSavedLocations(riderId);
     res.json(locations);
@@ -59,9 +59,12 @@ export const getSavedLocations = async (req, res, next) => {
 
 export const addSavedLocation = async (req, res, next) => {
   try {
-    const riderId = req.user?.id
-      ? parseInt(req.user.id, 10)
+    const riderId = req.user?.user_id
+      ? parseInt(req.user.user_id, 10)
       : parseInt(req.params.riderId, 10);
+
+      console.log();
+      
     if (isNaN(riderId)) {
       throw new ValidationError("Valid riderId is required.");
     }
@@ -74,8 +77,8 @@ export const addSavedLocation = async (req, res, next) => {
 
 export const deleteSavedLocation = async (req, res, next) => {
   try {
-    const riderId = req.user?.id
-      ? parseInt(req.user.id, 10)
+    const riderId = req.user?.user_id
+      ? parseInt(req.user.user_id, 10)
       : parseInt(req.params.riderId, 10);
     await riderService.deleteSavedLocation(
       riderId,
