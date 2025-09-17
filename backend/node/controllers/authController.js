@@ -6,12 +6,48 @@ import { sendEmailOTP, sendSmsOTP, verifyOTP } from "../services/notificationSer
 const pendingUsers = new Map();
 const resetSessions = new Map(); // email -> { expiresAt, otp }
 
+// export const initiateSignup = async (req, res) => {
+//   try {
+//     const { full_name, phone, email, role, password, license, gender, kyc_type, kyc_document } = req.body;
+//     if (role === "driver" && !license) return res.status(400).json({ message: "License number is required for drivers" });
+//     if (!full_name || !email || !phone || !role || !password) return res.status(400).json({ message: "Missing required fields" });
+//     if (await userRepository.findByEmail(email)) return res.status(409).json({ message: "Email already in use" });
+
+//     const password_hash = await bcrypt.hash(password, 10);
+//     const pendingId = `${email}:${Date.now()}`;
+//     pendingUsers.set(pendingId, { full_name, phone, email, role, license: role === "driver" ? license : null, password_hash, kyc_type, kyc_document, gender });
+
+//     const emailOtp = await sendEmailOTP(email);
+//     const phoneOtp = await sendSmsOTP(phone, email);
+
+//     res.json({ message: "OTP sent to email (both copies for demo)", pendingId, emailOtp: emailOtp.otp, phoneOtp: phoneOtp.otp });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: "Failed to initiate signup" });
+//   }
+// };
+
+// Updated initiateSignup function in authController.js
 export const initiateSignup = async (req, res) => {
   try {
     const { full_name, phone, email, role, password, license, gender, kyc_type, kyc_document } = req.body;
     if (role === "driver" && !license) return res.status(400).json({ message: "License number is required for drivers" });
     if (!full_name || !email || !phone || !role || !password) return res.status(400).json({ message: "Missing required fields" });
-    if (await userRepository.findByEmail(email)) return res.status(409).json({ message: "Email already in use" });
+    
+    // Check for existing email
+    if (await userRepository.findByEmail(email)) 
+      return res.status(409).json({ message: "Email already in use" });
+    
+    // Check for existing phone
+    if (await userRepository.findByPhone(phone))
+      return res.status(409).json({ message: "Phone number already in use" });
+    
+    // Check for existing kyc_document if provided
+    if (kyc_document) {
+      const existingUserWithKyc = await userRepository.findByKycDocument(kyc_document);
+      if (existingUserWithKyc)
+        return res.status(409).json({ message: "ID number already in use" });
+    }
 
     const password_hash = await bcrypt.hash(password, 10);
     const pendingId = `${email}:${Date.now()}`;
@@ -27,6 +63,33 @@ export const initiateSignup = async (req, res) => {
   }
 };
 
+
+
+// export const completeSignup = async (req, res) => {
+//   try {
+//     const { pendingId, emailOtp, phoneOtp } = req.body;
+//     const pendingUser = pendingUsers.get(pendingId);
+//     if (!pendingUser) return res.status(400).json({ message: "Invalid or expired signup session" });
+
+//     const emailCheck = verifyOTP(pendingUser.email, emailOtp);
+//     if (!emailCheck.valid) return res.status(401).json({ message: "Invalid or expired email OTP" });
+//     const phoneCheck = verifyOTP(pendingUser.phone, phoneOtp);
+//     if (!phoneCheck.valid) return res.status(401).json({ message: "Invalid or expired phone OTP" });
+
+//     const user = await userRepository.createUser({ ...pendingUser, emailVerified: true, phoneVerified: true });
+//     pendingUsers.delete(pendingId);
+
+//     const userId = user.user_id ?? user.id;
+//     const token = signToken({ user_id: userId, role: user.role });
+//     res.status(201).json({ message: "Signup complete", token, user: { user_id: userId, full_name: user.full_name, role: user.role } });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: "Signup failed" });
+//   }
+// };
+
+
+// Updated completeSignup function in authController.js
 export const completeSignup = async (req, res) => {
   try {
     const { pendingId, emailOtp, phoneOtp } = req.body;
@@ -38,17 +101,23 @@ export const completeSignup = async (req, res) => {
     const phoneCheck = verifyOTP(pendingUser.phone, phoneOtp);
     if (!phoneCheck.valid) return res.status(401).json({ message: "Invalid or expired phone OTP" });
 
-    const user = await userRepository.createUser({ ...pendingUser, emailVerified: true, phoneVerified: true });
-    pendingUsers.delete(pendingId);
+    try {
+      const user = await userRepository.createUser({ ...pendingUser, emailVerified: true, phoneVerified: true });
+      pendingUsers.delete(pendingId);
 
-    const userId = user.user_id ?? user.id;
-    const token = signToken({ user_id: userId, role: user.role });
-    res.status(201).json({ message: "Signup complete", token, user: { user_id: userId, full_name: user.full_name, role: user.role } });
+      const userId = user.user_id ?? user.id;
+      const token = signToken({ user_id: userId, role: user.role });
+      res.status(201).json({ message: "Signup complete", token, user: { user_id: userId, full_name: user.full_name, role: user.role } });
+    } catch (error) {
+      // Handle specific error messages from repository
+      return res.status(409).json({ message: error.message });
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Signup failed" });
   }
 };
+
 
 export const login = async (req, res) => {
   try {

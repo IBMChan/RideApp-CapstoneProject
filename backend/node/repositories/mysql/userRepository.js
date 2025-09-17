@@ -40,6 +40,13 @@ class UserRepository {
   return await User.findOne({ where: { phone } });
 }
 
+// Add this method to UserRepository class in userRepository.js
+async findByKycDocument(kyc_document) {
+  if (!kyc_document) return null;
+  return await User.findOne({ where: { kyc_document } });
+}
+
+
 
   async findByRole(role) {
     if (!role) return [];
@@ -50,10 +57,28 @@ class UserRepository {
     return await User.create(data);
   }
 
-  async findAll() {
-  const [rows] = await mysqlSequelize.query('SELECT * FROM users');
-  return rows;
+ // Updated createUser method in userRepository.js
+async createUser(data) {
+  try {
+    return await User.create(data);
+  } catch (error) {
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      // Check which field caused the uniqueness error
+      if (error.fields && error.fields.includes('email')) {
+        throw new Error('Email already in use');
+      }
+      if (error.fields && error.fields.includes('phone')) {
+        throw new Error('Phone number already in use');
+      }
+      if (error.fields && error.fields.includes('kyc_document')) {
+        throw new Error('ID number already in use');
+      }
+      throw new Error('User with these details already exists');
+    }
+    throw error;
+  }
 }
+
 
 
   async getDrivers() {
