@@ -10,18 +10,30 @@ class WalletTransactionRepository {
     return rows[0];
   }
 
-  async findById(txn_id) {
+  async findById(transc_id) {
     const { rows } = await pgSequelize.query(
       "SELECT * FROM wallet_transaction WHERE transc_id = $1",
-      [txn_id]
+      [transc_id]
     );
     return rows[0];
   }
 
-  async updateStatus(txn_id, status, razorpay_payment_id = null) {
+async findByRazorpayId(razorpay_payment_id) {
+  if (!razorpay_payment_id) return null;
+
+  const { rows } = await pgSequelize.query(
+    "SELECT * FROM wallet_transaction WHERE razorpay_payment_id = $1 LIMIT 1",
+    [razorpay_payment_id]  // <-- parameter array MUST be here
+  );
+
+  return rows[0] || null;
+}
+
+
+  async updateStatus(transc_id, status, razorpay_payment_id = null) {
     const { rows } = await pgSequelize.query(
       "UPDATE wallet_transaction SET status = $1, razorpay_payment_id = COALESCE($2, razorpay_payment_id) WHERE transc_id = $3 RETURNING *",
-      [status, razorpay_payment_id, txn_id]
+      [status, razorpay_payment_id, transc_id]
     );
     return rows[0];
   }

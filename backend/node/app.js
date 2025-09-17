@@ -20,7 +20,7 @@ import WalletTransaction from "./entities/walletTransactionModel.js";
 
 // Middlewares
 import { errorHandler } from "./middlewares/errorHandler.js";
-import { authMiddleware } from "./middlewares/authMiddleware.js";
+// import { authMiddleware } from "./middlewares/authMiddleware.js";
 
 // Routes
 import authRoutes from "./routes/authRoutes.js";
@@ -63,7 +63,7 @@ app.get("/", (_req, res) => {
 app.use("/api/auth", authRoutes);
 
 // Apply AuthGuard for all routes below
-app.use(authMiddleware);
+// app.use(authMiddleware);
 
 // Protected Routes
 app.use("/api/rides", rideRoutes);

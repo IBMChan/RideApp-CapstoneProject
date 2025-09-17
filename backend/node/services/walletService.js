@@ -12,7 +12,6 @@ class WalletService {
 
     this.walletScript = process.env.PYTHON_WALLET_SCRIPT_PATH ||
       path.resolve(__dirname, "../../python/wallet/walletService.py");
-    this.rideScript = path.resolve(__dirname, "../../python/rides/rideUtils.py");
   }
 
   runPython(scriptPath, args) {
@@ -30,21 +29,65 @@ class WalletService {
     });
   }
 
-  async createWallet(user_id, pin) {
-    const existingWallet = await WalletRepository.findByUser(user_id);
-    if (existingWallet) throw new AppError("Wallet already exists for user", 409);
-    const wallet = await WalletRepository.createForUserWithPin(user_id, pin);
-    if (!wallet) throw new AppError("Wallet creation failed", 500);
-    return wallet;
+  async getWalletByUserId(user_id) {
+    return await WalletRepository.findByUser(user_id) || null;
   }
 
-  async updatePin(user_id, newPin) {
-    if (!newPin || newPin.length < 4) return { success: false, message: "PIN must be at least 4 digits" };
+  async initiateAddMoney(user_id, amount, pin) {
     const wallet = await WalletRepository.findByUser(user_id);
     if (!wallet) throw new AppError("Wallet not found", 404);
+    if (String(wallet.pin) !== String(pin)) throw new AppError("Invalid wallet PIN", 401);
 
-    const updatedWallet = await WalletRepository.updatePin(user_id, newPin);
-    return { success: true, wallet: updatedWallet };
+    // call python to create credit txn and razorpay order
+    const result = await this.runPython(this.walletScript, ["credit", String(user_id), String(amount)]);
+    if (!result.success) throw new AppError(result.message || "Failed to initiate add money", 500);
+
+    const txn = result.txn; // transaction returned from Python
+    // ensure we save txn in Node-side if needed (or return to frontend)
+    return { success: true, message: "Add money initiated", txn };
+  }
+
+  async verifyAddMoneyByTxnId(razorpay_payment_id) {
+    if (!razorpay_payment_id) throw new AppError("razorpay_payment_id is required", 400);
+
+    // Fetch txn by razorpay_payment_id
+    const txn = await WalletTransactionRepository.findByRazorpayId(razorpay_payment_id);
+    if (!txn) return { success: false, message: "Transaction not found" };
+    if (txn.status === "completed") return { success: true, message: "Already verified" };
+
+    // Update wallet balance
+    const wallet = await WalletRepository.findById(txn.wallet_id);
+    if (!wallet) throw new AppError("Wallet not found", 404);
+
+    const newBalance = parseFloat(wallet.balance) + parseFloat(txn.credit || 0);
+    await WalletRepository.updateBalance(wallet.wallet_id, newBalance);
+
+    // Update transaction status
+    await WalletTransactionRepository.updateStatus(txn.transc_id, "completed");
+
+    return { success: true, message: "Wallet credited", balance: newBalance };
+  }
+
+  async initiateWithdraw(user_id, amount, pin) {
+    const wallet = await WalletRepository.findByUser(user_id);
+    if (!wallet) throw new AppError("Wallet not found", 404);
+    if (String(wallet.pin) !== String(pin)) throw new AppError("Invalid wallet PIN", 401);
+    if (parseFloat(wallet.balance) < parseFloat(amount)) throw new AppError("Insufficient balance", 400);
+
+    const result = await this.runPython(this.walletScript, ["withdraw", String(user_id), String(amount)]);
+    if (!result.success) throw new AppError(result.message || "Withdrawal failed", 500);
+
+    const newBalance = parseFloat(wallet.balance) - parseFloat(amount);
+    await WalletRepository.updateBalance(wallet.wallet_id, newBalance);
+
+    // Record debit txn
+    await WalletTransactionRepository.create({
+      wallet_id: wallet.wallet_id,
+      debit: amount,
+      status: "pending"
+    });
+
+    return { success: true, message: "Withdrawal initiated", balance: newBalance };
   }
 
   async getBalance(user_id) {
@@ -57,46 +100,16 @@ class WalletService {
     const wallet = await WalletRepository.findByUser(user_id);
     if (!wallet) throw new AppError("Wallet not found", 404);
 
-    return WalletTransactionRepository.findByWallet(wallet.wallet_id);
-  }
+    const txns = await WalletTransactionRepository.findByWallet(wallet.wallet_id);
 
-  async initiateWithdraw(user_id, amount, pin) {
-    const wallet = await WalletRepository.findByUser(user_id);
-    if (!wallet) throw new AppError('Wallet not found', 404);
-    if (String(wallet.pin) !== String(pin)) return { success: false, message: 'Invalid wallet PIN' };
-    if (parseFloat(wallet.balance) < parseFloat(amount)) return { success: false, message: 'Insufficient balance' };
-
-    const result = await this.runPython(this.walletScript, ["withdraw", String(user_id), String(amount)]);
-    if (!result.success) return { success: false, message: result.message || 'Withdrawal failed' };
-
-    const newBalance = parseFloat(wallet.balance) - parseFloat(amount);
-    const updatedWallet = await WalletRepository.updateBalanceByUserId(user_id, newBalance);
-    if (!updatedWallet) throw new AppError('Failed to update wallet balance', 500);
-
-    await WalletTransactionRepository.create({
-      wallet_id: wallet.wallet_id,
-      debit: amount,
-      type: 'debit',
-      description: 'Withdrawal'
-    });
-
-    return { success: true, message: 'Withdrawal successful', balance: newBalance };
-  }
-
-  async initiateAddMoney(user_id, amount, pin) {
-    const wallet = await WalletRepository.findByUser(user_id);
-    if (!wallet) throw new AppError("Wallet not found", 404);
-    if (String(wallet.pin) !== String(pin)) throw new AppError("Invalid wallet PIN", 401);
-
-    const result = await this.runPython(this.walletScript, ["credit", String(user_id), String(amount)]);
-    if (!result.success) throw new AppError(result.message || "Failed to add money", 500);
-    return result;
-  }
-
-  async verifyAddMoney(txn_id, razorpay_payment_id) {
-    const result = await this.runPython(this.walletScript, ["verify", String(txn_id), String(razorpay_payment_id)]);
-    if (!result.success) throw new AppError(result.message || "Failed to verify add money payment", 400);
-    return result;
+    return txns.map(t => ({
+      transc_id: t.transc_id,
+      txn_date: t.txn_date,
+      credit: t.credit,
+      debit: t.debit,
+      status: t.status,
+      razorpay_payment_id: t.razorpay_payment_id
+    }));
   }
 }
 

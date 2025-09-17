@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vaahan - Manage Wallet</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <script src="../assets/js/wallet.js" defer></script>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">🚗 Vaahan</div>
+  <nav class="header-nav">
+    <a href="#home" class="nav-link">Home</a>
+    <a id="logoutBtn" class="nav-link">Logout</a>
+    <a href="#profile" class="nav-link"><div class="profile-pic">P</div></a>
+    <button class="sos-btn">SOS</button>
+  </nav>
+</header>
+
+<aside class="sidebar">
+  <ul class="sidebar-menu">
+    <li><a href="#home" class="sidebar-link">🏠 Home</a></li>
+    <li><a href="book_ride.html" class="sidebar-link">🚖 Book Ride</a></li>
+    <li><a href="save_location.html" class="sidebar-link">📍 Save Location</a></li>
+    <li><a href="rider_wallet.html" class="sidebar-link active">💳 Manage Wallet</a></li>
+    <li><a href="#rides" class="sidebar-link">📝 My Rides</a></li>
+    <li><a href="#ticket" class="sidebar-link">🎫 Raise Ticket</a></li>
+  </ul>
+</aside>
+
+<main class="main-content">
+  <h1>Manage Wallet 💳</h1>
+
+  <!-- Wallet Info -->
+  <div class="welcome-card">
+    <p><strong>Wallet ID:</strong> <span id="walletId">Loading...</span></p>
+    <p><strong>Balance:</strong> ₹ <span id="walletBalance">0</span></p>
+    <button id="createWalletBtn" class="request-btn">Create Wallet</button>
+    <button id="addMoneyBtn" class="request-btn" disabled>Add Money</button>
+    <button id="viewTransactionsBtn" class="request-btn" disabled>View Transactions</button>
+  </div>
+
+  <!-- Create Wallet -->
+  <div id="createWalletForm" style="display:none;">
+    <label for="newPin">4-digit PIN</label>
+    <input type="password" id="newPin" maxlength="4">
+    <button id="proceedCreateWallet" class="request-btn">Create</button>
+    <button id="cancelCreateWallet" class="request-btn outline">Cancel</button>
+  </div>
+
+  <!-- Add Money Step 1 -->
+  <div id="addMoneyFormStep1" style="display:none;">
+    <label for="amount">Amount</label>
+    <input type="number" id="amount">
+    <label for="pin">Wallet PIN</label>
+    <input type="password" id="pin" maxlength="4">
+    <button id="proceedAddMoney" class="request-btn">Proceed</button>
+    <button id="cancelAddMoney1" class="request-btn outline">Cancel</button>
+  </div>
+
+  <!-- Add Money Step 2 -->
+  <div id="addMoneyFormStep2" style="display:none;" data-txn-id="">
+    <label for="txnId">Razorpay Transaction ID</label>
+    <input type="text" id="txnId">
+    <button id="confirmAddMoney" class="request-btn">Verify & Add Money</button>
+    <button id="cancelAddMoney2" class="request-btn outline">Cancel</button>
+  </div>
+
+  <!-- Transactions -->
+  <div id="transactionsSection" style="display:none;">
+    <h3>Transactions</h3>
+    <table>
+      <thead>
+        <tr><th>Date</th><th>Credit</th><th>Debit</th><th>Status</th></tr>
+      </thead>
+      <tbody id="transactionsList"></tbody>
+    </table>
+  </div>
+
+</main>
+
+<footer class="footer">
+  <p>© 2025 Vaahan. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
