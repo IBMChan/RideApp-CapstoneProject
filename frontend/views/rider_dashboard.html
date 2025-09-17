@@ -1,3 +1,4 @@
+<!-- raksha and harshit -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vaahan - Rider Dashboard</title>
   <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/rider_dashboard.css">
+  <script src="../assets/js/rider_dashboard.js"></script>
 </head>
 <body>
 
@@ -28,6 +31,7 @@
       <li class="sidebar-item"><a href="#save" class="sidebar-link">📍 Save Location</a></li>
       <li class="sidebar-item"><a href="#wallet" class="sidebar-link">💳 Payments & Wallet</a></li>
       <li class="sidebar-item"><a href="#rides" class="sidebar-link">📝 My Rides</a></li>
+      <li class="sidebar-item"><a href="#share" class="sidebar-link">📤 Share Ride Status</a></li>
       <li class="sidebar-item"><a href="#ticket" class="sidebar-link">🎫 Raise Ticket</a></li>
     </ul>
   </aside>
@@ -51,6 +55,30 @@
       </form>
     </section>
 
+     <!-- Saved Locations Section -->
+    <section id="save" class="dashboard-section">
+      <h2>📍 Saved Locations</h2>
+      <form id="saveLocationForm" class="form-inline">
+        <input type="text" id="locationLabel" placeholder="Label (e.g. Home)" required>
+        <input type="text" id="locationAddress" placeholder="Address" required>
+        <input type="text" id="latitude" placeholder="Latitude" required>
+        <input type="text" id="longitude" placeholder="Longitude" required>
+        <button type="submit" class="request-btn">Add Location</button>
+      </form>
+      <div id="savedLocationsList" class="list-container"></div>
+
+    </section>
+
+    <!-- Share Ride Status Section -->
+<section id="share" class="dashboard-section">
+  <h2>📤 Share Ride Status</h2>
+  <form id="shareRideForm" class="form-inline">
+    <input type="email" id="shareEmail" placeholder="Emergency Contact Email" required>
+    <button type="submit" class="request-btn">Share Ride</button>
+  </form>
+  <div id="shareRideMsg" class="message"></div>
+  
+</section>
     <!-- About Section -->
     <section id="about" class="about">
       <h2>About Us</h2>
