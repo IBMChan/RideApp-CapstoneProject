@@ -18,4 +18,6 @@ router.post("/:ride_id/payment", authMiddleware, rideController.processPayment);
 router.post("/:ride_id/initiate-payment", authMiddleware, rideController.initiatePayment);
 router.post("/:ride_id/confirm-payment", authMiddleware, rideController.confirmPayment);
 
+router.get("/matched/:driverId", rideController.getMatchedRides);
+
 export default router;

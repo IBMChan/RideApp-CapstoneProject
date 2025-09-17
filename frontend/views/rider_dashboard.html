@@ -1,52 +1,180 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Rider Dashboard — RideApp</title>
-  <link rel="stylesheet" href="../assets/css/style.css">
-  <script src="/assets/js/authGuard.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RideApp — Rider Dashboard</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Local CSS -->
+  <link rel="stylesheet" href="../assets/css/rider.css" />
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header>
-    <h1>RideApp — Rider Dashboard</h1>
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="container">
+      <div class="brand">
+        <div class="logo">🟦</div>
+        <div>
+          <h1>RideApp</h1>
+          <small>Fast. Reliable. Local.</small>
+        </div>
+      </div>
+
+      <nav class="tabs">
+        <button class="tab-btn active" data-tab="book">Book Ride</button>
+        <button class="tab-btn" data-tab="requests">Requests</button>
+        <button class="tab-btn" data-tab="features">Features</button>
+        <button class="tab-btn" data-tab="profile">Profile</button>
+      </nav>
+
+      <div class="user-actions">
+        <div id="userName">Guest</div>
+        <button id="btnLogout" class="ghost">Logout</button>
+      </div>
+    </div>
   </header>
 
-  <main class="dashboard">
-    <div class="card">
-      <h2>Welcome, Rider 🚗</h2>
-      <p>Book your next ride with a single click.</p>
-      <button class="btn">Book a Ride</button>
-      <br>
-      <button class="btn-secondary" id="logoutBtn">Logout</button>
-    </div>
+  <!-- Main Grid -->
+  <main class="container grid">
+    <!-- Left column: Map + Book -->
+    <section class="left-col card" id="book">
+      <h2>Create a Ride</h2>
 
-    <div class="card">
-      <h2>Your Ride History</h2>
-      <p>No rides booked yet.</p>
-    </div>
+      <div class="form-row">
+        <label>Pickup location</label>
+        <input id="pickupInput" placeholder="Start typing address or click on map" autocomplete="off" />
+        <div class="coords small muted" id="pickupCoords"></div>
+      </div>
+
+      <div class="form-row">
+        <label>Drop location</label>
+        <input id="dropInput" placeholder="Start typing address or click on map" autocomplete="off" />
+        <div class="coords small muted" id="dropCoords"></div>
+      </div>
+
+      <div class="row">
+        <button id="btnSwap" class="ghost small">Swap</button>
+        <div class="spacer"></div>
+        <button id="btnCreateRide" class="primary">Request Ride</button>
+      </div>
+
+      <hr />
+      <div id="matchResult" class="muted small"></div>
+      <div id="fareDistanceSummary" style="margin-top:8px;"></div>
+      <div id="map" class="map"></div>
+    </section>
+
+    <!-- Right column: Requests / Features / Profile -->
+    <section class="right-col">
+      <!-- Requests -->
+      <div class="card tab" id="requests" style="display:none;">
+        <h3>Ride Requests</h3>
+        <div id="requestsArea" class="list"></div>
+      </div>
+
+      <!-- Features (replaces History) -->
+      <div class="card tab" id="features" style="display:none;">
+        <h3>Rider Features</h3>
+
+        <!-- Saved Locations -->
+        <div class="features-section">
+          <h4>Saved Locations</h4>
+          <form id="formSaveLocation" class="form-grid">
+            <input id="locLabel" placeholder="Label (e.g., Home)" required />
+            <input id="locAddress" placeholder="Address" required />
+            <input id="locLat" placeholder="Latitude" type="number" step="0.000001" required />
+            <input id="locLng" placeholder="Longitude" type="number" step="0.000001" required />
+            <div class="form-actions">
+              <button type="submit" class="primary small">Save Location</button>
+              <button id="btnClearLoc" type="button" class="ghost small">Clear</button>
+            </div>
+          </form>
+          <div id="savedLocations" class="list" style="margin-top:12px"></div>
+        </div>
+
+        <hr />
+
+        <!-- Lost Items -->
+        <div class="features-section">
+          <h4>Report Lost Item</h4>
+          <form id="formLostItem" class="form-grid">
+            <input id="lostRideId" placeholder="Ride ID (required)" type="number" required />
+            <input id="lostDescription" placeholder="Describe lost item" required />
+            <div class="form-actions">
+              <button type="submit" class="primary small">Report Lost Item</button>
+            </div>
+          </form>
+          <div id="lostItemsList" class="list" style="margin-top:12px"></div>
+        </div>
+
+        <hr />
+
+        <!-- Share Ride -->
+        <div class="features-section">
+          <h4>Share Ride Status (Email)</h4>
+          <form id="formShareRide" class="form-grid">
+            <input id="shareRideId" placeholder="Ride ID (optional)" type="number" />
+            <input id="shareEmail" placeholder="Recipient Email" type="email" required />
+            <div class="form-actions">
+              <button type="submit" class="primary small">Share Ride</button>
+            </div>
+          </form>
+          <div id="shareResult" class="small muted" style="margin-top:8px"></div>
+        </div>
+
+        <hr />
+
+        <!-- SOS -->
+        <div class="features-section">
+          <h4>Emergency SOS</h4>
+          <form id="formSOS" class="form-grid">
+            <input id="sosEmail" placeholder="Emergency contact email" type="email" required />
+            <div class="form-actions">
+              <button type="submit" class="primary small danger">Send SOS</button>
+            </div>
+          </form>
+          <div id="sosResult" class="small muted" style="margin-top:8px"></div>
+        </div>
+      </div>
+
+      <!-- Profile -->
+      <div id="profile" class="tab" style="display:none; padding: 20px;">
+        <div id="profileCard" style="max-width:420px;"></div>
+
+        <form id="profileForm" style="display:none; max-width:420px; margin-top:20px;">
+          <label>Name:</label><br>
+          <input type="text" id="profileName" required><br><br>
+          <label>Email:</label><br>
+          <input type="email" id="profileEmail"><br><br>
+          <label>Phone:</label><br>
+          <input type="text" id="profilePhone"><br><br>
+          <div class="row">
+            <div class="spacer"></div>
+            <button type="submit" id="btnSaveProfile" class="primary small">Save</button>
+            <button type="button" id="btnCancelEdit" class="ghost small">Cancel</button>
+          </div>
+        </form>
+
+        <button id="btnEditProfile" style="margin-top:10px;" class="small ghost">Edit Profile</button>
+      </div>
+    </section>
   </main>
 
-  <footer>
-    &copy; <span id="year"></span> RideApp
+  <footer class="footer">
+    <div class="container">© RideApp • Built for demo</div>
   </footer>
 
-  <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      document.cookie.split(";").forEach(c => {
-        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-      });
-      window.location.href = "/index.html";
-    });
-
-    window.onload = async () => {
-      const user = await checkAuth(true);
-      if (user?.role !== "rider") {
-        alert("Access denied! Only riders allowed.");
-        window.location.href = "../login.html";
-      }
-    };
-  </script>
+  <!-- Local JS: ride helper + UI -->
+  <script src="../assets/js/ride.js"></script>
+  <script src="../assets/js/rider.js"></script>
 </body>
 </html>

@@ -10,7 +10,9 @@ import { callPython } from "./pythonService.js";
 import path from "path";
 import { spawn } from 'child_process';
 import vehicleRepository from "../repositories/mysql/vehicleRepository.js";
+import RideDriverAssignmentRepository from "../repositories/mysql/rideDriverAssignmentRepository.js";
 import crypto from "crypto";
+import Ride from "../entities/rideModel.js";
 // import notificationService from "./notificationService"; // Optional notifications
 
 class RideService {
@@ -95,6 +97,12 @@ class RideService {
       // };
 
       const matchedDrivers = await this.matchDrivers(ride.ride_id);
+      const assignments = matchedDrivers.assignments[0].drivers.map((d) => ({
+        ride_id: ride.ride_id,
+        driver_id: d.driver_id,
+        distance: d.distance,
+      }));
+      await RideDriverAssignmentRepository.bulkCreate(assignments);
       return { ride, matchedDrivers };
     } catch (err) {
       if (!(err instanceof AppError)) {
@@ -170,6 +178,27 @@ class RideService {
       costMatrix.forEach((row) => child.stdin.write(row.join(" ") + "\n"));
       child.stdin.end();
     });
+  }
+
+  // ---------------- NEW: Get rides where driver is matched ----------------
+  async getMatchedRidesForDriver(driver_id) {
+    if (!driver_id) throw new AppError("Driver ID is required", 400, "MISSING_DRIVER_ID");
+
+    const isDriver = await userRepository.isDriver(driver_id);
+    if (!isDriver) {
+      throw new AppError("Only drivers can fetch matched rides", 403, "ROLE_VALIDATION_ERROR");
+    }
+
+    const assignments = await RideDriverAssignmentRepository.findByDriverId(driver_id);
+    if (!assignments?.length) {
+      throw new AppError("No matched rides found", 404, "NO_MATCHED_RIDES");
+    }
+
+    return assignments.map((a) => ({
+      ride_id: a.ride_id,
+      distance: a.distance,
+      ride: a.ride, // includes pickup_loc, drop_loc, fare etc
+    }));
   }
 
   // ---------------- Driver Methods ----------------
@@ -298,20 +327,20 @@ class RideService {
     const now = new Date();
     const expiry = ride.expiry_time ? new Date(ride.expiry_time) : null;
 
-    if (expiry && now < expiry) {
-      // Revert to requested and remove assignment
-      await RideRepository.clearSensitiveFields(ride_id);
-      await ride.update({
-        status: "requested",
-      });
-      return ride;
-    } else {
-      // Past expiry -> cancel permanently
-      await RideRepository.clearSensitiveFields(ride_id);
-      const cancelled = await RideRepository.cancelRide(ride_id);
-      if (!cancelled) throw new AppError("Unable to cancel ride", 500, "CANCEL_FAILED");
-      return cancelled;
-    }
+    // if (role !== "rider" && expiry && now < expiry) {
+    //   // Revert to requested and remove assignment
+    //   await RideRepository.clearSensitiveFields(ride_id);
+    //   await ride.update({
+    //     status: "requested",
+    //   });
+    //   return ride;
+    // } else {
+    // Past expiry -> cancel permanently
+    await RideRepository.clearSensitiveFields(ride_id);
+    const cancelled = await RideRepository.cancelRide(ride_id);
+    if (!cancelled) throw new AppError("Unable to cancel ride", 500, "CANCEL_FAILED");
+    return cancelled;
+    // }
   }
 
   async getOngoingRides(driver_id) {

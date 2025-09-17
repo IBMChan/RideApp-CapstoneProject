@@ -4,15 +4,16 @@ process.env.TZ = "Asia/Kolkata";
 import { config as configDotenv } from "dotenv";
 configDotenv();
 
-import cors from "cors";
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import path from "path";
 import mysql from "mysql2/promise";
 import sequelize from "./config/sqlConfig.js";
 import { connectDB } from "./config/mongoConfig.js";
 import pgSequelize from "./config/postgreConfig.js";
 import redisClient from "./config/redisConfig.js";
+
 
 // Entities / Models
 import SavedLocation from "./entities/savLocModel.js";
@@ -41,6 +42,13 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(cors({
+  origin: ["http://127.0.0.1:3001", "http://localhost:3001", "http://192.168.56.1:3001", "http://192.168.0.111:3001"],
+  credentials: true
+}));
+
+const __dirname = path.resolve("../frontend");
+app.use(express.static(__dirname));
 
 // Simple request logger
 app.use((req, res, next) => {
@@ -48,16 +56,13 @@ app.use((req, res, next) => {
   next();
 });
 
-// ---------- Health Check ----------
-app.get("/", (_req, res) => {
-  res.send("🚀 Backend is running successfully! All DB connections are active.");
-});
+
 
 // ---------- Routes ----------
 app.use("/api/auth", authRoutes);
 
 // Apply AuthGuard for all routes below
-app.use(authMiddleware);
+// app.use(authMiddleware);
 
 // Protected Routes
 app.use("/api/rides", rideRoutes);
@@ -66,7 +71,17 @@ app.use("/api/driver", driverRoutes);
 app.use("/api/payment", paymentRoutes);      // Add payment routes
 app.use("/api/wallet", walletRoutes);  // Add wallet routes
 
-    // Error Raksha & Harshit
+// ---------- Health Check ----------
+// app.get("/", (_req, res) => {
+//   res.send("🚀 Backend is running successfully! All DB connections are active.");
+// });
+
+app.get(/.*/, (req, res) => {
+  res.sendFile(path.join(__dirname, "/index.html"));
+});
+
+
+// Error Raksha & Harshit
 app.use(errorHandler);
 
 // ---------- DB + Server Init ----------
@@ -90,7 +105,7 @@ app.use(errorHandler);
     // 3️⃣ Sequelize (MySQL)
     await sequelize.authenticate();
     console.log("✅ Sequelize connection established successfully.");
-    await sequelize.sync({alter: false, force: false}); // ⚠️ Dev-only
+    await sequelize.sync({ alter: false, force: false }); // ⚠️ Dev-only
     console.log("✅ Sequelize models synced successfully.");
 
     // 4️⃣ PostgreSQL
@@ -117,9 +132,9 @@ app.use(errorHandler);
   }
 
   app.use((err, req, res, next) => {
-  console.error("🔥 Error caught:", err); // logs full error
-  res.status(500).json({ error: err.message || "Internal Server Error" });
-});
+    console.error("🔥 Error caught:", err); // logs full error
+    res.status(500).json({ error: err.message || "Internal Server Error" });
+  });
 })();
 
 export default app;

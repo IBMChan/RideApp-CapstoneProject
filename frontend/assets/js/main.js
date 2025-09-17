@@ -34,14 +34,16 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("user", JSON.stringify(data.user));
 
         // optionally redirect
-    // Redirect based on role
-if (data.user.role === "rider") {
-  window.location.href = "../views/rider_dashboard.html";
-} else if (data.user.role === "driver") {
-  window.location.href = "../views/driver_dashboard.html";
-} else {
-  window.location.href = "../index.html";
-}
+        setTimeout(() => {
+          if (data.user.role === "rider") {
+            window.location.href = "../views/rider_dashboard.html";
+          } else if (data.user.role === "driver") {
+            window.location.href = "../views/driver_dashboard.html";
+          } else {
+            window.location.href = "../index.html";
+          }
+        }, 300); // 300ms delay
+
 
       } catch (err) {
         console.error("Login error:", err);
@@ -56,8 +58,8 @@ if (data.user.role === "rider") {
   if (car) {
     let dir = 1;
     setInterval(() => {
-      car.style.transform = `translateX(${(Math.sin(Date.now()/700) * 6)}px)`;
+      car.style.transform = `translateX(${(Math.sin(Date.now() / 700) * 6)}px)`;
     }, 60);
   }
 
-})();
+});
