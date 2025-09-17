@@ -6,11 +6,11 @@ import { authMiddleware } from "../middlewares/authMiddleware.js";
 const router = express.Router();
 
 // All routes for drivers require auth
-router.use(authMiddleware);
+// router.use(authMiddleware);
 
 // Profile
-router.get("/profile", driverController.getProfile);
-router.patch("/profile", driverController.updateProfile);
+router.get("/profile", authMiddleware, (req, res) => driverController.getProfile(req, res));
+router.patch("/profile", authMiddleware, (req, res) => driverController.updateProfile(req, res));
 
 // Ride History
 router.get("/rides", driverController.getRideHistory);

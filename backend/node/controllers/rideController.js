@@ -8,6 +8,7 @@ class RideController {
   async createRide(req, res) {
     try {
       const rider_id = req.user?.user_id;
+      console.log(rider_id);
       const { ride, matchedDrivers } = await RideService.createRide(req.body, rider_id);
 
       const rideData = await redisClient.get(`ride:${ride.ride_id}`);
