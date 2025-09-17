@@ -1,4 +1,4 @@
-// app.js - Unified Entry Point
+//app.js - Unified Entry Point
 
 process.env.TZ = "Asia/Kolkata";
 import { config as configDotenv } from "dotenv";
@@ -57,6 +57,14 @@ app.use("/api/wallet", walletRoutes);  // Add wallet routes
     // Error Raksha & Harshit
 app.use(errorHandler);
 
+
+
+// Catch everything that doesn't begin with /api
+app.get(/^(?!\/api).*/, (req, res) => {
+  res.sendFile(path.join(__dirname, '../../frontend/index.html'));
+});
+
+
 const utcMillis = Date.now();
 const dateInIST = new Date(utcMillis).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
 
@@ -112,3 +120,5 @@ console.log("IST date time:", dateInIST);
 })();
 
 export default app;
+
+
