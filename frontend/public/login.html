@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login — RideApp</title>
+  <link rel="stylesheet" href="../assets/css/style.css"> <!-- ✅ Use global styles -->
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">RideApp</div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="form-card">
+      <h2>Login</h2>
+      <form id="loginForm" class="form">
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button type="submit" class="btn">Login</button>
+      </form>
+      <div id="responseMsg" class="message"></div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    &copy; <span id="year"></span> RideApp — All rights reserved
+  </footer>
+
+  <!-- Scripts -->
+  <script src="../assets/js/main.js"></script>
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

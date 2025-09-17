@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Driver Dashboard</title>
+  <link rel="stylesheet" href="../assets/css/driver.css">
+</head>
+
+<body>
+  <h1>Driver Dashboard</h1>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="requests">Ride Requests</button>
+    <button class="tab-btn" data-tab="ongoing">Ongoing Rides</button>
+    <button class="tab-btn" data-tab="history">Ride History</button>
+    <button class="tab-btn" data-tab="profile">Profile</button>
+    <button class="tab-btn" data-tab="vehicles">Vehicles</button>
+    <button class="tab-btn" data-tab="payments">Payments</button>
+  </div>
+
+  <!-- Panels -->
+  <div id="requests" class="tab active">
+    <h2>Pending Ride Requests</h2>
+    <div id="rideRequestsList"></div>
+  </div>
+
+  <div id="ongoing" class="tab">
+    <h2>Ongoing Rides</h2>
+    <div id="ongoingRidesList"></div>
+  </div>
+
+  <div id="history" class="tab">
+    <h2>Ride History</h2>
+    <div id="rideHistoryList"></div>
+  </div>
+
+  <div id="profile" class="tab">
+    <h2>Driver Profile</h2>
+    <div id="profileInfo"></div>
+  </div>
+
+  <div id="vehicles" class="tab">
+    <h2>Your Vehicles</h2>
+    <div id="vehicleList"></div>
+  </div>
+
+  <div id="payments" class="tab">
+    <h2>Payments</h2>
+    <div id="paymentHistory"></div>
+  </div>
+
+  <button id="btnLogout">Logout</button>
+
+  <script src="../assets/js/driver.js"></script>
+</body>
+
+</html>
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Driver Dashboard - Vaahan</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="../assets/js/main.js" defer></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">Vaahan</div>
+    <nav class="header-nav">
+      <a href="#home" class="nav-link">Home</a>
+      <a id="logoutBtn" class="nav-link">Logout</a>
+      <a href="#profile" class="nav-link">
+        <div class="profile-pic">D</div>
+      </a>
+    </nav>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <button class="toggle-btn" id="toggleBtn"><i class="fas fa-bars"></i></button>
+    <ul class="sidebar-menu">
+      <li class="sidebar-item">
+        <a href="#" class="sidebar-link">
+          <i class="fas fa-car"></i>
+          <span style="margin-left:10px;">Check Rides</span>
+          <span style="color:red; font-size:1.2rem; margin-left:5px;">•</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="#" class="sidebar-link">
+          <i class="fas fa-wallet"></i>
+          <span style="margin-left:10px;">My Earnings</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="#" class="sidebar-link">
+          <i class="fas fa-credit-card"></i>
+          <span style="margin-left:10px;">Payment & Wallet</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="#" class="sidebar-link">
+          <i class="fas fa-history"></i>
+          <span style="margin-left:10px;">History</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="#" class="sidebar-link">
+          <i class="fas fa-cog"></i>
+          <span style="margin-left:10px;">Settings</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="hero">
+      <h1>No Active Rider</h1>
+      <p>Currently, you don’t have any active rides assigned.</p>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div>&copy; 2025 Vaahan. All Rights Reserved.</div>
+    <div class="footer-links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Support</a>
+    </div>
+  </footer>
+
+  <!-- Sidebar Toggle Script -->
+  <script>
+    const toggleBtn = document.getElementById("toggleBtn");
+    const sidebar = document.getElementById("sidebar");
+    toggleBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("collapsed");
+    });
+  </script>
+</body>
+</html> -->
