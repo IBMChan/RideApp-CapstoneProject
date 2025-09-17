@@ -1,22 +1,181 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Signup — RideApp</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signup — RideApp</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/signup.css">
 </head>
 <body>
-    <section class="hero">
-        <div class="form-container">
-            <h2>Signup</h2>
-            <form>
-                <input type="text" name="name" placeholder="Full Name" required>
-                <input type="email" name="email" placeholder="Email" required>
-                <input type="password" name="password" placeholder="Password" required>
-                <button class="btn" type="submit">Signup</button>
-            </form>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">RideApp</div>
+    <div class="header-nav">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="./login.html" class="nav-link">Login</a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="form-card">
+      <h2>Create Your Account</h2>
+      
+      <div class="progress-bar">
+        <div class="progress-step active" id="step1-progress">Role</div>
+        <div class="progress-step" id="step2-progress">Personal Info</div>
+        <div class="progress-step" id="step3-progress">Contact Details</div>
+        <div class="progress-step" id="step4-progress">Verification</div>
+      </div>
+      
+      <form id="signupForm" class="form">
+        <!-- Step 1: Role Selection -->
+        <div class="form-step active" id="step1">
+          <h3>Choose your role</h3>
+          <p>Select how you want to use RideApp</p>
+          
+          <div class="role-cards">
+            <div class="role-card" id="rider-card" data-role="rider">
+              <img src="../public/images/rider-icon.png" alt="Rider" width="64" height="64" onerror="this.src='../public/images/rider.png'">
+              <h3>Rider</h3>
+              <p>Book rides and travel</p>
+            </div>
+            
+            <div class="role-card" id="driver-card" data-role="driver">
+              <img src="../public/images/driver-icon.png" alt="Driver" width="64" height="64" onerror="this.src='../public/images/driver.png'">
+              <h3>Driver</h3>
+              <p>Offer rides and earn</p>
+            </div>
+          </div>
+          
+          <input type="hidden" id="role" name="role">
+          
+          <button type="button" class="btn" id="nextToStep2" disabled>Next</button>
         </div>
-    </section>
+        
+        <!-- Step 2: Personal Information -->
+        <div class="form-step" id="step2">
+  <h3>Personal Information</h3>
+  
+  <div class="form-group">
+    <label for="full_name">Full Name</label>
+    <input type="text" id="full_name" name="full_name" placeholder="Enter your full name" required>
+  </div>
+  
+  <div class="form-group">
+    <label for="gender">Gender</label>
+    <select id="gender" name="gender" required>
+      <option value="">Select gender</option>
+      <option value="male">Male</option>
+      <option value="female">Female</option>
+      <option value="other">Other</option>
+      <option value="prefer_not_to_say">Prefer not to say</option>
+    </select>
+  </div>
+  
+ <div class="form-group">
+  <label for="password">Password</label>
+  <input type="password" id="password" name="password" placeholder="Create a strong password" required>
+</div>
+
+<div class="form-group">
+  <label for="confirm_password">Confirm Password</label>
+  <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm your password" required>
+</div>
+
+<p id="password-error" style="color:red; display:none; font-size: 14px; margin-top: 5px;"></p>
+
+  <div class="buttons">
+    <button type="button" class="btn btn-secondary" id="backToStep1">Back</button>
+    <button type="button" class="btn" id="nextToStep3">Next</button>
+  </div>
+</div>
+
+        
+        <!-- Step 3: Contact Information -->
+        <div class="form-step" id="step3">
+          <h3>Contact Information</h3>
+          
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
+          </div>
+          
+          <!-- Driver-specific fields -->
+          <div id="driver-fields" style="display: none;">
+            <div class="form-section">
+              <h3>Driver Information</h3>
+              
+              <div class="form-group">
+                <label for="license">Driver's License Number</label>
+                <input type="text" id="license" name="license" placeholder="Enter your license number">
+              </div>
+              
+              <div class="form-group">
+                <label for="kyc_type">ID Type</label>
+                <select id="kyc_type" name="kyc_type">
+                  <option value="">Select ID type</option>
+                  <option value="pan">pan</option>
+                  <option value="aadhaar">Aadhaar</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="kyc_document">ID Number</label>
+                <input type="text" id="kyc_document" name="kyc_document" placeholder="Enter your ID number">
+              </div>
+            </div>
+          </div>
+          
+          <div class="buttons">
+            <button type="button" class="btn btn-secondary" id="backToStep2">Back</button>
+            <button type="button" class="btn" id="initiateSignup">Continue</button>
+          </div>
+        </div>
+        
+        <!-- Step 4: OTP Verification -->
+        <div class="form-step" id="step4">
+          <h3>Verify Your Account</h3>
+          <p>We've sent verification codes to your email and phone.</p>
+          
+          <div class="form-group">
+            <label for="emailOtp">Email Verification Code</label>
+            <input type="text" id="emailOtp" name="emailOtp" placeholder="Enter email code" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="phoneOtp">Phone Verification Code</label>
+            <input type="text" id="phoneOtp" name="phoneOtp" placeholder="Enter phone code" required>
+          </div>
+          
+          <div class="buttons">
+            <button type="button" class="btn btn-secondary" id="backToStep3">Back</button>
+            <button type="button" class="btn" id="completeSignup">Complete Signup</button>
+          </div>
+        </div>
+      </form>
+      
+      <div id="responseMsg" class="message"></div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    &copy; <span id="year"></span> RideApp — All rights reserved
+  </footer>
+
+  <!-- Scripts -->
+  <script src="../assets/js/main.js"></script>
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
+
+
