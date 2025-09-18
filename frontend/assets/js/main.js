@@ -33,11 +33,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Redirect based on role
         if (data.user.role === "rider") {
-          window.location.href = "/IBM_APP_JN/RideApp-CapstoneProject/frontend/views/rider_dashboard.html";
+          window.location.href = "/IBM_APP_JNX/frontend/views/rider_dashboard.html";
         } else if (data.user.role === "driver") {
-          window.location.href = "/IBM_APP_JN/RideApp-CapstoneProject/frontend/views/driver_dashboard.html";
+          window.location.href = "/IBM_APP_JNX/frontend/views/driver_dashboard.html";
         } else {
-          window.location.href = "/IBM_APP_JN/RideApp-CapstoneProject/frontend/index.html";
+          window.location.href = "/IBM_APP_JNX/frontend/index.html";
         }
 
       } catch (err) {
@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (res.ok) {
-          window.location.href = "/IBM_APP_JN/RideApp-CapstoneProject/frontend/index.html";
+          window.location.href = "/IBM_APP_JNX/frontend/index.html";
         } else {
           console.error("Logout failed");
         }

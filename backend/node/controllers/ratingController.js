@@ -1,8 +1,7 @@
 // Raksha & Harshit 
 
 import { ValidationError } from "../utils/appError.js";
-import rateService from "../services/ratingService.js";
-
+import rateService from "../services/ratingService.js"
 
 // --------------------- 7. Ratings (Rider → Driver) ---------------------
 export const rateDriver = async (req, res, next) => {

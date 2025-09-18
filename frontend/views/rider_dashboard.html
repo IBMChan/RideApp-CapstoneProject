@@ -32,7 +32,7 @@
       <li class="sidebar-item"><a href="#wallet" class="sidebar-link">💳 Payments & Wallet</a></li>
       <li class="sidebar-item"><a href="#rides" class="sidebar-link">📝 My Rides</a></li>
       <li class="sidebar-item"><a href="#share" class="sidebar-link">📤 Share Ride Status</a></li>
-      <li class="sidebar-item"><a href="#ticket" class="sidebar-link">🎫 Raise Ticket</a></li>
+      <li class="sidebar-item"><a href="#rate" class="sidebar-link">⭐ Rating</a></li>
     </ul>
   </aside>
 
@@ -79,6 +79,41 @@
   <div id="shareRideMsg" class="message"></div>
   
 </section>
+<!-- Ratings Section -->
+<section id="rate" class="dashboard-section">
+  <h2>⭐ Ratings</h2>
+
+  <!-- Submit Rating -->
+  <div class="rating-subsection">
+    <h3>Submit a Rating</h3>
+    <form id="ratingForm" class="form-inline">
+      <input type="number" id="ratingRideId" placeholder="Ride ID" required>
+      <input type="number" id="ratingDriverId" placeholder="Driver ID" required>
+      <select id="ratingStars" required>
+        <option value="">Select Stars</option>
+        <option value="1">⭐ 1</option>
+        <option value="2">⭐ 2</option>
+        <option value="3">⭐ 3</option>
+        <option value="4">⭐ 4</option>
+        <option value="5">⭐ 5</option>
+      </select>
+      <textarea id="ratingComment" placeholder="Your feedback..."></textarea>
+      <button type="submit" class="request-btn">Submit Rating</button>
+    </form>
+    <div id="ratingMsg" class="message"></div>
+  </div>
+
+  <!-- Fetch Rating -->
+  <div class="rating-subsection">
+    <h3>Fetch My Rating</h3>
+    <form id="fetchRatingForm" class="form-inline">
+      <input type="number" id="fetchRideId" placeholder="Ride ID" required>
+      <button type="submit" class="request-btn">Get Rating</button>
+    </form>
+    <div id="fetchedRating" class="message"></div>
+  </div>
+</section>
+
     <!-- About Section -->
     <section id="about" class="about">
       <h2>About Us</h2>
