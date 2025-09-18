@@ -169,6 +169,7 @@ import { initSocket } from "./utils/socket.js";
 import authRoutes from "./routes/authRoutes.js";
 import rideRoutes from "./routes/rideRoutes.js";
 import riderRoutes from "./routes/riderRoutes.js";
+import ratingRoutes from "./routes/ratingRoutes.js"
 import driverRoutes from "./routes/driverRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import walletRoutes from "./routes/walletRoutes.js";
@@ -228,6 +229,7 @@ app.use("/api/rider", riderRoutes);
 app.use("/api/driver", driverRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/wallet", walletRoutes);
+app.use("/api/rider", ratingRoutes);
 
 // Auth Check Endpoint (for frontend authGuard.js)
 app.get("/api/auth/check", (req, res) => {

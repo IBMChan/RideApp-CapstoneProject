@@ -1,7 +1,7 @@
 // Raksha & Harshit
 
 import express from "express";
-import * as ratingController from "../controllers/ratingController";
+import * as ratingController from "../controllers/ratingController.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
