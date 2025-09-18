@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Check Rides</title>
-<link rel="stylesheet" href="../assets/css/style.css">
-<link rel="stylesheet" href="../assets/css/checkRides.css">
+<link rel="stylesheet" href="../../assets/css/style.css">
+<link rel="stylesheet" href="../../assets/css/checkRides.css">
 </head>
 <body>
   <!-- Header -->
@@ -13,7 +13,7 @@
     <div class="logo">🚗 Vaahan</div>
     <nav class="header-nav">
       <a href="#home" class="nav-link">Home</a>
-      <a href="#logout" class="nav-link">Logout</a>
+            <a href="/RideApp-CapstoneProject/frontend/index.html" class="nav-link">Logout</a>
        <a href="#profile" class="nav-link">
         <div class="profile-pic">P</div>
       </a>
@@ -24,14 +24,25 @@
   <!-- ===== Sidebar ===== -->
   <aside class="sidebar">
     <ul class="sidebar-menu">
-      <li class="sidebar-item"><a href="rider_dashboard.html" class="sidebar-link">🏠 Home</a></li>
-      <li class="sidebar-item"><a href="book_ride.html" class="sidebar-link">🚖 Book Ride</a></li>
-      <li class="sidebar-item"><a href="save_location.html" class="sidebar-link">📍 Save Location</a></li>
-      <li class="sidebar-item"><a href="rider_wallet.html" class="sidebar-link">💳 Payments & Wallet</a></li>
-      <li class="sidebar-item"><a href="my_rides.html" class="sidebar-link">📝 My Rides</a></li>
-      <li class="sidebar-item"><a href="share_ride_status.html" class="sidebar-link">📤 Share Ride Status</a></li>
+      <li class="sidebar-item"> <a href = "driver_dashboard.html"  class="sidebar-link">Home</a>
+      </li>
+      <li class="sidebar-item">
+        <a href="checkRides.html" class="sidebar-link">Check Rides</a>
+      </li>
+      <li class="sidebar-item">
+        <a href="startRide.html" class="sidebar-link">Start a ride</a>
+      </li>
+      <li class="sidebar-item">
+        <a href="./addVehicle.html" class="sidebar-link ">Add Vehicle</a>
+      </li>
+      <!-- <li class="sidebar-item">
+        <a href="#" class="sidebar-link">My Earnings</a>
+      </li> -->
+      <li class="sidebar-item">
+        <a href="driver_wallet.html" class="sidebar-link">Payment & Wallet</a>
+      </li>
 
-      <!-- <li class="sidebar-item"><a href="#ticket" class="sidebar-link">🎫 Raise Ticket</a></li> -->
+
     </ul>
   </aside>
   <!-- Main Content -->
@@ -65,6 +76,6 @@
   </footer>
 
   <!-- JS -->
-  <script src="../assets/js/checkRides.js"></script>
+  <script src="../../assets/js/checkRides.js"></script>
 </body>
 </html>

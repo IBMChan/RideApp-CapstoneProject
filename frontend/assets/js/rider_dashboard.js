@@ -251,22 +251,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const sections = document.querySelectorAll(".main-content section");
 
   // Hide all except Home on load
-  sections.forEach(sec => {
-    if (sec.id !== "home") sec.style.display = "none";
-  });
+  // sections.forEach(sec => {
+  //   if (sec.id !== "home") sec.style.display = "none";
+  // });
 
-  sidebarLinks.forEach(link => {
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
-      const targetId = link.getAttribute("href").substring(1);
+  // sidebarLinks.forEach(link => {
+  //   link.addEventListener("click", (e) => {
+  //     e.preventDefault();
+  //     const targetId = link.getAttribute("href").substring(1);
 
-      console.log(`[NAV] Switching to section: ${targetId}`);
-      sections.forEach(sec => sec.style.display = "none");
+  //     console.log(`[NAV] Switching to section: ${targetId}`);
+  //     sections.forEach(sec => sec.style.display = "none");
 
-      const targetSection = document.getElementById(targetId);
-      if (targetSection) targetSection.style.display = "block";
-    });
-  });
+  //     const targetSection = document.getElementById(targetId);
+  //     if (targetSection) targetSection.style.display = "block";
+  //   });
+  // });
 
   /* ===============================
      SAVE / LOAD / DELETE LOCATIONS
