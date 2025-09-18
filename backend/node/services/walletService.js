@@ -76,7 +76,7 @@ class WalletService {
     await WalletTransactionRepository.create({
       wallet_id: wallet.wallet_id,
       debit: amount,
-      status: "pending"
+      status: "success"
     });
 
     return { success: true, message: "Withdrawal initiated", balance: newBalance };
@@ -95,6 +95,62 @@ class WalletService {
 
     const transactions = await WalletTransactionRepository.findByUserId(user_id);
     return transactions;  // just return array; controller will handle res
+  }
+
+  async walletDebit(user_id, amount, ride_id = null) {
+    try {
+      const wallet = await WalletRepository.findByUser(user_id);
+      if (!wallet) {
+        return { success: false, message: "Wallet not found" };
+      }
+
+      if (parseFloat(wallet.balance) < parseFloat(amount)) {
+        return { success: false, message: "Insufficient balance" };
+      }
+
+      // deduct balance
+      const newBalance = parseFloat(wallet.balance) - parseFloat(amount);
+      const updatedWallet = await WalletRepository.updateBalance(wallet.wallet_id, newBalance);
+
+      // log transaction
+      await WalletTransactionRepository.create({
+        wallet_id: wallet.wallet_id,
+        debit: amount,
+        credit: null,
+        status: "success",
+      });
+
+      return { success: true, wallet: updatedWallet };
+    } catch (err) {
+      console.error("❌ walletDebit error:", err);
+      return { success: false, message: "Internal error while debiting wallet" };
+    }
+  }
+
+  async walletCredit(user_id, amount) {
+    try {
+      const wallet = await WalletRepository.findByUser(user_id);
+      if (!wallet) {
+        return { success: false, message: "Wallet not found" };
+      }
+
+      // add balance
+      const newBalance = parseFloat(wallet.balance) + parseFloat(amount);
+      const updatedWallet = await WalletRepository.updateBalance(wallet.wallet_id, newBalance);
+
+      // log transaction
+      await WalletTransactionRepository.create({
+        wallet_id: wallet.wallet_id,
+        debit: null,
+        credit: amount,
+        status: "success",
+      });
+
+      return { success: true, wallet: updatedWallet };
+    } catch (err) {
+      console.error("❌ walletCredit error:", err);
+      return { success: false, message: "Internal error while crediting wallet" };
+    }
   }
 }
 
