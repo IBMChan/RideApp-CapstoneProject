@@ -118,7 +118,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    const driverId = data.user.id;
+    const driverId = data.user.user_id;
     console.log("Logged-in user:", data.user);
 
     // ✅ Now load rides with the driverId

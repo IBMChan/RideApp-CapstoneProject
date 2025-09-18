@@ -664,9 +664,9 @@ if (completeSignupBtn) {
       setTimeout(() => {
         const role = (data.user.role || '').toLowerCase();
         if (role === "rider") {
-          window.location.href = `${FRONTEND_BASE}/views/rider_dashboard.html`;
+          window.location.href = `${FRONTEND_BASE}/views/rider_views/rider_dashboard.html`;
         } else if (role === "driver") {
-          window.location.href = `${FRONTEND_BASE}/views/driver_dashboard.html`;
+          window.location.href = `${FRONTEND_BASE}/views/driver_views/driver_dashboard.html`;
         } else {
           window.location.href = `${FRONTEND_BASE}/index.html`;
         }
