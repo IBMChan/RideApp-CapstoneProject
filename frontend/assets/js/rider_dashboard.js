@@ -400,7 +400,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const ride = await rideRes.json();
         console.log("[SHARE] Active ride:", ride);
 
-        const res = await fetch(`http://localhost:3000/api/rider/share-ride-email/${ride.data.rides[0].ride_id}`, {
+        const res = await fetch(`http://localhost:3000/api/rider/share-ride/${ride.data.rides[0].ride_id}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",

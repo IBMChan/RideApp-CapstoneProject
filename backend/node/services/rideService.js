@@ -256,83 +256,92 @@ class RideService {
   }
 
   async updateRideStatus(ride_id, status, userId, role, pin = null) {
-    if (!ride_id) throw new AppError("Ride ID is required", 400, "MISSING_RIDE_ID");
-    if (!status) throw new AppError("Status is required", 400, "MISSING_STATUS");
-    if (!userId) throw new AppError("User ID is required", 400, "MISSING_USER_ID");
+  if (!ride_id) throw new AppError("Ride ID is required", 400, "MISSING_RIDE_ID");
+  if (!status) throw new AppError("Status is required", 400, "MISSING_STATUS");
+  if (!userId) throw new AppError("User ID is required", 400, "MISSING_USER_ID");
 
-    const ride = await RideRepository.findById(ride_id);
-    if (!ride) throw new AppError("Ride not found", 404, "RIDE_NOT_FOUND");
+  const ride = await RideRepository.findById(ride_id);
+  if (!ride) throw new AppError("Ride not found", 404, "RIDE_NOT_FOUND");
 
-    const validStatuses = ["requested", "accepted", "in_progress", "completed", "cancelled", "expired"];
-    if (!validStatuses.includes(status)) {
-      throw new AppError(`Invalid status. Allowed: ${validStatuses.join(", ")}`, 422, "INVALID_STATUS");
-    }
-
-    if (role === "driver" && !["accepted", "in_progress", "completed", "cancelled"].includes(status)) {
-      throw new AppError("Driver cannot set this status", 403, "STATUS_FORBIDDEN");
-    }
-    if (role === "rider" && status !== "cancelled") {
-      throw new AppError("Rider can only cancel rides", 403, "STATUS_FORBIDDEN");
-    }
-
-    if (status === "in_progress" && role === "driver") {
-      appEvents.emit(`rideStatusUpdate:${ride.rider_id}`, {
-        ride_id: ride.user_id,
-        status: ride.status,
-        driver_id: ride.driver_id || null,
-        vehicle_id: ride.vehicle_id || null,
-        timestamp: Date.now()
-      });
-      const updated = await RideRepository.updateStatus(ride_id, "in_progress", pin);
-      if (!updated) throw new AppError("Invalid PIN. Cannot start ride.", 400, "INVALID_PIN");
-      return updated;
-    }
-    appEvents.emit(`rideStatusUpdate:${ride.rider_id}`, {
-      ride_id: ride.user_id,
-      status: ride.status,
-      driver_id: ride.driver_id || null,
-      vehicle_id: ride.vehicle_id || null,
-      timestamp: Date.now()
-    });
-
-    return await RideRepository.updateStatus(ride_id, status);
+  const validStatuses = ["requested", "accepted", "in_progress", "completed", "cancelled", "expired"];
+  if (!validStatuses.includes(status)) {
+    throw new AppError(`Invalid status. Allowed: ${validStatuses.join(", ")}`, 422, "INVALID_STATUS");
   }
 
-  async completeRide(ride_id) {
-    if (!ride_id) throw new AppError("Missing ride_id", 400);
+  if (role === "driver" && !["accepted", "in_progress", "completed", "cancelled"].includes(status)) {
+    throw new AppError("Driver cannot set this status", 403, "STATUS_FORBIDDEN");
+  }
+  if (role === "rider" && status !== "cancelled") {
+    throw new AppError("Rider can only cancel rides", 403, "STATUS_FORBIDDEN");
+  }
 
-    const ride = await RideRepository.completeRide(ride_id);
-    if (!ride) throw new AppError("Ride not found", 404);
+  if (status === "in_progress" && role === "driver") {
+    const updated = await RideRepository.updateStatus(ride_id, "in_progress", pin);
+    if (!updated) throw new AppError("Invalid PIN. Cannot start ride.", 400, "INVALID_PIN");
+    
+    // Send status change email to rider
+    try {
+      // Get rider details
+      const rider = await userRepository.findById(ride.rider_id);
+      if (rider && rider.email) {
+        // Import the notification service
+        const { sendRideStatusChangeEmail } = await import("./notificationService.js");
+        
+        // Send email notification to rider
+        await sendRideStatusChangeEmail(
+          rider.email,
+          updated
+        );
+        
+        console.log("Ride status change email sent to rider");
+      }
+    } catch (error) {
+      console.error("Failed to send status change email:", error.message);
+      // Don't throw error here, just log it - we don't want to fail the status update
+    }
+    
+    return updated;
+  }
 
-    // const payment = await paymentService.getPaymentByRide(ride.ride_id);
-    // if (payment && payment.mode === "wallet" && payment.status === "pending") {
-    //   try {
-    //     const debitResult = await paymentService.debitWalletForRide(ride.rider_id, Number(ride.fare), ride.ride_id);
-    //     if (debitResult && debitResult.success) {
-    //       await paymentService.confirmPaymentByDriver(ride.ride_id); // mark payment success
-    //     } else {
-    //       console.error("Debit failed:", debitResult);
-    //     }
-    //   } catch (err) {
-    //     console.error("debit exception:", err);
-    //   }
-    // } else {
-    //   if (!payment) {
-    //     await paymentService.createPaymentForRide({
-    //       ride_id: ride.ride_id,
-    //       fare: ride.fare,
-    //       mode: "cash",
-    //     });
-    //   }
-    // }
-    appEvents.emit(`rideStatusUpdate:${ride.rider_id}`, {
-      ride_id: ride.user_id,
-      status: ride.status,
-      driver_id: ride.driver_id || null,
-      vehicle_id: ride.vehicle_id || null,
-      timestamp: Date.now()
-    });
+  return await RideRepository.updateStatus(ride_id, status);
+}
+async completeRide(ride_id) {
+  if (!ride_id) throw new AppError("Missing ride_id", 400);
 
+  // Get the ride before updating its status
+  const rideBeforeUpdate = await RideRepository.findById(ride_id);
+  if (!rideBeforeUpdate) throw new AppError("Ride not found", 404);
+
+  // Complete the ride
+  const ride = await RideRepository.completeRide(ride_id);
+  if (!ride) throw new AppError("Ride not found", 404);
+
+  try {
+    // Get rider details
+    const rider = await userRepository.findById(ride.rider_id);
+   
+    // Get driver details
+    const driver = await userRepository.findById(ride.driver_id);
+   
+    if (rider && rider.email && driver) {
+      // Import the notification service
+      const { sendRideCompletionEmail } = await import("./notificationService.js");
+     
+      // Send email notification to rider with the receipt
+      await sendRideCompletionEmail(
+        rider.email,
+        ride,
+        driver
+      );
+     
+      console.log("Ride completion email with receipt sent to rider");
+    } else {
+      console.error("Could not send completion email: Rider email or driver details not found");
+    }
+  } catch (error) {
+    console.error("Failed to send ride completion email:", error.message);
+    // Don't throw error here, just log it - we don't want to fail the ride completion
+  }
     return ride;
   }
 

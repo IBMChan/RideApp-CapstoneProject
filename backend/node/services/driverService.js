@@ -17,6 +17,7 @@ class DriverService {
     if (!driver) throw new Error("Driver not found");
     return driver;
   }
+
   async updateProfile(driverId, fields) {
     const allowedFields = ["full_name", "phone", "email"];
     const updates = {};
@@ -53,7 +54,6 @@ class DriverService {
   async getPaymentHistory(driverId) {
     return await PaymentRepository.findPaymentsByDriver(driverId);
   }
-  // Vehicle Management
   async addVehicle(driverId, vehicleData) {
     if (!vehicleData || typeof vehicleData !== "object") {
       throw new Error("Invalid vehicle data");

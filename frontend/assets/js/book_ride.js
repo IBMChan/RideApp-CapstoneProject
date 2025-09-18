@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // show ride information (attempt to normalize)
                 const ride = rideObj.ride || rideObj;
                 showRideInfo(normalizeRide(ride, resp));
-                window.location.href = "/RideApp-CapstoneProject/frontend/views/my_rides.html";
+                window.location.href = "/RideApp-CapstoneProject/frontend/views/rider_views/my_rides.html";
                 // also refresh saved locations (no harm)
 
             } else {
