@@ -7,8 +7,9 @@
   <title>Vaahan - Rider Dashboard</title>
 
   <!-- Styles -->
-  <link rel="stylesheet" href="../assets/css/style.css" />
-  <link rel="stylesheet" href="../assets/css/book_ride.css" />
+  <link rel="stylesheet" href="../../assets/css/style.css" />
+  <link rel="stylesheet" href="../../assets/css/book_ride.css" />
+  
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -20,8 +21,8 @@
     <div class="logo">🚗 Vaahan</div>
     <nav class="header-nav">
       <a href="#home" class="nav-link">Home</a>
-      <a id="logoutBtn" class="nav-link">Logout</a>
-      <a href="./profile.html" class="nav-link">
+      <a href="#logout" class="nav-link">Logout</a>
+       <a href="#profile" class="nav-link">
         <div class="profile-pic">P</div>
       </a>
       <button class="sos-btn">SOS</button>
@@ -31,16 +32,18 @@
   <!-- Layout wrapper -->
   <div class="layout">
     <!-- Sidebar -->
-    <aside class="sidebar">
-      <ul class="sidebar-menu">
-        <li class="sidebar-item"><a href="#home" class="sidebar-link">🏠 Home</a></li>
-        <li class="sidebar-item"><a href="./book_ride.html" class="sidebar-link">🚖 Book Ride</a></li>
-        <li class="sidebar-item"><a href="save_location" class="sidebar-link">📍 Save Location</a></li>
-        <li class="sidebar-item"><a href="rider_wallet.html" class="sidebar-link">💳 Manage Wallet</a></li>
-        <li class="sidebar-item"><a href="./my_rides.html" class="sidebar-link">📝 My Rides</a></li>
-        <li class="sidebar-item"><a href="#ticket" class="sidebar-link">🎫 Raise Ticket</a></li>
-      </ul>
-    </aside>
+  <aside class="sidebar">
+    <ul class="sidebar-menu">
+      <li class="sidebar-item"><a href="rider_dashboard.html" class="sidebar-link">🏠 Home</a></li>
+      <li class="sidebar-item"><a href="book_ride.html" class="sidebar-link">🚖 Book Ride</a></li>
+      <li class="sidebar-item"><a href="save_location.html" class="sidebar-link">📍 Save Location</a></li>
+      <li class="sidebar-item"><a href="rider_wallet.html" class="sidebar-link">💳 Payments & Wallet</a></li>
+      <li class="sidebar-item"><a href="my_rides.html" class="sidebar-link">📝 My Rides</a></li>
+      <li class="sidebar-item"><a href="share_ride_status.html" class="sidebar-link">📤 Share Ride Status</a></li>
+
+      <!-- <li class="sidebar-item"><a href="#ticket" class="sidebar-link">🎫 Raise Ticket</a></li> -->
+    </ul>
+  </aside>
 
     <!-- Main Content -->
     <main class="main-content">

@@ -38,33 +38,28 @@ class WalletService {
     if (!wallet) throw new AppError("Wallet not found", 404);
     if (String(wallet.pin) !== String(pin)) throw new AppError("Invalid wallet PIN", 401);
 
-    // call python to create credit txn and razorpay order
     const result = await this.runPython(this.walletScript, ["credit", String(user_id), String(amount)]);
     if (!result.success) throw new AppError(result.message || "Failed to initiate add money", 500);
 
-    const txn = result.txn; // transaction returned from Python
-    // ensure we save txn in Node-side if needed (or return to frontend)
+    const txn = result.txn; 
     return { success: true, message: "Add money initiated", txn };
   }
 
-async verifyAddMoneyByTxnId(razorpay_payment_id) {
-  const txn = await WalletTransactionRepository.findByRazorpayId(razorpay_payment_id);
+  async verifyAddMoneyByTxnId(razorpay_payment_id) {
+    const txn = await WalletTransactionRepository.findByRazorpayId(razorpay_payment_id);
 
-  if (!txn) return { success: false, message: "Transaction not found" };
-  if (txn.status === "completed") return { success: true, message: "Already verified" };
+    if (!txn) return { success: false, message: "Transaction not found" };
+    if (txn.status === "completed") return { success: true, message: "Already verified" };
 
-  // Update wallet balance
-  const wallet = await WalletRepository.findById(txn.wallet_id);
-  if (!wallet) return { success: false, message: "Wallet not found" };
+    const wallet = await WalletRepository.findById(txn.wallet_id);
+    if (!wallet) return { success: false, message: "Wallet not found" };
 
-  const newBalance = parseFloat(wallet.balance) + parseFloat(txn.credit || 0);
-  await WalletRepository.updateBalance(wallet.wallet_id, newBalance);
+    const newBalance = parseFloat(wallet.balance) + parseFloat(txn.credit || 0);
+    await WalletRepository.updateBalance(wallet.wallet_id, newBalance);
+    await WalletTransactionRepository.updateStatus(txn.transc_id, "completed");
 
-  // Update txn status
-  await WalletTransactionRepository.updateStatus(txn.transc_id, "completed");
-
-  return { success: true, balance: newBalance };
-}
+    return { success: true, balance: newBalance };
+  }
 
   async initiateWithdraw(user_id, amount, pin) {
     const wallet = await WalletRepository.findByUser(user_id);
@@ -78,7 +73,6 @@ async verifyAddMoneyByTxnId(razorpay_payment_id) {
     const newBalance = parseFloat(wallet.balance) - parseFloat(amount);
     await WalletRepository.updateBalance(wallet.wallet_id, newBalance);
 
-    // Record debit txn
     await WalletTransactionRepository.create({
       wallet_id: wallet.wallet_id,
       debit: amount,
@@ -94,20 +88,13 @@ async verifyAddMoneyByTxnId(razorpay_payment_id) {
     return wallet.balance;
   }
 
+  // ✅ Updated getTransactions to receive user_id like other methods
   async getTransactions(user_id) {
     const wallet = await WalletRepository.findByUser(user_id);
     if (!wallet) throw new AppError("Wallet not found", 404);
 
-    const txns = await WalletTransactionRepository.findByWallet(wallet.wallet_id);
-
-    return txns.map(t => ({
-      transc_id: t.transc_id,
-      txn_date: t.txn_date,
-      credit: t.credit,
-      debit: t.debit,
-      status: t.status,
-      razorpay_payment_id: t.razorpay_payment_id
-    }));
+    const transactions = await WalletTransactionRepository.findByUserId(user_id);
+    return transactions;  // just return array; controller will handle res
   }
 }
 

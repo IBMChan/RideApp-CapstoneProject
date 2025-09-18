@@ -1,3 +1,4 @@
+// walletController.js
 import WalletService from "../services/walletService.js";
 import UserRepository from "../repositories/mysql/userRepository.js";
 import { successResponse, errorResponse } from "../utils/apiResponse.js";
@@ -21,7 +22,7 @@ export async function createWallet(req, res) {
 
 export async function getMyWallet(req, res) {
   try {
-    const user_id = req.user?.id;
+    const user_id = req.user.user_id;
     if (!user_id) return errorResponse(res, "Unauthorized: missing user id", 401);
 
     const wallet = await WalletService.getWalletByUserId(user_id);
@@ -35,7 +36,7 @@ export async function getMyWallet(req, res) {
 
 export async function addMoney(req, res) {
   try {
-    const user_id = req.user.id;
+    const user_id = req.user.user_id;
     const { amount, pin } = req.body;
 
     if (!amount || amount <= 0) return errorResponse(res, "Invalid amount", 400);
@@ -74,13 +75,13 @@ export async function withdraw(req, res) {
   try {
     const user_id = req.user.user_id;
     const { amount, pin } = req.body;
-    if (!amount || amount <= 0) return errorResponse(res, 'Invalid amount', 400);
-    if (!pin) return errorResponse(res, 'Wallet PIN required', 400);
+    if (!amount || amount <= 0) return errorResponse(res, "Invalid amount", 400);
+    if (!pin) return errorResponse(res, "Wallet PIN required", 400);
 
     const result = await WalletService.initiateWithdraw(user_id, amount, pin);
     if (!result.success) return errorResponse(res, result.message, 400);
 
-    return successResponse(res, 'Withdrawal successful', { balance: result.balance });
+    return successResponse(res, "Withdrawal successful", { balance: result.balance });
   } catch (err) {
     return errorResponse(res, err.message || err, err.statusCode || 500);
   }
@@ -88,13 +89,17 @@ export async function withdraw(req, res) {
 
 export const viewBalance = async (req, res) => {
   try {
-    const userId = req.user?.id;
-    if (!userId) return errorResponse(res, "User ID missing", 400);
+    const user_id = req.user.user_id;
+    if (!user_id) return errorResponse(res, "User ID missing", 400);
 
-    const wallet = await WalletService.getWalletByUserId(userId);
+    const wallet = await WalletService.getWalletByUserId(user_id);
     if (!wallet) return errorResponse(res, "Wallet not found", 404);
 
-    return successResponse(res, "Balance fetched successfully", { balance: wallet.balance });
+    return successResponse(res, "Balance fetched successfully", { 
+  wallet_id: wallet.wallet_id, 
+  balance: wallet.balance 
+});
+
   } catch (err) {
     return errorResponse(res, err.message || err, err.statusCode || 500);
   }
@@ -134,4 +139,15 @@ export async function resetPinConfirm(req, res) {
   } catch (err) {
     return errorResponse(res, err.message || err, err.statusCode || 500);
   }
+
 }
+export const getTransactions = async (req, res) => {
+  try {
+    const userId = req.user.id; // assuming you have middleware setting req.user
+    const transactions = await WalletTransactionRepository.findByUserId(userId);
+    res.json({ success: true, data: transactions });
+  } catch (err) {
+    console.error("Transactions fetch failed:", err);
+    res.status(500).json({ success: false, message: "Could not fetch transactions" });
+  }
+};

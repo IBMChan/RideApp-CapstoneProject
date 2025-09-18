@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vaahan - Share Ride Status</title>
+  <link rel="stylesheet" href="../../assets/css/rider_dashboard.css">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <script src="../assets/js/rider_dashboard.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script src="../assets/js/rider.js"></script>
+</head>
+<body>
+
+  <header class="header">
+    <div class="logo">🚗 Vaahan</div>
+    <nav class="header-nav">
+      <a href="#home" class="nav-link">Home</a>
+      <a href="#logout" class="nav-link">Logout</a>
+       <a href="#profile" class="nav-link">
+        <div class="profile-pic">P</div>
+      </a>
+      <button class="sos-btn">SOS</button>
+    </nav>
+  </header>
+  <aside class="sidebar">
+    <ul class="sidebar-menu">
+      <li class="sidebar-item"><a href="rider_dashboard.html" class="sidebar-link">🏠 Home</a></li>
+      <li class="sidebar-item"><a href="book_ride.html" class="sidebar-link">🚖 Book Ride</a></li>
+      <li class="sidebar-item"><a href="save_location.html" class="sidebar-link">📍 Save Location</a></li>
+      <li class="sidebar-item"><a href="rider_wallet.html" class="sidebar-link">💳 Payments & Wallet</a></li>
+      <li class="sidebar-item"><a href="my_rides.html" class="sidebar-link">📝 My Rides</a></li>
+      <li class="sidebar-item"><a href="share_ride_status.html" class="sidebar-link">📤 Share Ride Status</a></li>
+
+      <!-- <li class="sidebar-item"><a href="#ticket" class="sidebar-link">🎫 Raise Ticket</a></li> -->
+    </ul>
+  </aside>
+  <!-- Main Content -->
+  <main class="main-content">
+    <section id="share" class="dashboard-section">
+      <h2>📤 Share Ride Status</h2>
+      <form id="shareRideForm" class="form-inline">
+        <input type="email" id="shareEmail" placeholder="Emergency Contact Email" required>
+        <button type="submit" class="request-btn">Share Ride</button>
+      </form>
+      <div id="shareRideMsg" class="message"></div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>© 2025 Vaahan. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </footer>
+
+</body>
+</html>

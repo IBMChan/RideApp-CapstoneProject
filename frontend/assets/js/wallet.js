@@ -1,8 +1,8 @@
 const BASE_URL = "http://localhost:3000/api";
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const walletIdEl = document.getElementById("walletId");
-  const walletBalanceEl = document.getElementById("walletBalance");
+const walletIdEl = document.getElementById("walletId"); // fix ID to match HTML
+const walletBalanceEl = document.getElementById("walletBalance");
   const createWalletBtn = document.getElementById("createWalletBtn");
   const addMoneyBtn = document.getElementById("addMoneyBtn");
   const viewTransactionsBtn = document.getElementById("viewTransactionsBtn");
@@ -29,49 +29,72 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!res.ok) {
       const errText = await res.text();
       let errMsg = "API error";
-      try { errMsg = JSON.parse(errText).message || errMsg; } catch {}
+      try {
+        errMsg = JSON.parse(errText).message || errMsg;
+      } catch {}
       throw new Error(errMsg);
     }
     return res.json();
   };
 
   // ===== Load wallet info =====
-const loadWallet = async () => {
+async function loadWallet() {
   try {
-    const userRes = await apiFetch("/wallet/me");       // { success, data: {...} }
-    const walletRes = await apiFetch("/wallet/balance"); // { success, data: { balance } }
+    const data = await apiFetch("/wallet/balance");
 
-    if (walletRes.success && walletRes.data) {
-      walletExists = true;
-      createWalletBtn.disabled = true;
-      addMoneyBtn.disabled = false;
-      viewTransactionsBtn.disabled = false;
-
-      walletIdEl.textContent = userRes.data.wallet_id || "N/A";
-      walletBalanceEl.textContent = walletRes.data.balance || 0;  // ✅ consistent
-    } else {
+    if (!data.success || !data.data) {
+      console.error("Wallet load failed:", data.message);
+      walletIdEl.textContent = "N/A";
+      walletBalanceEl.textContent = "₹0";
       walletExists = false;
-      createWalletBtn.disabled = false;
       addMoneyBtn.disabled = true;
       viewTransactionsBtn.disabled = true;
-
-      walletIdEl.textContent = "Not created";
-      walletBalanceEl.textContent = "0";
+      return;
     }
+
+    walletIdEl.textContent = data.data.wallet_id || "N/A";
+    walletBalanceEl.textContent = `₹${data.data.balance || 0}`;
+    walletExists = true;
+    addMoneyBtn.disabled = false;
+    viewTransactionsBtn.disabled = false;
   } catch (err) {
-    console.warn("Wallet load failed:", err.message);
+    console.error("Wallet load failed:", err.message);
+    walletIdEl.textContent = "N/A";
+    walletBalanceEl.textContent = "₹0";
     walletExists = false;
-    createWalletBtn.disabled = false;
     addMoneyBtn.disabled = true;
     viewTransactionsBtn.disabled = true;
-
-    walletIdEl.textContent = "Not created";
-    walletBalanceEl.textContent = "0";
   }
-};
+}
 
 
-  await loadWallet();
+  // ===== Load transactions =====
+async function loadTransactions() {
+  try {
+    const data = await apiFetch("/wallet/transactions");
+
+    if (!data.success) {
+      console.error("Transactions load failed:", data.message);
+      return;
+    }
+
+    transactionsList.innerHTML = "";
+
+    data.data.transactions.forEach((txn) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${new Date(txn.txn_date || txn.created_at).toLocaleString()}</td>
+        <td>${txn.credit ? "₹" + txn.credit : "-"}</td>
+        <td>${txn.debit ? "₹" + txn.debit : "-"}</td>
+        <td>${txn.status || "pending"}</td>
+      `;
+      transactionsList.appendChild(tr);
+    });
+  } catch (err) {
+    console.error("Transactions fetch failed:", err.message);
+  }
+}
+
 
   // ===== Create Wallet =====
   createWalletBtn?.addEventListener("click", () => {
@@ -104,14 +127,17 @@ const loadWallet = async () => {
   });
 
   // ===== Add Money =====
-  addMoneyBtn?.addEventListener("click", () => addMoneyFormStep1.style.display = "block");
-  document.getElementById("cancelAddMoney1")?.addEventListener("click", () => addMoneyFormStep1.style.display = "none");
+  addMoneyBtn?.addEventListener("click", () => (addMoneyFormStep1.style.display = "block"));
+  document.getElementById("cancelAddMoney1")?.addEventListener("click", () => (addMoneyFormStep1.style.display = "none"));
 
   document.getElementById("proceedAddMoney")?.addEventListener("click", async () => {
     const amount = document.getElementById("amount").value;
     const pin = document.getElementById("pin").value;
 
-    if (!amount || !pin) { alert("Enter amount and PIN"); return; }
+    if (!amount || !pin) {
+      alert("Enter amount and PIN");
+      return;
+    }
 
     try {
       const res = await apiFetch("/wallet/add-money", {
@@ -130,53 +156,42 @@ const loadWallet = async () => {
   });
 
   // ===== Verify Transaction =====
-// ===== Verify Transaction =====
-document.getElementById("confirmAddMoney")?.addEventListener("click", async () => {
-  const razorpay_payment_id = document.getElementById("txnId").value;
+  document.getElementById("confirmAddMoney")?.addEventListener("click", async () => {
+    const razorpay_payment_id = document.getElementById("txnId").value;
 
-  if (!razorpay_payment_id) {
-    alert("Enter Razorpay Transaction ID");
-    return;
-  }
+    if (!razorpay_payment_id) {
+      alert("Enter Razorpay Transaction ID");
+      return;
+    }
 
-  try {
-    // Send only razorpay_payment_id now
-    await apiFetch("/wallet/verify-add-money", {
-      method: "POST",
-      body: JSON.stringify({ razorpay_payment_id }),
-    });
-
-    alert("Money added successfully!");
-    addMoneyFormStep2.style.display = "none";
-    await loadWallet(); // reload balance
-  } catch (err) {
-    console.error(err);
-    alert("Failed to verify transaction: " + err.message);
-  }
-});
-
-
-  // ===== View Transactions =====
-  document.getElementById("viewTransactionsBtn")?.addEventListener("click", async () => {
     try {
-      const txns = await apiFetch("/wallet/transactions");
-      transactionsList.innerHTML = "";
-
-      txns.data.forEach(t => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${new Date(t.txn_date).toLocaleString()}</td>
-          <td>${t.credit || "-"}</td>
-          <td>${t.debit || "-"}</td>
-          <td>${t.status}</td>
-        `;
-        transactionsList.appendChild(row);
+      await apiFetch("/wallet/verify-add-money", {
+        method: "POST",
+        body: JSON.stringify({ razorpay_payment_id }),
       });
 
+      alert("Money added successfully!");
+      addMoneyFormStep2.style.display = "none";
+      await loadWallet(); // reload balance
+      await loadTransactions(); // reload txns
+    } catch (err) {
+      console.error(err);
+      alert("Failed to verify transaction: " + err.message);
+    }
+  });
+
+  // ===== View Transactions =====
+  viewTransactionsBtn?.addEventListener("click", async () => {
+    try {
+      await loadTransactions();
       transactionsSection.style.display = "block";
     } catch (err) {
       console.error(err);
       alert("Failed to fetch transactions");
     }
   });
+
+  // ===== Run these when page loads =====
+  await loadWallet();
+  await loadTransactions();
 });

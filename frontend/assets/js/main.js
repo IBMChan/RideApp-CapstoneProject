@@ -37,9 +37,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Redirect based on role
         if (data.user.role === "rider") {
-          window.location.href = "/RideApp-CapstoneProject/frontend/views/rider_dashboard.html";
+          window.location.href = "/RideApp-CapstoneProject/frontend/views/rider_views/rider_dashboard.html";
         } else if (data.user.role === "driver") {
-          window.location.href = "/RideApp-CapstoneProject/frontend/views/driver_dashboard.html";
+          window.location.href = "/RideApp-CapstoneProject/frontend/views/driver_views/driver_dashboard.html";
         } else {
           window.location.href = "/RideApp-CapstoneProject/frontend/index.html";
         }

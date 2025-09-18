@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vaahan - Manage Wallet</title>
-  <link rel="stylesheet" href="../assets/css/style.css">
-  <script src="../assets/js/wallet.js" defer></script>
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <script src="../../assets/js/wallet.js" defer></script>
 </head>
 <body>
 
@@ -19,17 +19,18 @@
   </nav>
 </header>
 
-<aside class="sidebar">
-  <ul class="sidebar-menu">
-    <li><a href="#home" class="sidebar-link">🏠 Home</a></li>
-    <li><a href="book_ride.html" class="sidebar-link">🚖 Book Ride</a></li>
-    <li><a href="save_location.html" class="sidebar-link">📍 Save Location</a></li>
-    <li><a href="rider_wallet.html" class="sidebar-link active">💳 Manage Wallet</a></li>
-    <li><a href="#rides" class="sidebar-link">📝 My Rides</a></li>
-    <li><a href="#ticket" class="sidebar-link">🎫 Raise Ticket</a></li>
-  </ul>
-</aside>
+  <aside class="sidebar">
+    <ul class="sidebar-menu">
+      <li class="sidebar-item"><a href="rider_dashboard.html" class="sidebar-link">🏠 Home</a></li>
+      <li class="sidebar-item"><a href="book_ride.html" class="sidebar-link">🚖 Book Ride</a></li>
+      <li class="sidebar-item"><a href="save_location.html" class="sidebar-link">📍 Save Location</a></li>
+      <li class="sidebar-item"><a href="rider_wallet.html" class="sidebar-link">💳 Payments & Wallet</a></li>
+      <li class="sidebar-item"><a href="my_rides.html" class="sidebar-link">📝 My Rides</a></li>
+      <li class="sidebar-item"><a href="share_ride_status.html" class="sidebar-link">📤 Share Ride Status</a></li>
 
+      <!-- <li class="sidebar-item"><a href="#ticket" class="sidebar-link">🎫 Raise Ticket</a></li> -->
+    </ul>
+  </aside>
 <main class="main-content">
   <h1>Manage Wallet 💳</h1>
 
@@ -37,9 +38,12 @@
   <div class="welcome-card">
     <p><strong>Wallet ID:</strong> <span id="walletId">Loading...</span></p>
     <p><strong>Balance:</strong> ₹ <span id="walletBalance">0</span></p>
-    <button id="createWalletBtn" class="request-btn">Create Wallet</button>
-    <button id="addMoneyBtn" class="request-btn" disabled>Add Money</button>
-    <button id="viewTransactionsBtn" class="request-btn" disabled>View Transactions</button>
+<div class="wallet-buttons">
+  <button id="createWalletBtn" class="request-btn">Create Wallet</button>
+  <button id="addMoneyBtn" class="request-btn" disabled>Add Money</button>
+  <button id="viewTransactionsBtn" class="request-btn" disabled>View Transactions</button>
+</div>
+
   </div>
 
   <!-- Create Wallet -->

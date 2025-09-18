@@ -20,6 +20,18 @@ class WalletRepository {
     return result[0] || null; // return single wallet or null
   }
 
+  async findById(wallet_id) {
+  const result = await pgSequelize.query(
+    "SELECT * FROM wallet WHERE wallet_id = ? LIMIT 1",
+    {
+      replacements: [wallet_id],
+      type: QueryTypes.SELECT,
+    }
+  );
+  return result[0] || null;
+}
+
+
   async updateBalanceByUserId(user_id, newBalance) {
     const result = await pgSequelize.query(
       "UPDATE wallet SET balance = ? WHERE user_id = ? RETURNING *",
@@ -74,6 +86,10 @@ class WalletRepository {
     );
     return result.length > 0;
   }
+  async getWalletByUserId(user_id) {
+  return await WalletRepository.findByUser(user_id) || null;
+}
+
 }
 
 export default new WalletRepository();
